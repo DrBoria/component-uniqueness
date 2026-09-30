@@ -1,5 +1,5 @@
 {
-  "name": "@md/react-component-uniqueness",
+  "name": "react-component-uniqueness",
   "version": "0.0.1",
   "description": "ESLint rule that enforces one canonical location per React component: duplicate declarations, raw HTML outside the canonical packages, hand-rolled components by behavior, and styled.* created in the app.",
   "license": "MIT",

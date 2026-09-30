@@ -1,4 +1,4 @@
-# @md/react-component-uniqueness
+# react-component-uniqueness
 
 An ESLint rule that enforces **one component = one canonical location** in a
 React monorepo. It ships as a plain npm dependency and works with the standard
@@ -40,8 +40,8 @@ identically on Linux, macOS and Windows.
 ## Install
 
 ```sh
-npm install @md/react-component-uniqueness
-# or: pnpm add -D @md/react-component-uniqueness
+npm install react-component-uniqueness
+# or: pnpm add -D react-component-uniqueness
 ```
 
 Peer dependencies: `eslint >= 8.40.0`, `typescript >= 4.7.0`.
@@ -50,7 +50,7 @@ Peer dependencies: `eslint >= 8.40.0`, `typescript >= 4.7.0`.
 
 ```js
 // eslint.config.js
-const componentUniqueness = require("@md/react-component-uniqueness/plugin");
+const componentUniqueness = require("react-component-uniqueness/plugin");
 
 module.exports = [
   {
