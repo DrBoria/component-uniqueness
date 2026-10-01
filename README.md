@@ -7,6 +7,8 @@ ESLint rule + CLI scanner that finds **duplicate React components** in your app 
 ```mermaid
 flowchart TD
     A["Canonical components<br/>(walk folders, extract signatures)"] --> B[("catalog.json")]
+    A --> CD["canon-dup<br/>canonicals matched against each other (strict thresholds)<br/>duplicates dropped → unique canonical set"]
+    CD --> A
     C["App code<br/>(every JSX element)"] --> D
 
     subgraph match["Match (4 matchers in parallel)"]
@@ -25,15 +27,13 @@ flowchart TD
     M3 --> F1
     M4 --> F1
 
-    B --> CD["canon-dup<br/>canonicals are also matched against each other (strict thresholds)"]
-
     subgraph filter["Filter"]
         F1["drop-usages<br/>app already imports the canonical"]
         F1 --> F2["drop-child-element<br/>match is on a child, not the root"]
     end
 
     F2 --> E["report.md<br/>Markdown funnel of duplicates"]
-    CD --> E
+    CD -. "own section" .-> E
 ```
 
 ## Quick start
