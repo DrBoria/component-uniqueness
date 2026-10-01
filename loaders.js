@@ -16,6 +16,9 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
+const { generateCatalog } = require("./scanner/generate");
+const { writeCatalog } = require("./scanner/output");
+
 const cache = new Map(); // absolutePath -> { loaded: boolean, value: any, warned: boolean }
 
 /**
@@ -68,14 +71,40 @@ function loadRegistry(config) {
 }
 
 /**
- * Load the component catalog.
+ * Load the component catalog. When the file is missing, generate it on the
+ * fly from the configured component folders (the catalog is gitignored and
+ * never committed — CI gets it the same way, on first lint).
  *
  * @param {object} config runtime config (from config.normalizeOptions)
  * @returns {object|null} { components: [{ name, path, tag, styles, actions, a11y, data }] } or null
  */
 function loadCatalog(config) {
 	if (config.catalog) return config.catalog;
-	return loadJson(config.catalogPath, "component catalog");
+
+	const roots = (config.componentsFolder || []).map((d) => d.replace(/\/+$/, ""));
+
+	if (fs.existsSync(config.catalogPath)) {
+		return loadJson(config.catalogPath, "component catalog");
+	}
+
+	if (roots.length === 0) {
+		return loadJson(config.catalogPath, "component catalog");
+	}
+
+	try {
+		const { components } = generateCatalog(roots, config.root || process.cwd(), config.include, config.exclude);
+		const out = { generatedAt: new Date().toISOString(), components };
+		fs.mkdirSync(path.dirname(config.catalogPath), { recursive: true });
+		fs.writeFileSync(config.catalogPath, JSON.stringify(out, null, 2) + "\n");
+		cache.set(config.catalogPath, { loaded: true, value: out, warned: false });
+		// eslint-disable-next-line no-console
+		console.log(`[react-component-uniqueness] generated component catalog (${components.length} signature(s)) at ${config.catalogPath}`);
+		return out;
+	} catch (err) {
+		// eslint-disable-next-line no-console
+		console.warn(`[react-component-uniqueness] could not generate the component catalog: ${err && err.message ? err.message : err}`);
+		return null;
+	}
 }
 
 /**

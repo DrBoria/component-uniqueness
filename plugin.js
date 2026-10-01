@@ -5,12 +5,12 @@
  *
  * ESLint flat-config plugin export. Usage:
  *
- *   const plugin = require("@md/react-component-uniqueness/plugin");
+ *   const plugin = require("@md-code/react-component-uniqueness/plugin");
  *
  *   export default [
  *     {
- *       plugins: { "react-component-uniqueness": plugin },
- *       rules: { "react-component-uniqueness/react-component-uniqueness": "error" },
+ *       plugins: { "md-code": plugin },
+ *       rules: { "md-code/react-component-uniqueness": "error" },
  *     },
  *   ];
  */

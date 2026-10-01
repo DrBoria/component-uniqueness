@@ -30,7 +30,7 @@
  *   component: Input,  duplicates: 2  (2 exact)
  */
 
-const { stylesSimilarity, meaningfulA11yToken, MIN_SHARED_STYLE_KEYS } = require("./signature");
+const { stylesSimilarity, specificA11yToken, MIN_SHARED_STYLE_KEYS } = require("./signature");
 
 /**
  * Generic layout/box CSS keys that appear on hundreds of unrelated elements and
@@ -176,8 +176,12 @@ function clusterSignatures(allSigs) {
 			// chain the whole graph into one giant hub. A real a11y duplicate
 			// shares a role or a typed input (role:dialog, type:range, ...).
 			if (!sameFile) {
-				const ai = new Set((si.a11y || []).filter(meaningfulA11yToken));
-				if ((sj.a11y || []).some((t) => meaningfulA11yToken(t) && ai.has(t))) {
+				// Only tokens specific enough to identify a component (role:dialog,
+				// aria-label:..., ...). Ubiquitous ones (type:button, role:group,
+				// every text input's type:text) are transitive glue: a single
+				// catalog button would chain every button in the repo into one hub.
+				const ai = new Set((si.a11y || []).filter(specificA11yToken));
+				if ((sj.a11y || []).some((t) => specificA11yToken(t) && ai.has(t))) {
 					union(i, j);
 					continue;
 				}

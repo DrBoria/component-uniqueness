@@ -1,11 +1,11 @@
 {
-  "name": "react-component-uniqueness",
-  "version": "0.0.1",
+  "name": "@md-code/react-component-uniqueness",
+  "version": "0.1.0",
   "description": "ESLint rule that enforces one canonical location per React component: duplicate declarations, raw HTML outside the canonical packages, hand-rolled components by behavior, and styled.* created in the app.",
   "license": "MIT",
   "main": "index.js",
   "bin": {
-    "react-component-uniqueness": "./bin/react-component-uniqueness.js"
+    "md-code-react-component-uniqueness": "./bin/react-component-uniqueness.js"
   },
   "files": [
     "index.js",
@@ -13,12 +13,14 @@
     "config.js",
     "signature.js",
     "debt.js",
+    "thresholds.js",
     "loaders.js",
     "resolve.js",
     "dom.js",
     "report.js",
     "errorTypes/",
     "scanner/",
+    "scanner/filters/",
     "bin/",
     "snapshots/",
     "README.md"
@@ -29,7 +31,9 @@
     "./config": "./config.js",
     "./signature": "./signature.js",
     "./debt": "./debt.js",
+    "./thresholds": "./thresholds.js",
     "./report": "./report.js",
+    "./filters": "./scanner/filters/index.js",
     "./snapshots": "./snapshots/run.mjs",
     "./snapshots/*": "./snapshots/*"
   },

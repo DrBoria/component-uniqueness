@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 /**
  * build-playground.mjs
@@ -33,19 +33,22 @@ const root = arg("root", process.cwd());
 const manifestPath = arg("manifest", join(root, "playground/manifest.js"));
 
 // esbuild: consumer's node_modules first, then this package's, then env override.
+const importFile = (p) => import(pathToFileURL(p).href);
 let esbuild;
 try {
-	esbuild = await import(req.resolve("esbuild"));
+	esbuild = await importFile(req.resolve("esbuild"));
 } catch {
 	try {
-		esbuild = await import(req.resolve(join(here, "..", "node_modules/esbuild/lib/main.js")));
+		esbuild = await importFile(req.resolve(join(here, "..", "node_modules/esbuild/lib/main.js")));
 	} catch {
 		if (!process.env.ESBUILD_PATH) throw new Error("esbuild not found: install it or set ESBUILD_PATH");
-		esbuild = await import(process.env.ESBUILD_PATH);
+		const ep = process.env.ESBUILD_PATH;
+		esbuild = ep.startsWith("file:") || ep.startsWith("node:") ? await import(ep) : await importFile(ep);
 	}
 }
 
-const manifest = (await import(manifestPath)).default;
+const manifestUrl = manifestPath.startsWith("file:") ? manifestPath : pathToFileURL(manifestPath).href;
+const manifest = (await import(manifestUrl)).default;
 if (!Array.isArray(manifest) || !manifest.length) throw new Error(`manifest at ${manifestPath} must export a non-empty array`);
 
 const dist = join(root, "dist");

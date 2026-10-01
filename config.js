@@ -72,33 +72,6 @@ const ROLE_WHAT = {
 	button: "button (a hand-rolled control)",
 };
 
-/**
- * Behavior -> canonical component names. A raw element whose behavior matches
- * is NOT reported when it lives inside the canonical directory of one of
- * these components (that is the canonical implementation, not a duplicate).
- */
-const BEHAVIOR_CANONICAL = {
-	"clickable element (a hand-rolled button)": ["Button"],
-	"button (a hand-rolled control)": ["Button"],
-	slider: ["Slider"],
-	"checkbox (a hand-rolled control)": ["Checkbox"],
-	"radio (a hand-rolled control)": ["Radio"],
-	"switch (a hand-rolled control)": ["Switch", "Toggle"],
-	"modal / dialog": ["Modal", "Dialog", "Drawer"],
-	"dropdown / menu": ["Dropdown", "Menu"],
-	"dropdown / menu trigger": ["Dropdown", "Menu"],
-	"menu item (a hand-rolled control)": ["Dropdown", "Menu"],
-	tabs: ["Tabs"],
-	"tab (a hand-rolled control)": ["Tabs"],
-	tooltip: ["Tooltip"],
-	"progress indicator": ["Progress"],
-	alert: ["Alert"],
-	"accordion / collapsible": ["Collapse", "Accordion"],
-	"card / paper": ["Card"],
-	"spinner / skeleton": ["Loading", "Skeleton", "Spinner"],
-	"layout container": ["Container"],
-};
-
 /** Raw elements that ALSO go through the behavior error type (input type=range, select, dialog, ...). */
 const RAW_BEHAVIOR_TAGS = new Set(["input", "select", "textarea", "form", "table", "dialog"]);
 
@@ -197,18 +170,42 @@ function normalizeOptions(opts) {
 /**
  * Normalize a list of folder prefixes: posix separators, no leading "./",
  * exactly one trailing slash. "packages/components" and "packages/components/"
- * become the same string.
+ * become the same string. Entries may also be objects: { path, rank } — rank
+ * orders the canonical layers (0 = lowest, e.g. atoms; higher = built on top,
+ * e.g. partials). String entries get their rank from their position.
  *
- * @param {string[]} folders
+ * @param {Array<string|{path:string, rank?:number}>} folders
  * @returns {string[]}
  */
 function normalizeFolders(folders) {
-	return (folders || []).map((f) => {
-		let s = String(f).trim().split(path.sep).join("/");
+	return (folders || []).map((f, i) => {
+		const raw = f && typeof f === "object" ? f.path : f;
+		let s = String(raw).trim().split(path.sep).join("/");
 		while (s.startsWith("./")) s = s.slice(2);
 		if (!s.endsWith("/")) s += "/";
 		return s;
 	});
+}
+
+/**
+ * Map of normalized folder prefix -> rank. Object entries carry an explicit
+ * rank; string entries fall back to their position in the list.
+ *
+ * @param {Array<string|{path:string, rank?:number}>} folders
+ * @returns {Map<string, number>}
+ */
+function folderRank(folders) {
+	const map = new Map();
+	(folders || []).forEach((f, i) => {
+		const isObj = f && typeof f === "object";
+		const raw = isObj ? f.path : f;
+		let s = String(raw).trim().split(path.sep).join("/");
+		while (s.startsWith("./")) s = s.slice(2);
+		if (!s.endsWith("/")) s += "/";
+		const r = isObj && typeof f.rank === "number" ? f.rank : i;
+		if (!map.has(s)) map.set(s, r);
+	});
+	return map;
 }
 
 /**
@@ -283,11 +280,11 @@ module.exports = {
 	CARD_SECOND_RE,
 	CONTAINER_CLASS_RE,
 	ROLE_WHAT,
-	BEHAVIOR_CANONICAL,
 	RAW_BEHAVIOR_TAGS,
 	ACTION_ATTR_NAMES,
 	normalizeOptions,
 	inComponentsFolder,
 	inCanonicalDir,
 	isIgnored,
+	folderRank,
 };

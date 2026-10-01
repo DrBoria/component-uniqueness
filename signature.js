@@ -541,6 +541,45 @@ function meaningfulA11yToken(token) {
 	return !!token && !token.endsWith(":true");
 }
 
+/**
+ * Tokens that are meaningful (they carry a value) but still too common to
+ * identify a component on their own: every button declares type:button, every
+ * text input type:text, every fieldset role:group. In the ESLint rule these
+ * are fine because the candidate is ONE specific element; in report clustering
+ * they are transitive glue — a single type:button catalog entry chains every
+ * button in the repo into one giant cluster.
+ */
+const UBQUITOUS_A11Y_TOKENS = new Set([
+	"type:button",
+	"type:text",
+	"type:submit",
+	"type:reset",
+	"type:email",
+	"type:password",
+	"type:search",
+	"type:tel",
+	"type:url",
+	"type:number",
+	"type:date",
+	"type:time",
+	"role:group",
+	"role:presentation",
+	"role:none",
+	"role:list",
+	"role:listitem",
+	"role:status",
+	"role:alert",
+	"role:img",
+]);
+
+/**
+ * An a11y token specific enough to identify a component by itself
+ * (role:dialog, aria-label:Rows per page, ...).
+ */
+function specificA11yToken(token) {
+	return meaningfulA11yToken(token) && !UBQUITOUS_A11Y_TOKENS.has(token);
+}
+
 function decide(candidate, entry) {
 	const entryA11y = new Set(entry.a11y);
 	const a11yOverlap = candidate.a11y.filter((a) => meaningfulA11yToken(a) && entryA11y.has(a));
@@ -621,4 +660,4 @@ function matchSignature(candidate, catalog) {
 	return best;
 }
 
-module.exports = { TW, twToStyles, camelToKebab, cssTextToStyles, mergeStyles, stylesSimilarity, decide, matchSignature, meaningfulA11yToken, MIN_SHARED_STYLE_KEYS };
+module.exports = { TW, twToStyles, camelToKebab, cssTextToStyles, mergeStyles, stylesSimilarity, decide, matchSignature, meaningfulA11yToken, specificA11yToken, MIN_SHARED_STYLE_KEYS };

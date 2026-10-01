@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import { writeFileSync, mkdirSync, cpSync, existsSync } from "node:fs";
 import { join, dirname, resolve, relative, basename } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 /**
  * snapshot.mjs
@@ -44,9 +44,10 @@ const outRel = arg("out", "reports/component-catalog-dynamic.json");
 if (!url) throw new Error("--url is required (file:// URL of the built playground.html)");
 
 // puppeteer-core: consumer first, then env override, then known hoisted locations.
+const importFile = (p) => import(pathToFileURL(p).href);
 let puppeteer;
 try {
-	puppeteer = await import(req.resolve("puppeteer-core"));
+	puppeteer = await importFile(req.resolve("puppeteer-core"));
 } catch {
 	const candidates = [
 		process.env.SNAPSHOT_PUPPETEER,
@@ -55,7 +56,7 @@ try {
 	let lastErr;
 	for (const c of candidates) {
 		try {
-			puppeteer = await import(resolve(c));
+			puppeteer = await importFile(resolve(c));
 			break;
 		} catch (e) {
 			lastErr = e;
@@ -71,10 +72,13 @@ const chrome =
 		"/usr/bin/chromium",
 		"/usr/bin/chromium-browser",
 		"/usr/bin/google-chrome",
+		"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+		"C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
 	].find((p) => existsSync(p));
 if (!chrome) throw new Error("No chromium found. Set SNAPSHOT_CHROME.");
 
-const manifest = (await import(manifestPath)).default;
+const manifestUrl = manifestPath.startsWith("file:") ? manifestPath : pathToFileURL(manifestPath).href;
+const manifest = (await import(manifestUrl)).default;
 
 // Confinement: snap chromium cannot read /tmp. Copy the page to a home-dir temp.
 let pageUrl = url;
@@ -112,9 +116,10 @@ try {
 			"font-size", "font-weight", "text-align", "text-transform", "letter-spacing",
 			"line-height", "width", "max-width", "height", "list-style",
 		];
-		const slots = [...document.querySelectorAll("[data-slot]")];
+		const slots = [...document.querySelectorAll("[data-slot][data-comp]")];
 		return slots.map((slot) => {
 			const el = slot.children[1] || slot.firstElementChild;
+			if (!el) return null;
 			const cs = getComputedStyle(el);
 			const styles = {};
 			for (const p of props) {
@@ -169,7 +174,7 @@ try {
 		return out;
 	};
 
-	const byId = new Map(raw.map((r) => [r.id, r]));
+	const byId = new Map(raw.filter(Boolean).map((r) => [r.id, r]));
 	const components = manifest.map((m) => {
 		const r = byId.get(m.id);
 		if (!r) throw new Error(`snapshot missing slot ${m.id}`);

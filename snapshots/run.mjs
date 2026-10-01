@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { existsSync } from "node:fs";
 
 /**
@@ -27,7 +27,7 @@ function arg(name, dflt) {
 }
 const root = arg("root", process.cwd());
 const manifest = arg("manifest", join(root, "playground/manifest.js"));
-const url = arg("url", `file://${join(root, "dist/playground.html")}`);
+const url = arg("url", pathToFileURL(join(root, "dist", "playground.html")).href);
 
 const node = process.execPath;
 const env = { ...process.env };

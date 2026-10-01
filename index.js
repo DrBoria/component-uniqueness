@@ -1,7 +1,7 @@
 "use strict";
 
 /**
- * @md/react-component-uniqueness
+ * @md-code/react-component-uniqueness
  *
  * One component = one canonical location. Four error types:
  *
@@ -100,10 +100,26 @@ module.exports = {
 					dynamicCatalogPath: { type: "string" },
 					rawElements: { type: "array", items: { type: "string" } },
 					behaviorTags: { type: "array", items: { type: "string" } },
-					componentsFolder: { type: "array", items: { type: "string" } },
+					componentsFolder: {
+						type: "array",
+						items: {
+							anyOf: [
+								{ type: "string" },
+								{
+									type: "object",
+									properties: {
+										path: { type: "string" },
+										rank: { type: "number" },
+									},
+									required: ["path"],
+								},
+							],
+						},
+					},
 				include: { type: "array", items: { type: "string" } },
 				exclude: { type: "array", items: { type: "string" } },
 					debt: { type: "object" },
+					thresholds: { type: "object" },
 				},
 				additionalProperties: false,
 			},
@@ -114,7 +130,7 @@ module.exports = {
 		const rawOptions = rawContext.options ?? [];
 		const opts = (Array.isArray(rawOptions) ? rawOptions[0] : rawOptions) || {};
 		const config = normalizeOptions(opts);
-		const context = applyDebt(rawContext, config.debt, "md/react-component-uniqueness");
+		const context = applyDebt(rawContext, config.debt, "md-code/react-component-uniqueness");
 
 		const registry = loadRegistry(config);
 		const names = (registry && registry.names) || {};
