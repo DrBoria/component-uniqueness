@@ -27,7 +27,7 @@ const pascalWords = (s) => String(s || "").replace(/([a-z0-9])([A-Z])/g, "$1 $2"
 const kebabWords = (s) => String(s || "").split(/[^A-Za-z0-9]+/).filter(Boolean);
 const singular = (w) => (w.length > 3 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w);
 
-function fuzzyNameHit(appName, canonNames) {
+const fuzzyNameHit = (appName, canonNames) => {
 	const words = pascalWords(appName);
 	if (words.length === 0) return null;
 	let best = null;
@@ -45,7 +45,7 @@ function fuzzyNameHit(appName, canonNames) {
 	return best;
 }
 
-function fuzzyBasenameHit(appPath, canonNames) {
+const fuzzyBasenameHit = (appPath, canonNames) => {
 	const base = path.basename(appPath, path.extname(appPath));
 	const words = kebabWords(base).map((w) => w.toLowerCase());
 	if (words.length === 0) return null;
@@ -80,7 +80,7 @@ function fuzzyBasenameHit(appPath, canonNames) {
 	return best;
 }
 
-function computeGenericTokens(canonComponents) {
+const computeGenericTokens = (canonComponents) => {
 	const elements = [];
 	for (const c of canonComponents) {
 		for (const e of c.elementProps || []) {
@@ -103,7 +103,7 @@ const distinctiveTokens = (tokens, generic) => {
 	return out;
 };
 
-function buildCanonicalIndex(canonComponents) {
+const buildCanonicalIndex = (canonComponents) => {
 	const byName = new Map();
 	const byBasename = new Map();
 	for (const c of canonComponents) {
@@ -118,7 +118,7 @@ function buildCanonicalIndex(canonComponents) {
 	return { byName, byBasename };
 }
 
-function canonElementIndex(canonComponents, generic) {
+const canonElementIndex = (canonComponents, generic) => {
 	const out = [];
 	for (const c of canonComponents) {
 		for (const e of c.elementProps || []) {
@@ -132,7 +132,7 @@ function canonElementIndex(canonComponents, generic) {
 	return out;
 }
 
-function findStructuralBest(app, canonEls, generic, th, skipSelf) {
+const findStructuralBest = (app, canonEls, generic, th, skipSelf) => {
 	let best = null;
 	for (const el of app.elementProps || []) {
 		const appTag = (el.tag || "").toLowerCase();
@@ -158,7 +158,7 @@ function findStructuralBest(app, canonEls, generic, th, skipSelf) {
 	return best;
 }
 
-function isSubsequence(needle, hay) {
+const isSubsequence = (needle, hay) => {
 	let i = 0;
 	for (const t of hay) {
 		if (i < needle.length && needle[i] === t) i += 1;
@@ -166,7 +166,7 @@ function isSubsequence(needle, hay) {
 	return i === needle.length;
 }
 
-function matchJsxBlocks(appComponents, canonComponents, generic, opts) {
+const matchJsxBlocks = (appComponents, canonComponents, generic, opts) => {
 	const th = resolveThresholds(opts);
 	const o = opts || {};
 	const index = new Map();
@@ -215,7 +215,7 @@ function matchJsxBlocks(appComponents, canonComponents, generic, opts) {
 	return matches;
 }
 
-function matchComponents(appComponents, canonComponents, opts) {
+const matchComponents = (appComponents, canonComponents, opts) => {
 	const o = opts || {};
 	const th = resolveThresholds(o);
 	const index = buildCanonicalIndex(canonComponents);

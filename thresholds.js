@@ -10,7 +10,7 @@ const DEFAULTS = {
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
-function resolveThresholds(opts) {
+const resolveThresholds = (opts) => {
 	const o = opts && typeof opts === "object" ? opts : {};
 	const t = (o.thresholds && typeof o.thresholds === "object") ? o.thresholds : {};
 	const num = (key) => (typeof t[key] === "number" && Number.isFinite(t[key]) ? t[key] : DEFAULTS[key]);

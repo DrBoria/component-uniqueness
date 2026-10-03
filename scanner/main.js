@@ -1,36 +1,6 @@
 #!/usr/bin/env node
 "use strict";
 
-/**
- * scanner/main.js
- *
- * Orchestrator: scans the canonical packages, extracts component element
- * signatures, attributes each to a component, and writes the catalog JSON
- * that the ESLint rule matches app-code against.
- *
- * Usage:
- *   node scanner/main.js [options]
- *
- * Options:
- *   --roots <dir>[:<dir>...]   REQUIRED. Scan roots (repo-relative or
- *                              absolute) — the canonical component directories.
- *   --out <file>               output path. Default: reports/component-catalog.json
- *   --registry <file>          registry path (for name attribution).
- *                              Default: reports/component-registry.json
- *   --repo-root <dir>          repo root. Default: discovered by walking up
- *                              for pnpm-workspace.yaml from cwd.
- *   --check                    do not write; exit 1 when the catalog would
- *                              change (for CI gates).
- *   --report [file]            write the component-level Markdown report of
- *                              app-code duplicates. With a value: that path.
- *                              Without: reports/component-duplicates-components.md
- *   --app-roots <dir>[:<dir>..] app-code roots scanned for the report.
- *                              Default: the repo root (canonical packages
- *                              are skipped).
- *   --verbose                  Include the "Filtered out" section in the
- *                              report (hidden by default).
- */
-
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -38,28 +8,23 @@ const { findRepoRoot } = require("../debt");
 const { isIgnored, DEFAULT_EXCLUDE } = require("../config");
 const { loadRuleOptions } = require("./load-config");
 const { walk } = require("./walk");
+const { signaturesFromFile } = require("./extract");
 const { componentsFromFile, isHtmlTag } = require("./component");
 const { matchComponents, matchJsxBlocks, computeGenericTokens } = require("./matching");
 const { clusterComponents, matchFamilies } = require("./clusters");
+const { buildDirNameMap, componentNameFor } = require("./attribute");
 const { dedupeAndSort, writeCatalog } = require("./output");
-const { generateCatalog } = require("./generate");
 const { applyFilters, FILTERS } = require("./filters");
 const { folderRank } = require("../config");
 const { CANON_DUP_STRICT } = require("../thresholds");
 
-function fail(message) {
-	// eslint-disable-next-line no-console
+const fail = (message) => {
+	
 	console.error(`[react-component-uniqueness] ${message}`);
 	process.exit(1);
 }
 
-/**
- * Parse command-line arguments into a config object.
- *
- * @param {string[]} argv process.argv.slice(2)
- * @returns {object} { roots, out, registry, repoRoot, check }
- */
-function parseArgs(argv) {
+const parseArgs = (argv) => {
 	const cfg = { roots: null, out: null, registry: null, repoRoot: null, check: false, report: null, appRoots: null, verbose: false };
 	for (let i = 0; i < argv.length; i += 1) {
 		const a = argv[i];
@@ -70,7 +35,7 @@ function parseArgs(argv) {
 			if (next && !next.startsWith("--")) {
 				cfg.report = argv[++i];
 			} else {
-				cfg.report = "reports/component-duplicates-components.md"; // default
+				cfg.report = "reports/component-duplicates-components.md"; 
 			}
 		} else if (a === "--roots") {
 			if (!argv[i + 1]) fail("--roots requires a value (colon-separated list of directories)");
@@ -90,10 +55,10 @@ function parseArgs(argv) {
 		} else if (a === "--verbose") {
 			cfg.verbose = true;
 		} else if (a === "--help" || a === "-h") {
-			// eslint-disable-next-line no-console
-			console.log("Usage: md-code-react-component-uniqueness [--roots a:b] [--out file] [--registry file] [--repo-root dir] [--check] [--report [file.md]] [--app-roots a:b] [--verbose] (report = component-level duplicate funnel)");
-			// eslint-disable-next-line no-console
-			console.log("Without --roots, the options are read from the consumer's eslint.config.js (rule md-code/react-component-uniqueness) or md-code-react-component-uniqueness.config.js.");
+			
+			console.log("Usage: react-component-uniqueness [--roots a:b] [--out file] [--registry file] [--repo-root dir] [--check] [--report [file.md]] [--app-roots a:b] [--verbose] (report = component-level duplicate funnel)");
+			
+			console.log("Without --roots, the options are read from the consumer's eslint.config.js (rule react-component-uniqueness/react-component-uniqueness) or react-component-uniqueness.config.js.");
 			process.exit(0);
 		} else {
 			fail(`unknown argument: ${a} (see --help)`);
@@ -103,8 +68,48 @@ function parseArgs(argv) {
 }
 
 /** Resolve a possibly-relative path against the repo root. */
-function resolveAgainst(value, repoRoot) {
+const resolveAgainst = (value, repoRoot) => {
 	return path.isAbsolute(value) ? value : path.resolve(repoRoot, value);
+}
+
+/** Repo-relative posix path for the ignore matcher. */
+const relPosix = (repoRoot, abs) => {
+	return path.relative(repoRoot, abs).split(path.sep).join("/");
+}
+
+/**
+ * Walk every scan root and collect one signature entry per component element.
+ *
+ * @returns {{ components: object[], scanned: number }}
+ */
+const scanCatalog = (roots, repoRoot, shouldSkip, dirNameMap) => {
+	const components = [];
+	let scanned = 0;
+	for (const relRoot of roots) {
+		const rootDir = resolveAgainst(relRoot, repoRoot);
+		if (!fs.existsSync(rootDir)) {
+			// eslint-disable-next-line no-console
+			console.warn(`[react-component-uniqueness] scan root not found, skipping: ${rootDir}`);
+			continue;
+		}
+		for (const file of walk(rootDir)) {
+			if (shouldSkip(file)) continue;
+			if (/\.(stories|test|spec)\.[tj]sx?$/.test(file)) continue;
+			scanned += 1;
+			let sigs;
+			try {
+				sigs = signaturesFromFile(file);
+			} catch {
+				continue; // unreadable / unparseable file — skip
+			}
+			const name = componentNameFor(file, repoRoot, dirNameMap);
+			const relFile = path.relative(repoRoot, file).split(path.sep).join("/");
+			for (const s of sigs) {
+				components.push({ name, path: relFile, ...s });
+			}
+		}
+	}
+	return { components, scanned };
 }
 
 async function main() {
@@ -121,11 +126,11 @@ async function main() {
 	const repoRoot = args.repoRoot ? path.resolve(cwd, args.repoRoot) : findRepoRoot(cwd) || cwd;
 
 	// No default scan roots: the repo layout is the consumer's knowledge.
-	// CLI --roots always wins over the rule options' componentsFolder.
+	
 	const configRoots = (configOptions.componentsFolder || []).map((d) => (d && typeof d === "object" ? d.path : d)).map((d) => String(d).replace(/\\/g, "/").replace(/\/+$/, ""));
 	const roots = args.roots || configRoots;
 	if (!roots || roots.length === 0) {
-		fail("no scan roots: pass --roots <dir1>:<dir2> or set componentsFolder in the rule options (eslint.config.js / md-code-react-component-uniqueness.config.js)");
+		fail("no scan roots: pass --roots <dir1>:<dir2> or set componentsFolder in the rule options (eslint.config.js / react-component-uniqueness.config.js)");
 	}
 
 	const outPath = resolveAgainst(args.out || configOptions.catalogPath || "reports/component-catalog.json", repoRoot);
@@ -133,9 +138,10 @@ async function main() {
 
 	const include = configOptions.include || [];
 	const exclude = configOptions.exclude || DEFAULT_EXCLUDE;
-	const shouldSkip = (abs) => isIgnored(path.relative(repoRoot, abs).split(path.sep).join("/"), include, exclude);
+	const shouldSkip = (abs) => isIgnored(relPosix(repoRoot, abs), include, exclude);
 
-	const { components, scanned } = generateCatalog(roots, repoRoot, include, exclude, registryPath);
+	const dirNameMap = buildDirNameMap(repoRoot, registryPath);
+	const { components, scanned } = scanCatalog(roots, repoRoot, shouldSkip, dirNameMap);
 
 	const final = dedupeAndSort(components);
 
@@ -144,20 +150,20 @@ async function main() {
 		try {
 			current = JSON.parse(fs.readFileSync(outPath, "utf8"));
 		} catch {
-			// missing catalog — a change (unless the scan produced nothing)
+			
 		}
 		const same = current && JSON.stringify(current.components || []) === JSON.stringify(final);
 		if (!same) {
 			fail(`catalog is out of date (${final.length} signature(s) expected at ${path.relative(repoRoot, outPath)}); regenerate it (node scanner/main.js)`);
 		}
-		// eslint-disable-next-line no-console
+		
 		console.log(`[react-component-uniqueness] catalog up to date (${final.length} signature(s))`);
 		return;
 	}
 
 	writeCatalog(outPath, final);
 	const tagCount = new Set(final.map((c) => c.tag)).size;
-	// eslint-disable-next-line no-console
+	
 	console.log(`[react-component-uniqueness] wrote ${path.relative(repoRoot, outPath)} (${final.length} signature(s), ${tagCount} tag(s), ${scanned} file(s) scanned)`);
 
 	if (args.report) {
@@ -165,23 +171,19 @@ async function main() {
 		const comp = buildComponentReport(args, repoRoot, roots, shouldSkip, configOptions);
 		fs.mkdirSync(path.dirname(reportPath), { recursive: true });
 		fs.writeFileSync(reportPath, renderComponentReport(comp, args.verbose));
-		// eslint-disable-next-line no-console
+		
 		console.log(`[react-component-uniqueness] wrote report ${reportPath} (${comp.matches.length} duplicate component(s) across ${comp.files} file(s))`);
 	}
 }
 
-function rankOfPath(relPath, ranks) {
+const rankOfPath = (relPath, ranks) => {
 	for (const [dir, rank] of [...ranks].sort((a, b) => b[0].length - a[0].length)) {
 		if (relPath.startsWith(dir)) return rank;
 	}
 	return null;
 }
 
-/**
- * Walk the canonical roots: every file (for the canonicalFiles set) plus the
- * parseable ones (stories/tests/specs excluded).
- */
-function collectCanonicalFiles(roots, repoRoot, shouldSkip) {
+const collectCanonicalFiles = (roots, repoRoot, shouldSkip) => {
 	const canonicalFiles = new Set();
 	const canonFiles = [];
 	for (const relRoot of roots) {
@@ -198,12 +200,7 @@ function collectCanonicalFiles(roots, repoRoot, shouldSkip) {
 	return { canonicalFiles, canonFiles };
 }
 
-/**
- * Parse canonical components in two passes: the first pass discovers the
- * canonical names, the second re-parses with them so `usesCanonical` is
- * populated inside canonical files (needed by the wrapper rule).
- */
-function parseCanonicalComponents(canonFiles, ranks) {
+const parseCanonicalComponents = (canonFiles, ranks) => {
 	const parse = (names) => {
 		const out = [];
 		for (const { file, rel } of canonFiles) {
@@ -217,18 +214,12 @@ function parseCanonicalComponents(canonFiles, ranks) {
 		}
 		return out;
 	};
-	const first = parse(null);
+	const initial = parse(null);
 
-	return parse(new Set(first.map((c) => c.name)));
+	return parse(new Set(initial.map((c) => c.name)));
 }
 
-/**
- * Canonical-vs-canonical pass: strict thresholds, no basename index, and the
- * wrapper rule (a higher-rank component that uses the lower-rank one is a
- * wrapper, not a duplicate). Returns the matches and the keys of the
- * components that are duplicates themselves.
- */
-function findCanonicalDuplicates(canonComponents, ranks, thresholds) {
+const findCanonicalDuplicates = (canonComponents, ranks, thresholds) => {
 	const matches = [];
 	const dupKeys = new Set();
 	if (ranks.size === 0) return { matches, dupKeys };
@@ -263,8 +254,7 @@ function findCanonicalDuplicates(canonComponents, ranks, thresholds) {
 	return { matches, dupKeys };
 }
 
-/** Walk the app roots, excluding canonical dirs, tests, _medplum and iris. */
-function collectAppFiles(appRoots, repoRoot, shouldSkip, skipDirs) {
+const collectAppFiles = (appRoots, repoRoot, shouldSkip, skipDirs) => {
 	const files = [];
 	let count = 0;
 	for (const relRoot of appRoots) {
@@ -283,8 +273,7 @@ function collectAppFiles(appRoots, repoRoot, shouldSkip, skipDirs) {
 	return { files, count };
 }
 
-/** Parse app files into components, filling `usesCanonical` from canonNames. */
-function parseAppComponents(files, canonNames) {
+const parseAppComponents = (files, canonNames) => {
 	const comps = [];
 	for (const { file, rel } of files) {
 		let parsed;
@@ -298,8 +287,7 @@ function parseAppComponents(files, canonNames) {
 	return comps;
 }
 
-/** All four app-vs-canonical matching tiers in one step. */
-function matchAppComponents(appComponents, uniqueCanon, canonicalFiles, thresholds) {
+const matchAppComponents = (appComponents, uniqueCanon, canonicalFiles, thresholds) => {
 	const matches = matchComponents(appComponents, uniqueCanon, {
 		canonicalFiles,
 		skipWrappers: true,
@@ -312,19 +300,7 @@ function matchAppComponents(appComponents, uniqueCanon, canonicalFiles, threshol
 	return matches;
 }
 
-/**
- * The report pipeline, read top to bottom:
- *
- *   scan canonical files
- *     -> parse canonical components (two passes)
- *     -> find canonical-vs-canonical duplicates (strict thresholds)
- *     -> keep only the unique canonicals
- *     -> scan app files (canonical dirs / tests / _medplum / iris excluded)
- *     -> parse app components
- *     -> match app vs unique canonicals (name / structural / family / jsx)
- *     -> apply filters
- */
-function buildComponentReport(args, repoRoot, roots, shouldSkip, configOptions) {
+const buildComponentReport = (args, repoRoot, roots, shouldSkip, configOptions) => {
 	const ranks = folderRank(configOptions.componentsFolder || []);
 	const thresholds = configOptions.thresholds;
 
@@ -353,7 +329,7 @@ const TIER_LABEL = {
 	"jsx-block": "JSX block (canonical drawn by hand inside)",
 };
 
-function renderHeader(comp) {
+const renderHeader = (comp) => {
 	const lines = [];
 	lines.push("# Component duplicates (component-level funnel)");
 	lines.push("");
@@ -364,7 +340,7 @@ function renderHeader(comp) {
 	return lines;
 }
 
-function renderCanonDupSection(rows) {
+const renderCanonDupSection = (rows) => {
 	const lines = [];
 	lines.push(`## Canonical duplicates (layered folders) (${rows.length})`);
 	lines.push("");
@@ -381,7 +357,7 @@ function renderCanonDupSection(rows) {
 	return lines;
 }
 
-function renderTierSection(tier, rows) {
+const renderTierSection = (tier, rows) => {
 	const lines = [];
 	lines.push(`## ${TIER_LABEL[tier]} (${rows.length})`);
 	lines.push("");
@@ -396,7 +372,7 @@ function renderTierSection(tier, rows) {
 	return lines;
 }
 
-function renderFilteredSection(dropped) {
+const renderFilteredSection = (dropped) => {
 	const lines = [];
 	const byFilter = new Map();
 	for (const d of dropped) {
@@ -420,7 +396,7 @@ function renderFilteredSection(dropped) {
 	return lines;
 }
 
-function renderComponentReport(comp, verbose) {
+const renderComponentReport = (comp, verbose) => {
 	const lines = [];
 	lines.push(...renderHeader(comp));
 	if (comp.canonDup && comp.canonDup.length > 0) lines.push(...renderCanonDupSection(comp.canonDup));

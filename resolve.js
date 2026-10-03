@@ -1,27 +1,10 @@
 "use strict";
 
-/**
- * resolve.js
- *
- * String-literal resolution machinery shared by the rule (ESTree AST) and the
- * catalog scanner (TypeScript AST).
- *
- *   - ESTree (rule): stringLiteralsOf, resolveExportedFromFile,
- *     resolveStringCandidates — resolve className/style expressions to
- *     candidate string literals, following local constants, cn()/clsx()
- *     calls, ternaries, and imported helpers (read from disk).
- *   - TS AST (scanner): tsStringLiteralsOf — the same job over a TypeScript
- *     AST node (used by the catalog generator).
- */
-
 const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
 
-/**
- * Collect string literals from an ESTree expression (shallow, capped).
- */
-function stringLiteralsOf(expr, out, depth) {
+const stringLiteralsOf = (expr, out, depth) => {
 	if (!expr || depth > 4 || out.length >= 24) return;
 	switch (expr.type) {
 		case "Literal":
@@ -64,8 +47,7 @@ function stringLiteralsOf(expr, out, depth) {
 	}
 }
 
-/** Collect string literals from a TypeScript AST node (shallow, capped). */
-function tsStringLiteralsOf(node, out, depth, root) {
+const tsStringLiteralsOf = (node, out, depth, root) => {
 	if (!node || depth > 4 || out.length >= 24) return;
 	if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
 		out.push(node.text);
@@ -110,8 +92,8 @@ function tsStringLiteralsOf(node, out, depth, root) {
 		return;
 	}
 	if (ts.isIdentifier(node) && root) {
-		// A bare identifier in the initializer (e.g. const cls = baseCls) —
-		// resolve it within the same file.
+		
+		
 		const findDecl = (n) => {
 			if (out.length >= 24) return;
 			if (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && n.name.text === node.text && n.initializer) {
@@ -124,17 +106,9 @@ function tsStringLiteralsOf(node, out, depth, root) {
 	}
 }
 
-// Cache of imported-value lookups: absPath -> { name: result }.
 const importedCache = new Map();
 
-/**
- * Read a sibling file from disk and resolve one of its exported constants to
- * string literals. Handles: const X = "...", template literals, cn()/clsx()
- * calls, object literals, ternaries, and re-exports (export { Y as X }).
- * Cached per file. Returns null when the file cannot be read or the export is
- * not a static string.
- */
-function resolveExportedFromFile(fileAbs, exportName) {
+const resolveExportedFromFile = (fileAbs, exportName) => {
 	let byFile = importedCache.get(fileAbs);
 	if (!byFile) {
 		byFile = {};
@@ -147,21 +121,21 @@ function resolveExportedFromFile(fileAbs, exportName) {
 		const sf = ts.createSourceFile(fileAbs, source, ts.ScriptTarget.ES2020, true, fileAbs.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
 		const visit = (node) => {
 			if (result) return;
-			// export function NAME(...) { ... }
+			
 			if (ts.isFunctionDeclaration(node) && node.name && node.name.text === exportName && ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Export) {
 				const out = [];
 				if (node.body) tsStringLiteralsOf(node.body, out, 0, sf);
 				result = out.length > 0 ? out : null;
 				return;
 			}
-			// export const NAME = ... / export let / export var
+			
 			if (ts.isVariableStatement(node) && ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Export) {
 				for (const d of node.declarationList.declarations) {
 					if (ts.isIdentifier(d.name) && d.name.text === exportName && d.initializer) {
 						const out = [];
 						tsStringLiteralsOf(d.initializer, out, 0, sf);
-						// Arrow/function initializer: also collect the body
-						// (const rowCls = (w) => w ? "a" : "b").
+						
+						
 						if (out.length === 0 && (ts.isArrowFunction(d.initializer) || ts.isFunctionExpression(d.initializer))) {
 							if (d.initializer.body) tsStringLiteralsOf(d.initializer.body, out, 0, sf);
 						}
@@ -170,13 +144,13 @@ function resolveExportedFromFile(fileAbs, exportName) {
 					}
 				}
 			}
-			// export { Y as NAME } / export { Y as NAME } from "./other"
+			
 			if (ts.isExportDeclaration(node) && node.exportClause && ts.isNamedExports(node.exportClause)) {
 				for (const el of node.exportClause.elements) {
 					const exported = el.name && el.name.text;
 					if (exported === exportName) {
 						if (node.moduleSpecifier) {
-							// Re-export from another file — resolve there.
+							
 							const localName = el.propertyName ? el.propertyName.text : exportName;
 							const target = path.resolve(path.dirname(fileAbs), node.moduleSpecifier.text);
 							const exts = ["", ".ts", ".tsx", ".js", ".jsx", "/index.ts", "/index.tsx", "/index.js"];
@@ -188,11 +162,11 @@ function resolveExportedFromFile(fileAbs, exportName) {
 										return;
 									}
 								} catch {
-									// try next extension
+									
 								}
 							}
 						} else {
-							// Local re-export: find the local declaration.
+							
 							const localName = el.propertyName ? el.propertyName.text : exportName;
 							const findLocal = (n) => {
 								if (result) return;
@@ -219,22 +193,16 @@ function resolveExportedFromFile(fileAbs, exportName) {
 	return result;
 }
 
-/**
- * Resolve an expression to candidate string values (dynamic values: local
- * variables, ternaries, cn()/clsx() calls, template literals, imported
- * constants). Returns null when the expression is not a statically known
- * string.
- */
-function resolveStringCandidates(expr, scope, depth, fileDir) {
+const resolveStringCandidates = (expr, scope, depth, fileDir) => {
 	if (!expr || depth > 3) return null;
 	switch (expr.type) {
 		case "Literal":
-			// Strings and numbers: inline style values are often numeric
-			// (padding: 16, borderRadius: 8). The catalog scanner
-			// (scanner/extract.js) records numeric literals the same way, so
-			// the runtime candidate must too — otherwise a numeric-styled
-			// element loses those style keys and falls below the shared-key
-			// threshold.
+			
+			
+			
+			
+			
+			
 			return typeof expr.value === "string" || typeof expr.value === "number" ? [String(expr.value)] : null;
 		case "TemplateLiteral": {
 			if (expr.expressions.length === 0) {
@@ -287,8 +255,8 @@ function resolveStringCandidates(expr, scope, depth, fileDir) {
 				}
 				return out.length ? out : null;
 			}
-			// Call of an imported function (e.g. rowCls(wide)) — resolve the
-			// exported function body in the sibling file.
+			
+			
 			if (callee.type === "Identifier" && fileDir) {
 				let imp = null;
 				for (let s = scope; s; s = s.upper) {
@@ -310,7 +278,7 @@ function resolveStringCandidates(expr, scope, depth, fileDir) {
 									break;
 								}
 							} catch {
-								// try next extension
+								
 							}
 						}
 					}
@@ -319,7 +287,7 @@ function resolveStringCandidates(expr, scope, depth, fileDir) {
 			return null;
 		}
 		case "Identifier": {
-			// Local declaration in an enclosing scope (const cls = ...).
+			
 			for (let s = scope; s; s = s.upper) {
 				const v = s.variables.find((x) => x.name === expr.name);
 				if (!v) continue;
@@ -331,9 +299,9 @@ function resolveStringCandidates(expr, scope, depth, fileDir) {
 					}
 				}
 			}
-			// Imported from a sibling file — read the file, find the exported
-			// constant, collect its string literals. The import binding lives
-			// in the module scope, so walk up.
+			
+			
+			
 			let imp = null;
 			for (let s = scope; s; s = s.upper) {
 				imp = (s.variables || []).find((v) => v.name === expr.name && v.defs && v.defs.some((d) => d.type === "ImportBinding"));
@@ -354,7 +322,7 @@ function resolveStringCandidates(expr, scope, depth, fileDir) {
 								break;
 							}
 						} catch {
-							// try next extension
+							
 						}
 					}
 				}

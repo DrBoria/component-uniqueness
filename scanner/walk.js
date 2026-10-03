@@ -1,29 +1,16 @@
 "use strict";
 
-/**
- * scanner/walk.js
- *
- * Directory walking for the catalog scanner: yields every .ts/.tsx/.jsx
- * file under a root, skipping node_modules, dist, and dotfiles.
- */
-
 const fs = require("node:fs");
 const path = require("node:path");
 
-/**
- * Walk a directory tree, yielding absolute paths of .ts/.tsx/.jsx files.
- *
- * @param {string} dir absolute directory
- * @returns {Generator<string>}
- */
 function* walk(dir) {
-	let entries;
+	let list;
 	try {
-		entries = fs.readdirSync(dir, { withFileTypes: true });
+		list = fs.readdirSync(dir, { withFileTypes: true });
 	} catch {
-		return; // unreadable directory — skip
+		return;
 	}
-	for (const entry of entries) {
+	for (const entry of list) {
 		if (entry.name === "node_modules" || entry.name === "dist" || entry.name.startsWith(".")) continue;
 		const full = path.join(dir, entry.name);
 		if (entry.isDirectory()) {

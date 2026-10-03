@@ -1,28 +1,7 @@
 "use strict";
 
-/**
- * signature.js
- *
- * Component-signature machinery shared by the rule and the catalog scanner.
- *
- * A Signature is the normalized, order-insensitive description of one JSX
- * element:
- *
- *   {
- *     tag:    "div",
- *     styles: { "display": ["flex"], "gap": ["1rem"], ... },  // CSS prop -> candidate values
- *     actions: ["click", ...],        // event handlers (onClick -> click)
- *     a11y:    ["role:dialog", "aria-modal:true", ...],
- *     data:    ["data-testid:...", ...],
- *   }
- *
- * All style sources — tailwind className, inline style={...}, and
- * styled-components CSS — are converted into the same CSS-property space,
- * so "flex gap-4" (tailwind), { display: "flex", gap: "1rem" } (inline), and
- * "display: flex; gap: 1rem;" (styled) all describe the same element.
- */
+const { entries, keys } = require("remeda");
 
-/** Tailwind utility class -> [cssProperty, cssValue] (value null = property presence). */
 const TW = {
 	flex: ["display", "flex"],
 	"flex-1": ["flex", "1"],
@@ -346,16 +325,8 @@ const TW = {
 	"bg-scroll": ["background-attachment", "scroll"],
 };
 
-/** Responsive/state prefixes to strip (sm:, md:, lg:, xl:, hover:, focus:, ...). */
 const TW_PREFIX_RE = /^(sm|md|lg|xl|2xl|hover|focus|active|disabled|group-hover|peer-hover|motion-safe|motion-reduce|dark|light|first|last|odd|even|checked|indeterminate|selected|placeholder|file|before|after|in|out|open|read-only|read-write|required|valid|invalid|target|visited|link|any|not|has|is|empty|only|aria|focus-within|focus-visible|has-focus|group-focus|peer-focus|group-active|peer-active|group-disabled|peer-disabled|group-checked|peer-checked|group-selected|peer-selected|group-focus-within|peer-focus-within|group-focus-visible|peer-focus-visible|group-open|peer-open|group-read-only|peer-read-only|group-read-write|peer-read-write|group-required|peer-required|group-valid|peer-valid|group-invalid|peer-invalid|group-target|peer-target|group-visited|peer-visited|group-link|peer-link):/;
 
-/**
- * Arbitrary-value utilities: the bracketed value is taken VERBATIM (Tailwind
- * does the same — `z-[1000]` is `z-index: 1000`), the prefix maps to a CSS
- * property. `text-[13px]` is a font-size only when the value is a length
- * (`text-[red]` is a color and is skipped); `bg-[...]` is a background-color
- * only for color-like values (`bg-[url(...)]` is skipped).
- */
 const TW_ARBITRARY_PREFIX = {
 	z: "z-index",
 	top: "top",
@@ -385,52 +356,42 @@ const TW_ARBITRARY_PREFIX = {
 	ml: "margin-left",
 	rounded: "border-radius",
 	border: "border-width",
-	text: "font-size", // only for length values — see twArbitrary
-	bg: "background-color", // only for color values — see twArbitrary
+	text: "font-size", 
+	bg: "background-color", 
 };
 const TW_LENGTH_RE = /^[0-9.]+(px|rem|em|vh|vw|vmin|vmax|ch|ex|%|pt|pc|in|cm|mm)$/;
 const TW_COLOR_RE = /^(#|rgb|hsl|hwb|lab|lch|oklab|oklch|color\(|[a-z]+$)/;
 
-/**
- * Parse an arbitrary-value utility (`z-[1000]`, `w-[420px]`, `inset-[0px]`,
- * `p-[12px]`, `text-[13px]`, `rounded-[8px]`, `bg-[#000]`, ...).
- * Returns [prop, value] or null when the prefix (or value kind) is unknown.
- */
-function twArbitrary(token) {
+const twArbitrary = (token) => {
 	const m = token.match(/^([a-z]+(?:-[a-z0-9]+)*)-\[(.+)\]$/);
 	if (!m) return null;
 	const prop = TW_ARBITRARY_PREFIX[m[1]];
 	if (!prop) return null;
 	const value = m[2];
-	if (m[1] === "text" && !TW_LENGTH_RE.test(value)) return null; // text-[red] = color, not size
-	if (m[1] === "bg" && !TW_COLOR_RE.test(value)) return null; // bg-[url(...)] = image
+	if (m[1] === "text" && !TW_LENGTH_RE.test(value)) return null; 
+	if (m[1] === "bg" && !TW_COLOR_RE.test(value)) return null; 
 	return [prop, value];
 }
 
-/**
- * Convert a tailwind class string into a styles map
- * (cssProperty -> array of candidate values). Unknown utilities are
- * skipped — only recognized utilities contribute to the signature.
- */
-function twToStyles(cls) {
+const twToStyles = (cls) => {
 	const styles = {};
 	if (typeof cls !== "string") return styles;
 	for (const rawToken of cls.split(/\s+/)) {
 		if (!rawToken) continue;
 		let token = rawToken;
-		// Strip responsive/state prefixes (repeat for stacked ones like lg:hover:).
+		
 		let guard = 0;
 		while (TW_PREFIX_RE.test(token) && guard < 4) {
 			token = token.replace(TW_PREFIX_RE, "");
 			guard += 1;
 		}
-		// Negative values: -ml-4 -> margin-left: -1rem.
+		
 		let negative = false;
 		if (token.startsWith("-")) {
 			negative = true;
 			token = token.slice(1);
 		}
-		// Arbitrary values first (`z-[1000]`, `w-[420px]`, ...), then the fixed map.
+		
 		const arb = twArbitrary(token);
 		const hit = arb || TW[token];
 		if (!hit) continue;
@@ -442,20 +403,14 @@ function twToStyles(cls) {
 	return styles;
 }
 
-/** camelCase (JS style object) -> kebab-case (CSS). */
-function camelToKebab(name) {
+const camelToKebab = (name) => {
 	return String(name).replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 }
 
-/**
- * Parse a CSS declaration block (styled-components template body or a plain
- * "a: b; c: d" string) into a styles map. Interpolations ({...}) are
- * skipped — only static declarations contribute.
- */
-function cssTextToStyles(text) {
+const cssTextToStyles = (text) => {
 	const styles = {};
 	if (typeof text !== "string") return styles;
-	// Remove comments.
+	
 	const clean = text.replace(/\/\*[\s\S]*?\*\//g, "");
 	for (const decl of clean.split(";")) {
 		const idx = decl.indexOf(":");
@@ -472,22 +427,18 @@ function cssTextToStyles(text) {
 	return styles;
 }
 
-/**
- * Merge styles maps. A value is "compatible" when one is a presence marker
- * ("1") — in that case the other value wins.
- */
-function mergeStyles(a, b) {
+const mergeStyles = (a, b) => {
 	const out = {};
-	for (const [prop, values] of Object.entries(a)) {
+	for (const [prop, values] of entries(a)) {
 		out[prop] = [...values];
 	}
-	for (const [prop, values] of Object.entries(b)) {
+	for (const [prop, values] of entries(b)) {
 		if (!Object.prototype.hasOwnProperty.call(out, prop)) {
 			out[prop] = [...values];
 			continue;
 		}
 		for (const v of values) {
-			if (v === "1" && out[prop].length > 0) continue; // presence marker loses
+			if (v === "1" && out[prop].length > 0) continue; 
 			if (v === "1" && out[prop].every((x) => x === "1")) continue;
 			if (!out[prop].includes(v)) out[prop].push(v);
 		}
@@ -495,10 +446,9 @@ function mergeStyles(a, b) {
 	return out;
 }
 
-/** Jaccard similarity of two styles maps (property-level). */
-function stylesSimilarity(a, b) {
-	const A = new Set(Object.keys(a));
-	const B = new Set(Object.keys(b));
+const stylesSimilarity = (a, b) => {
+	const A = new Set(keys(a));
+	const B = new Set(keys(b));
 	if (A.size === 0 && B.size === 0) return 0;
 	let inter = 0;
 	for (const p of A) if (B.has(p)) inter += 1;
@@ -506,49 +456,12 @@ function stylesSimilarity(a, b) {
 	return union === 0 ? 0 : inter / union;
 }
 
-/**
- * Decision matrix for a candidate element signature vs a catalog entry.
- *
- * Returns null (no match), or { level: "error" | "warning", reason }.
- *
- *   error:   a11y/actions overlap (role:dialog, input[type=range], onClick on a role)
- *            OR styles >= 0.9 (any tag)
- *            OR same tag AND styles >= 0.7
- *   warning: different tag AND styles 0.5..0.9
- *            OR same tag AND styles 0.4..0.7
- */
-/**
- * Minimum number of SHARED style keys required for a styles-only match to
- * count. A generic 2-key layout (e.g. `display:flex; justify-content:center`)
- * appears on hundreds of unrelated divs; without this floor it becomes a
- * union-find "hub" that absorbs the whole graph and hides real duplicates.
- * A distinctive 5-key signature still matches. a11y/action matches are never
- * gated by this floor (they are already specific signals).
- */
 const MIN_SHARED_STYLE_KEYS = 3;
 
-/**
- * Is an a11y token a real duplicate signal? Boolean-presence tokens (value
- * "true", e.g. `aria-label:true`, `aria-expanded:true`) are NOT: they mark
- * "this element HAS an aria-label / is expanded", which is ubiquitous and
- * would match any labeled app element against any labeled catalog component.
- * Meaningful tokens carry a concrete value (role:dialog, type:range, ...).
- *
- * @param {string} token a11y token, e.g. "role:dialog" or "aria-label:true"
- * @returns {boolean} true when the token is a real duplicate signal
- */
-function meaningfulA11yToken(token) {
+const meaningfulA11yToken = (token) => {
 	return !!token && !token.endsWith(":true");
 }
 
-/**
- * Tokens that are meaningful (they carry a value) but still too common to
- * identify a component on their own: every button declares type:button, every
- * text input type:text, every fieldset role:group. In the ESLint rule these
- * are fine because the candidate is ONE specific element; in report clustering
- * they are transitive glue — a single type:button catalog entry chains every
- * button in the repo into one giant cluster.
- */
 const UBQUITOUS_A11Y_TOKENS = new Set([
 	"type:button",
 	"type:text",
@@ -572,61 +485,57 @@ const UBQUITOUS_A11Y_TOKENS = new Set([
 	"role:img",
 ]);
 
-/**
- * An a11y token specific enough to identify a component by itself
- * (role:dialog, aria-label:Rows per page, ...).
- */
-function specificA11yToken(token) {
+const specificA11yToken = (token) => {
 	return meaningfulA11yToken(token) && !UBQUITOUS_A11Y_TOKENS.has(token);
 }
 
-function decide(candidate, entry) {
+const decide = (candidate, entry) => {
 	const entryA11y = new Set(entry.a11y);
 	const a11yOverlap = candidate.a11y.filter((a) => meaningfulA11yToken(a) && entryA11y.has(a));
 	const actionOverlap = candidate.actions.filter((a) => entry.actions.includes(a));
 	const sameTag = candidate.tag === entry.tag;
 	const sim = stylesSimilarity(candidate.styles, entry.styles);
-	// Shared style-key footprint.
-	const A = Object.keys(candidate.styles);
-	const B = new Set(Object.keys(entry.styles));
+	
+	const A = keys(candidate.styles);
+	const B = new Set(keys(entry.styles));
 	const shared = A.filter((p) => B.has(p)).length;
 
-	// a11y overlap is a specific, standalone duplicate signal (role:dialog,
-	// type:range, ...). Boolean-presence tokens are filtered by meaningfulA11yToken.
+	
+	
 	if (a11yOverlap.length > 0) return { level: "error", reason: a11yOverlap[0] };
 
-	// Action overlap (click/change/...) is NOT a standalone duplicate signal:
-	// every button has onClick, every input has onChange, so a bare action match
-	// would make every button "duplicate" every other button. It only proves a
-	// duplicate when at least one side carries a MEANINGFUL a11y marker
-	// (type:button, role:dialog, ...) — that marker identifies the element as a
-	// re-implementation of a specific canonical component rather than just
-	// "another clickable thing". A plain <Button onClick> with no such marker
-	// against a catalog entry that has none either stays silent.
-	// Action overlap (click/change/...) is a WEAK standalone signal: every
-	// button has onClick, every input has onChange, so a bare action match would
-	// make every clickable element "duplicate" every other clickable element.
-	// It is promoted to a duplicate ONLY when the ENTRY is a full BUTTON
-	// definition: it carries the `type:button` marker AND a real style footprint
-	// (>= MIN_SHARED_STYLE_KEYS). That combination is unambiguous — "the
-	// canonical button" — so a bare element matching it on action is a
-	// re-implementation of THAT component, not just "another clickable thing".
-	//
-	// A bare <PageNumber onClick> / <ClearButton onClick> against an entry that
-	// is only a labeled overlay (role:dialog), a tab (role:tab + 2 generic
-	// styles), or a range (type:range) is NOT convicted here: it is "another
-	// clickable thing", not a re-implementation of that component. The candidate
-	// is still caught by the a11y-overlap branch (above) or the styles branch
-	// (below) whenever it genuinely shares those signals. The candidate's OWN
-	// meaningful a11y is deliberately NOT used here — it does not prove the
-	// element matches THIS entry and is the source of the ubiquitous-action FPs.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	const entryIsButton = (entry.a11y || []).includes("type:button");
-	const entryStyleCount = Object.keys(entry.styles || {}).length;
+	const entryStyleCount = keys(entry.styles || {}).length;
 	if (actionOverlap.length > 0 && entryIsButton && entryStyleCount >= MIN_SHARED_STYLE_KEYS) {
 		return { level: "error", reason: actionOverlap[0] };
 	}
 
-	// Styles-only match (no a11y/action signal): require a real shared footprint.
+	
 	if (shared < MIN_SHARED_STYLE_KEYS) return null;
 	if (sim >= 0.9) return { level: "error", reason: `styles ${sim.toFixed(2)}` };
 	if (sameTag && sim >= 0.7) return { level: "error", reason: `styles ${sim.toFixed(2)}` };
@@ -635,24 +544,20 @@ function decide(candidate, entry) {
 	return null;
 }
 
-/**
- * Match a candidate signature against the catalog. Returns the best
- * { name, path, level, reason, sim } or null.
- */
-function matchSignature(candidate, catalog) {
-	const entries = (catalog && catalog.components) || [];
+const matchSignature = (candidate, catalog) => {
+	const comps = (catalog && catalog.components) || [];
 	let best = null;
-	for (const entry of entries) {
+	for (const entry of comps) {
 		const d = decide(candidate, entry);
 		if (!d) continue;
 		const score = d.level === "error" ? 2 : 1;
 		const sim = stylesSimilarity(candidate.styles, entry.styles);
-		// `score` MUST be stored on `best`: the comparison below reads
-		// `best.score`, and without it `best.score` is `undefined`, so
-		// `score > best.score` is always false and the first match wins
-		// regardless of level — silently defeating the "error beats warning"
-		// selection (a warning-tier match found earlier would mask a later
-		// error-tier duplicate).
+		
+		
+		
+		
+		
+		
 		if (!best || score > best.score || (score === best.score && sim > best.sim)) {
 			best = { name: entry.name, path: entry.path, level: d.level, reason: d.reason, sim, score };
 		}

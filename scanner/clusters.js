@@ -21,7 +21,7 @@ const jaccard = (a, b) => {
 	return union === 0 ? 0 : inter / union;
 };
 
-function clusterComponents(canonComponents) {
+const clusterComponents = (canonComponents) => {
 	const generic = computeGenericTokens(canonComponents);
 	const sets = canonComponents.map((c) => componentTokenSet(c, generic));
 	const clusters = [];
@@ -50,7 +50,7 @@ function clusterComponents(canonComponents) {
 	return { families, sets, generic };
 }
 
-function nearestMember(family, appTokens) {
+const nearestMember = (family, appTokens) => {
 	let best = null;
 	for (const i of family.members) {
 		const j = jaccard(appTokens, family.sets[i]);
@@ -59,7 +59,7 @@ function nearestMember(family, appTokens) {
 	return best;
 }
 
-function matchFamilies(appComponents, canonComponents, cluster, opts) {
+const matchFamilies = (appComponents, canonComponents, cluster, opts) => {
 	const { families, sets, generic } = cluster;
 	const th = resolveThresholds(opts);
 	const matches = [];

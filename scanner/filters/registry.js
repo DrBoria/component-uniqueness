@@ -2,14 +2,14 @@
 
 const FILTERS = [];
 
-function registerFilter(filter) {
+const registerFilter = (filter) => {
 	if (!filter || typeof filter.name !== "string") throw new Error("filter must have a string `name`");
 	if (typeof filter.test !== "function") throw new Error(`filter "${filter && filter.name}" must have a test(match) function`);
 	FILTERS.push(filter);
 	return filter;
 }
 
-function applyFilters(matches) {
+const applyFilters = (matches) => {
 	const kept = [];
 	const dropped = [];
 	for (const m of matches) {

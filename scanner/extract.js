@@ -1,25 +1,13 @@
 "use strict";
 
-/**
- * scanner/extract.js
- *
- * Signature extraction from one source file (TypeScript AST). For every
- * JSX element and every styled.* template, a normalized Signature is
- * recorded:
- *
- *   { tag, styles, actions, a11y, data }
- *
- * Only elements with at least one style / action / a11y marker are kept —
- * a bare <div> is building material, not a component signature.
- */
+const { entries, keys } = require("remeda");
 
 const fs = require("node:fs");
 const ts = require("typescript");
 const sig = require("../signature");
 const { ACTION_ATTR_NAMES } = require("../config");
 
-/** Collect string literals from a TS expression (shallow, capped). */
-function stringLiterals(node, out, depth = 0) {
+const stringLiterals = (node, out, depth = 0) => {
 	if (!node || depth > 4 || out.length >= 24) return;
 	if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
 		out.push(node.text);
@@ -57,11 +45,7 @@ function stringLiterals(node, out, depth = 0) {
 	}
 }
 
-/**
- * Resolve an identifier to a string-literal initializer or object literal
- * declared somewhere in the same file (const cls = "..."; const st = {...}).
- */
-function resolveLocalIdentifier(name, fileSf, kind) {
+const resolveLocalIdentifier = (name, fileSf, kind) => {
 	const found = { str: [], obj: null };
 	const walk = (n) => {
 		if (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && n.name.text === name && n.initializer) {
@@ -80,23 +64,17 @@ function resolveLocalIdentifier(name, fileSf, kind) {
 	return found;
 }
 
-/**
- * Extract component signatures from one source file.
- *
- * @param {string} fileAbs absolute path to a .ts/.tsx/.jsx file
- * @returns {Array<{tag: string, styles: object, actions: string[], a11y: string[], data: string[]}>}
- */
-function signaturesFromFile(fileAbs) {
+const signaturesFromFile = (fileAbs) => {
 	const source = fs.readFileSync(fileAbs, "utf8");
 	const sf = ts.createSourceFile(fileAbs, source, ts.ScriptTarget.ES2020, true, fileAbs.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
 	const out = [];
 
-	/** Resolve a className-ish expression to a styles map. */
+	
 	const classNameStyles = (expr) => {
 		const merged = {};
 		const addStyles = (s) => {
 			const tw = sig.twToStyles(s);
-			for (const [p, v] of Object.entries(tw)) {
+			for (const [p, v] of entries(tw)) {
 				if (!merged[p]) merged[p] = [];
 				for (const x of v) if (!merged[p].includes(x)) merged[p].push(x);
 			}
@@ -113,9 +91,9 @@ function signaturesFromFile(fileAbs) {
 		return merged;
 	};
 
-	/** Resolve a style={{...}} expression to { prop: [values] }. */
+	
 	const styleObjectStyles = (expr) => {
-		// The attr initializer is a JSXExpressionContainer wrapping the real expression.
+		
 		if (expr && expr.kind === ts.SyntaxKind.JsxExpression) expr = expr.expression;
 		const styles = {};
 		const add = (prop, value) => {
@@ -161,10 +139,10 @@ function signaturesFromFile(fileAbs) {
 	const tagOf = (name) => (ts.isIdentifier(name) ? name.text : ts.isNamespacedName(name) ? `${name.name.text}:${name.namespace.text}` : null);
 
 	const visit = (node) => {
-		// JSX elements: <div className="..." role="dialog" onClick={...} data-testid="x" />
+		
 		if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
-			// JsxElement carries the tag in node.openingElement; a JsxSelfClosingElement
-			// IS the opening tag (it has tagName + attributes directly, no openingElement).
+			
+			
 			const opening = ts.isJsxElement(node) ? node.openingElement : node;
 			const tag = tagOf(opening.tagName);
 			if (!tag) return;
@@ -204,27 +182,27 @@ function signaturesFromFile(fileAbs) {
 					if (!sigObj.a11y.includes("contenteditable")) sigObj.a11y.push("contenteditable");
 				}
 			}
-			if (Object.keys(sigObj.styles).length > 0 || sigObj.actions.length > 0 || sigObj.a11y.length > 0) {
+			if (keys(sigObj.styles).length > 0 || sigObj.actions.length > 0 || sigObj.a11y.length > 0) {
 				out.push(sigObj);
 			}
 			if (ts.isJsxElement(node)) ts.forEachChild(node, visit);
 			return;
 		}
 
-		// styled.div`css` / styled("div")`css`
+		
 		if (ts.isVariableDeclaration(node) && node.initializer && ts.isTaggedTemplateExpression(node.initializer)) {
-			// styled.div`...` → tag is the PropertyAccessExpression itself (styled.div).
-			// styled("div")`...` → tag is a CallExpression. styled.div<Props>`...` → wrapped in a TypeAssertion.
+			
+			
 			const tagExpr = node.initializer.tag;
 			const tpl = node.initializer.template;
-			// No interpolation → NoSubstitutionTemplateLiteral (.text). With ${} → TemplateExpression (.head + .templateSpans).
+			
 			const cssText = ts.isTemplateExpression(tpl)
 				? tpl.head.text + tpl.templateSpans.map((s) => s.literal.text).join("")
 				: ts.isNoSubstitutionTemplateLiteral(tpl)
 					? tpl.text
 					: "";
 			let tag = null;
-			// styled.div<Props>`...` wraps the member access in a TypeAssertion.
+			
 			let real = tagExpr;
 			while (real && (ts.isTypeAssertionExpression(real) || ts.isAsExpression(real))) real = real.expression;
 			if (real && ts.isPropertyAccessExpression(real)) {
@@ -232,18 +210,18 @@ function signaturesFromFile(fileAbs) {
 				if (ts.isIdentifier(base) && base.text === "styled") tag = real.name.text;
 			} else if (tagExpr && ts.isCallExpression(tagExpr)) {
 				const arg0 = tagExpr.arguments[0];
-				// styled("div")`...` — string literal.
+				
 				if (arg0 && ts.isStringLiteral(arg0)) tag = arg0.text;
-				// styled(MuiButton)`...` — identifier: a wrapper built on a
-				// LIBRARY component. The tag is the component name (the rendered
-				// DOM tag is unknown statically — that is what the dynamic
-				// snapshot catalog is for), so the signature is matched by the
-				// CSS the wrapper adds on top of the library styles.
+				
+				
+				
+				
+				
 				else if (arg0 && ts.isIdentifier(arg0)) tag = arg0.text;
 			}
 			if (tag) {
 				const sigObj = { tag, styles: sig.cssTextToStyles(cssText), actions: [], a11y: [], data: [] };
-				if (Object.keys(sigObj.styles).length > 0) out.push(sigObj);
+				if (keys(sigObj.styles).length > 0) out.push(sigObj);
 			}
 		}
 

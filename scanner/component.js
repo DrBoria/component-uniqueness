@@ -107,7 +107,7 @@ const dottedName = (name) => {
 
 const tagOf = (name) => dottedName(name);
 
-function hasJsx(node) {
+const hasJsx = (node) => {
 	let found = false;
 	const visit = (n) => {
 		if (found) return;
@@ -121,7 +121,7 @@ function hasJsx(node) {
 	return found;
 }
 
-function isExported(node, sf) {
+const isExported = (node, sf) => {
 	const mods = ts.getModifiers(node) || [];
 	if (mods.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) return true;
 	const parent = node.parent;
@@ -129,7 +129,7 @@ function isExported(node, sf) {
 	return false;
 }
 
-function collectTokens(expr, sf, out) {
+const collectTokens = (expr, sf, out) => {
 	if (!expr) return;
 	if (ts.isJsxExpression(expr)) expr = expr.expression;
 	const strs = [];
@@ -151,11 +151,11 @@ function collectTokens(expr, sf, out) {
 	}
 }
 
-function openingOf(node) {
+const openingOf = (node) => {
 	return ts.isJsxElement(node) ? node.openingElement : node;
 }
 
-function classNameTokens(opening, sf, out) {
+const classNameTokens = (opening, sf, out) => {
 	for (const attr of opening.attributes.properties) {
 		if (ts.isJsxAttribute(attr) && attr.name) {
 			const aname = attr.name.getText(sf);
@@ -164,7 +164,7 @@ function classNameTokens(opening, sf, out) {
 	}
 }
 
-function gatherElements(node, sf, out) {
+const gatherElements = (node, sf, out) => {
 	const visit = (n) => {
 		if (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n)) {
 			const opening = openingOf(n);
@@ -178,7 +178,7 @@ function gatherElements(node, sf, out) {
 	visit(node);
 }
 
-function gatherSubtrees(node, sf) {
+const gatherSubtrees = (node, sf) => {
 	const out = [];
 	const visit = (n) => {
 		if (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n)) {
@@ -192,7 +192,7 @@ function gatherSubtrees(node, sf) {
 
 const MAX_SUBTREE_TAGS = 80;
 
-function subtreeInfo(node, sf) {
+const subtreeInfo = (node, sf) => {
 	const seq = [];
 	const tokens = new Set();
 	const visit = (n) => {
@@ -208,7 +208,7 @@ function subtreeInfo(node, sf) {
 	return { seq, tokens };
 }
 
-function subtreesOf(node, sf) {
+const subtreesOf = (node, sf) => {
 	const out = [];
 	for (const el of gatherSubtrees(node, sf, [])) {
 		const info = subtreeInfo(el, sf);
@@ -219,7 +219,7 @@ function subtreesOf(node, sf) {
 	return out;
 }
 
-function rootTagsOf(node, sf) {
+const rootTagsOf = (node, sf) => {
 	const out = new Set();
 	const visit = (n, parent) => {
 		if (n !== node && (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n))) {
@@ -235,7 +235,7 @@ function rootTagsOf(node, sf) {
 	return out;
 }
 
-function gatherA11y(node, sf, out) {
+const gatherA11y = (node, sf, out) => {
 	const visit = (n) => {
 		if (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n)) {
 			const opening = openingOf(n);
@@ -257,7 +257,7 @@ function gatherA11y(node, sf, out) {
 	visit(node);
 }
 
-function canonicalImportNames(sf) {
+const canonicalImportNames = (sf) => {
 	const names = new Set();
 	const visit = (n) => {
 		if (ts.isImportDeclaration(n) && n.moduleSpecifier && ts.isStringLiteral(n.moduleSpecifier)) {
@@ -277,7 +277,7 @@ function canonicalImportNames(sf) {
 	return names;
 }
 
-function canonicalTagsUsed(node, names) {
+const canonicalTagsUsed = (node, names) => {
 	const found = new Set();
 	const visit = (n) => {
 		if (ts.isJsxElement(n) || ts.isJsxSelfClosingElement(n)) {
@@ -309,7 +309,7 @@ function* iterateDeclarations(sf) {
 	for (const d of found) yield d;
 }
 
-function componentsFromFile(fileAbs, canonicalNames) {
+const componentsFromFile = (fileAbs, canonicalNames) => {
 	const source = fs.readFileSync(fileAbs, "utf8");
 	const kind = fileAbs.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
 	const sf = ts.createSourceFile(fileAbs, source, ts.ScriptTarget.ES2020, true, kind);
