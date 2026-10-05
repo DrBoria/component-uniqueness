@@ -168,6 +168,17 @@ const createRule = () => {
 	};
 };
 
-module.exports = createRule();
+const rule = createRule();
+const pkg = require("./package.json");
+
+module.exports = {
+	meta: {
+		name: pkg.name,
+		version: pkg.version,
+	},
+	rules: {
+		"component-uniqueness": rule,
+	},
+};
 module.exports.RULE_NAME = RULE_NAME;
 module.exports.RULE_SHORT = RULE_SHORT;

@@ -20,7 +20,7 @@ bun add -D @md-code/component-uniqueness
 
 ```js
 // eslint.config.js
-const plugin = require("@md-code/component-uniqueness/plugin");
+const plugin = require("@md-code/component-uniqueness");
 
 module.exports = [
   {

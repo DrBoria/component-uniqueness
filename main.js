@@ -69,7 +69,7 @@ const parseArgs = (argv) => {
 			cfg.verbose = true;
 		} else if (a === "--help" || a === "-h") {
 			console.log("Usage: component-uniqueness [--roots a:b] [--out file] [--registry file] [--repo-root dir] [--check] [--report [file.md]] [--app-roots a:b] [--ignore-dirs a:b] [--verbose]");
-			console.log("Without --roots, the options are read from the consumer's eslint.config.js (rule md-code/duplicate-component) or component-uniqueness.config.js.");
+			console.log("Without --roots, the options are read from the consumer's eslint.config.js (rule md-code/component-uniqueness) or component-uniqueness.config.js.");
 			process.exit(0);
 		} else {
 			fail(`unknown argument: ${a} (see --help)`);

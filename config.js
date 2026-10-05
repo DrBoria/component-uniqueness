@@ -185,7 +185,7 @@ const isIgnored = (relPath, include, exclude) => {
 	return false;
 };
 
-const RULE_NAME = "md-code/duplicate-component";
+const RULE_NAME = "md-code/component-uniqueness";
 const RULE_SHORT = "md-code";
 
 const FLAT_CANDIDATES = ["eslint.config.js", "eslint.config.mjs", "eslint.config.cjs", "eslint.config.ts"];
