@@ -1,60 +1,59 @@
 {
-	"name": "react-component-uniqueness",
-	"version": "0.0.1",
-	"description": "ESLint rule that enforces one canonical location per React component: duplicate declarations, raw HTML outside the canonical packages, hand-rolled components by behavior, and styled.* created in the app.",
+	"name": "@md-code/component-uniqueness",
+	"version": "0.1.0",
+	"description": "ESLint rule and CLI that find duplicate components, raw HTML that should be a canonical component, and copied parts of components, by comparing structure, CSS, behavior, accessibility and framework profile.",
 	"license": "MIT",
+	"keywords": [
+		"eslint",
+		"eslintplugin",
+		"eslint-plugin",
+		"duplicate-components",
+		"design-system"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/DrBoria/component-uniqueness.git"
+	},
+	"engines": {
+		"node": ">=18"
+	},
 	"main": "index.js",
 	"bin": {
-		"react-component-uniqueness": "./bin/react-component-uniqueness.js"
+		"component-uniqueness": "main.js"
 	},
 	"files": [
 		"index.js",
 		"plugin.js",
 		"config.js",
-		"signature.js",
-		"debt.js",
-		"thresholds.js",
-		"loaders.js",
-		"resolve.js",
-		"dom.js",
+		"main.js",
+		"utils.js",
+		"decision-maker.js",
 		"report.js",
-		"errorTypes/",
-		"scanner/",
-		"scanner/filters/",
-		"bin/",
-		"snapshots/",
+		"normalize/",
+		"matcher/",
+		"filter/",
+		"playgrounds/",
 		"README.md"
 	],
 	"exports": {
 		".": "./index.js",
 		"./plugin": "./plugin.js",
 		"./config": "./config.js",
-		"./signature": "./signature.js",
-		"./debt": "./debt.js",
-		"./thresholds": "./thresholds.js",
 		"./report": "./report.js",
-		"./filters": "./scanner/filters/index.js",
-		"./snapshots": "./snapshots/run.mjs",
-		"./snapshots/*": "./snapshots/*"
+		"./package.json": "./package.json"
 	},
 	"dependencies": {
+		"jsdom": "^29.1.1",
 		"minimatch": "^9.0.4",
-		"remeda": "^2.50.0"
+		"remeda": "^2.50.0",
+		"tailwindcss": "^4.3.3",
+		"typescript": ">=5.5.0 <7"
 	},
 	"scripts": {
-		"gen:catalog": "node scanner/main.js"
+		"gen:catalog": "node main.js"
 	},
 	"peerDependencies": {
-		"eslint": ">=8.40.0",
-		"typescript": ">=4.7.0"
-	},
-	"peerDependenciesMeta": {
-		"puppeteer-core": {
-			"optional": true
-		}
-	},
-	"optionalDependencies": {
-		"puppeteer-core": "^24.0.0"
+		"eslint": ">=8.40.0"
 	},
 	"publishConfig": {
 		"access": "public"
