@@ -1,40 +1,16 @@
 # @md-code/component-uniqueness
 
-ESLint rule + CLI scanner that finds **duplicate components** in your app code by comparing them against your canonical component library. Cross-framework: React today, the same signature model is designed to carry over to Vue and Angular.
-
-## How it works
+ESLint rule and CLI that find components, raw HTML and copied JSX blocks that duplicate a component you already have in your design system.
 
 ```mermaid
-flowchart TD
-    A["Canonical components<br/>(walk folders, extract signatures)"] --> B[("catalog.json")]
-    A --> CD["canon-dup<br/>canonicals matched against each other (strict thresholds)<br/>duplicates dropped → unique canonical set"]
-    CD --> A
-    C["App code<br/>(every JSX element)"] --> D
-
-    subgraph match["Match (4 matchers in parallel)"]
-        D --> M1["name<br/>same or fuzzy name"]
-        D --> M2["structural<br/>shared class tokens"]
-        D --> M3["family<br/>token-profile cluster"]
-        D --> M4["jsx-block<br/>subtree contains canonical"]
-        B --> M1
-        B --> M2
-        B --> M3
-        B --> M4
-    end
-
-    M1 --> F1
-    M2 --> F1
-    M3 --> F1
-    M4 --> F1
-
-    subgraph filter["Filter"]
-        F1["drop-usages<br/>app already imports the canonical"]
-        F1 --> F2["drop-child-element<br/>match is on a child, not the root"]
-    end
-
-    F2 --> E["report.md<br/>Markdown funnel of duplicates"]
-    CD -. "own section" .-> E
+flowchart LR
+    A["Canonical<br/>components"] --> M
+    B["App code<br/>components · elements · parts"] --> M
+    M["Match<br/>name · structure · behavior · a11y · framework"] --> F["Filter<br/>usages · child elements"]
+    F --> R["Report"]
 ```
+
+Structure is compared as rendered HTML with the CSS your classes resolve to, so two differently written components with the same markup and styles match.
 
 ## Quick start
 
@@ -44,106 +20,74 @@ bun add -D @md-code/component-uniqueness
 
 ```js
 // eslint.config.js
-const uniqueness = require("@md-code/component-uniqueness/plugin");
+const plugin = require("@md-code/component-uniqueness/plugin");
 
 module.exports = [
   {
-    files: ["**/*.tsx"],
-    plugins: { "md-code": uniqueness },
+    files: ["src/**/*.{ts,tsx}"],
+    plugins: { "md-code": plugin },
     rules: {
-      "md-code/component-uniqueness": ["error", {
-        componentsFolder: [
-          { path: "core/ui/atoms", rank: 0 },
-          { path: "core/ui/formation", rank: 1 },
-          { path: "core/ui/partials", rank: 2 },
-        ],
-        catalogPath: "reports/component-catalog.json",
+      "md-code/duplicate-component": ["error", {
+        componentsFolder: ["src/ui/atoms", "src/ui/formation", "src/ui/partials"],
+        tsconfig: "src/ui/tsconfig.json",
+        rawHtml: true,
+        parts: true,
       }],
     },
   },
 ];
 ```
 
-The catalog is generated automatically on the first lint when the file is
-missing (from the `componentsFolder` option) — it is gitignored and never
-committed. You can also generate it explicitly:
+Generate the catalog once before linting, and again when the canonical components change. It is read from `reports/component-catalog.json` and should be gitignored.
 
 ```sh
-bunx md-code-component-uniqueness
+bunx component-uniqueness
 ```
 
-Run the linter as usual:
+## Layers
 
-```sh
-bunx eslint "src/**/*.tsx"
-```
+`componentsFolder` is ordered: each folder is built from the ones before it. A file inside a folder is compared only with the folders to its left, so `formation` is checked against `atoms`, and `partials` against both. The first folder is the base and is not compared with anything. Files outside all of them are compared with every folder.
+
+## What it reports
+
+| messageId | Fires when |
+| --- | --- |
+| `duplicateComponent` | A component duplicates a canonical one |
+| `rawHtml` | A raw element (`button`, `input`, `a`, …) should be a canonical component. Needs `rawHtml: true`. Not applied inside `componentsFolder` |
+| `partOfComponent` | A block inside a component duplicates a canonical one. Needs `parts: true` |
+
+A component that already renders the canonical one is a usage, not a duplicate, and is skipped.
+
+## Options
+
+| Option | Default | Notes |
+| --- | --- | --- |
+| `componentsFolder` | `[]` | Canonical folders, lowest layer first |
+| `tsconfig` | — | Used to resolve imports when a file has no `tsconfig` of its own |
+| `rawHtml` | `false` | Also check raw elements |
+| `parts` | `false` | Also check blocks inside components |
+| `catalogPath` | `reports/component-catalog.json` | Where the catalog is read and written |
+| `include` | `[]` | Lint only matching files. Files inside `componentsFolder` are always linted |
+| `exclude` | stories, tests, `*.d.ts` | Globs to skip |
+| `ignoreDirs` | `node_modules`, `dist`, `build` | Added to the defaults |
+| `exts` | `.tsx` `.ts` `.jsx` `.js` | File extensions |
+| `weights` | name 0.10, structure 0.5, behavior 0.2, a11y 0.1, framework 0.15 | Signal weights |
+| `thresholds` | duplicate 0.6, similar 0.4 | Confidence cut-offs |
 
 ## CLI
 
 ```sh
-bunx md-code-component-uniqueness [flags]
+bunx component-uniqueness [flags]
 ```
+
+Options are read from the rule in `eslint.config.js`.
 
 | Flag | Description |
 | --- | --- |
-| `--roots a:b` | Scan roots (overrides `componentsFolder` from config) |
-| `--out <file>` | Catalog output path (default `reports/component-catalog.json`) |
-| `--check` | CI gate — exit 1 if catalog is stale |
-| `--report [file]` | Write a Markdown duplicate report |
-| `--verbose` | Include the "Filtered out" section in the report |
-| `--app-roots a:b` | App-code roots for the report (default: repo root) |
-| `--repo-root <dir>` | Repo root (default: auto-discovered) |
-
-## What it flags
-
-| Tier | Meaning |
-| --- | --- |
-| `name` | App component has the same name as a canonical one |
-| `name-fuzzy` | Name is a fuzzy match (e.g. `MyButton` vs `Button`) |
-| `structural-exact` | ≥ 80% of the canonical's distinctive class tokens are shared |
-| `structural-similar` | 40–80% shared |
-| `family` | Clusters by token profile (hand-built library pieces) |
-| `jsx-block` | A JSX subtree in app code contains the full tag-sequence of a canonical component |
-
-## What the ESLint rule reports
-
-| messageId | Fires when |
-| --- | --- |
-| `duplicateComponent` | A canonical component name is declared outside its registry directory |
-| `rawHtml` | A raw interactive element (`button`, `input`, `select`, …) is used outside the canonical packages — the element's behavior (its `type`, `role`, `aria-*`) maps to a canonical component |
-| `layoutPrimitive` | A hand-rolled element **behaves like** a canonical component: its behavioral signals (event handlers + behavioral `role`/`type`/`aria-*` tokens) are a subset of a canonical's. Derived entirely from the catalog — no hardcoded role/behavior lists |
-| `styledInApp` | A `styled.*` component is created outside the canonical packages |
-| `catalogDuplicate` | An element structurally duplicates a canonical one (shared a11y token, or ≥ 3 shared layout style keys with high similarity) — error level |
-| `similarComponent` | Same as above but below the error threshold — warning level |
-
-The behavioral check (`layoutPrimitive`) runs only outside the canonical
-folders — inside them, the canonical's own body is the source of truth. It
-keys off the **lowest-rank** canonical whose signal set contains the
-candidate's, so the most basic canonical wins.
-
-## Options (rule config)
-
-| Option | Default | Notes |
-| --- | --- | --- |
-| `componentsFolder` | `[]` | Canonical dirs. `{ path, rank }` objects or plain strings. Rank drives the behavioral check (lowest = most basic) |
-| `catalog` / `catalogPath` | — / `reports/component-catalog.json` | Inline catalog object, or path to load one |
-| `registry` / `registryPath` | — / `reports/component-registry.json` | Canonical name → allowed dirs, for `duplicateComponent` |
-| `includeDynamic` | `false` | Also load a dynamic (DOM-snapshot) catalog |
-| `dynamicCatalog` / `dynamicCatalogPath` | — | Inline / path for the dynamic catalog |
-| `tsconfig` | — | Fallback `tsconfig.json` (or any `.ts` file next to one) used to resolve imports when the file has no `tsconfig` of its own. Resolution is done by TypeScript; unresolved imports keep their component name |
-| `rawHtml` | `false` | Match every HTML element that carries behavior (an event handler, `role`/`aria-*`, or an interactive tag) against the canonical catalog with the same matchers and decision-maker as components. The best canonical at or above the duplicate threshold is suggested |
-| `exclude` | `*.stories.*`, `*.test.*`, `*.spec.*`, `*.d.ts`, `**/__tests__/**` | Globs, `^...$` regexes or `/.../ ` regexes to skip |
-| `include` | `[]` | If set, only matching files are linted |
-| `exts` | `.tsx`, `.ts`, `.jsx`, `.js` | File extensions to scan |
-| `ignoreDirs` | `node_modules`, `dist`, `build` | Directory names to skip while walking |
-| `rootMarkers` | `.git` | File names that mark the repo root (auto-discovery) |
-| `debt` | `{}` | Known-duplicate ledger (shrink-only) |
-
-## Notes
-
-- The catalog is **generated on demand** by the rule when the file is missing
-  (same code path as the CLI), so it can stay gitignored and CI works out of
-  the box. The CLI is still useful for `--report` and `--check`.
-- The catalog is read once per ESLint process and cached.
-- A missing or stale catalog logs a warning; lint never crashes.
-- Everything is plain Node + `fs`/`path` — works identically on Linux, macOS, Windows.
+| `--report [file]` | Write a Markdown report of every finding |
+| `--check` | Exit 1 if the catalog is stale |
+| `--roots a:b` | Canonical folders, instead of `componentsFolder` |
+| `--app-roots a:b` | Folders to scan for the report (default: repo root) |
+| `--repo-root <dir>` | Repo root (default: auto-detected) |
+| `--out <file>` | Catalog path |
+| `--verbose` | Also list what the filters dropped |

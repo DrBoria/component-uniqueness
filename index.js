@@ -35,6 +35,14 @@ const isComponentBinding = (node) => {
 	return true;
 };
 
+const normalizedCanons = new WeakMap();
+
+const normalizeCanon = (canon, config) => {
+	if (!normalizedCanons.has(canon)) normalizedCanons.set(canon, buildCandidate(canon, config));
+
+	return normalizedCanons.get(canon);
+};
+
 const createRule = () => {
 	return {
 		meta: {
@@ -96,7 +104,6 @@ const createRule = () => {
 				}
 				const normalizeComp = (comp) => buildCandidate(comp, config);
 
-				const normCanons = new Map();
 				for (const comp of parsed) {
 					if (!comp.isExported) continue;
 					const candidate = normalizeComp({ ...comp, path: relPath });
@@ -104,11 +111,7 @@ const createRule = () => {
 					for (const canon of catalogComponents) {
 						if (canon.name === candidate.name) continue;
 						if (!canSeeCanon(relPath, canon.path, config.componentsFolder)) continue;
-						let normCanon = normCanons.get(canon.name);
-						if (!normCanon) {
-							normCanon = normalizeComp(canon);
-							normCanons.set(canon.name, normCanon);
-						}
+						const normCanon = normalizeCanon(canon, config);
 						const signals = matchSignals(candidate, normCanon, { canonNames, frameworkMatcher });
 						const decision = decide(candidate, normCanon, { signals, weights: config.weights, thresholds: config.thresholds });
 						pairs.push({ canon: normCanon, signals, decision });
@@ -127,11 +130,7 @@ const createRule = () => {
 					}
 				}
 				if (config.rawHtml && !isInComponentsFolder) {
-					const canons = catalogComponents.map((canon) => {
-						if (!normCanons.has(canon.name)) normCanons.set(canon.name, normalizeComp(canon));
-
-						return normCanons.get(canon.name);
-					});
+					const canons = catalogComponents.map((canon) => normalizeCanon(canon, config));
 					let elements = [];
 					try {
 						elements = parseElements(filename, canonNames, config);
@@ -151,11 +150,7 @@ const createRule = () => {
 					}
 				}
 				if (config.parts) {
-					const canons = catalogComponents.map((canon) => {
-						if (!normCanons.has(canon.name)) normCanons.set(canon.name, normalizeComp(canon));
-
-						return normCanons.get(canon.name);
-					});
+					const canons = catalogComponents.map((canon) => normalizeCanon(canon, config));
 					for (const { part, best } of findParts(filename, relPath, canons, config, new Set(canonNames))) {
 						context.report({
 							loc: { start: { line: part.line, column: part.column }, end: { line: part.endLine, column: 0 } },
