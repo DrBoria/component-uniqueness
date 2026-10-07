@@ -143,6 +143,8 @@ const styleObjectToCssText = (obj) => {
 
 const layoutOnly = (node) => ({
 	tag: node.tag,
+	text: node.text || undefined,
+	interactive: !!node.interactive,
 	css: Object.fromEntries(Object.entries(node.css || {}).filter(([prop]) => isLayoutProp(prop))),
 	children: (node.children || []).map(layoutOnly),
 });

@@ -13,15 +13,19 @@ const matchBehavior = (candidate, canon) => {
 	const candA = new Set((candidate.framework && candidate.framework.events) || []);
 	const canonA = new Set((canon.framework && canon.framework.events) || []);
 	const shared = new Set([...candA].filter((event) => canonA.has(event)));
-	const score = jaccard(candA, canonA);
+	const base = jaccard(candA, canonA);
+	const union = candA.size + canonA.size - shared.size;
+	const smallSetDiscount = Math.min(1, union / 2);
+	const score = base * smallSetDiscount;
 	return {
 		score,
 		evidence: {
 			candidateEvents: [...candA].sort(),
 			canonicalEvents: [...canonA].sort(),
 			sharedEvents: [...shared].sort(),
+			smallSetDiscount: Math.round(smallSetDiscount * 100) / 100,
 		},
 	};
-};;
+};
 
 module.exports = { matchBehavior };

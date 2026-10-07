@@ -12,8 +12,8 @@ const DEFAULT_WEIGHTS = {
 };
 
 const DEFAULT_THRESHOLDS = {
-	duplicate: 0.6,
-	similar: 0.4,
+	duplicate: 0.4,
+	similar: 0.2,
 };
 
 const clamp01 = (x) => Math.max(0, Math.min(1, x));
@@ -77,12 +77,8 @@ const decide = (candidate, canon, ctx) => {
 		tier = "similar";
 	}
 
-	const contributions = Object.fromEntries(Object.entries(signals).map(([k, s]) => [k, weights[k] * s.score]));
-	const parts = [];
-	for (const key of ["name", "structure", "behavior", "a11y", "framework"]) {
-		if (signals[key].score > 0) parts.push(`${key} ${signals[key].score.toFixed(2)}`);
-	}
-	const reason = parts.length > 0 ? `confidence ${confidence.toFixed(2)} (${parts.join(", ")})` : `confidence ${confidence.toFixed(2)}`;
+	const parts = ["name", "structure", "behavior", "a11y", "framework"].map((key) => `${key} ${signals[key].score.toFixed(2)}`);
+	const reason = `confidence ${confidence.toFixed(2)} (${parts.join(", ")})`;
 
 	return {
 		isDuplicate,

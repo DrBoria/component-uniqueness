@@ -214,13 +214,24 @@ const pickOptions = (v) => {
 	return {};
 };
 
+const isRuleKey = (key) => key === RULE_NAME || key === RULE_SHORT || key === "component-uniqueness" || key.endsWith("/component-uniqueness");
+
+const ruleValue = (rules) => {
+	for (const [key, v] of Object.entries(rules)) {
+		if (!isRuleKey(key)) continue;
+		if (v === undefined || v === null) continue;
+		return v;
+	}
+	return null;
+};
+
 const loadFlatOptions = async (file) => {
 	const mod = await loadModule(file);
 	const list = mod && mod.default !== undefined ? mod.default : mod;
 	if (!Array.isArray(list)) return null;
 	for (const entry of list) {
 		if (!entry || typeof entry !== "object" || !entry.rules) continue;
-		const v = entry.rules[RULE_NAME] ?? entry.rules[RULE_SHORT];
+		const v = ruleValue(entry.rules);
 		if (v === undefined || v === null) continue;
 		return pickOptions(v);
 	}
@@ -229,8 +240,8 @@ const loadFlatOptions = async (file) => {
 
 const loadLegacyOptions = async (file) => {
 	const mod = await loadModule(file);
-	const rules = (mod && mod.rules) || {};
-	return pickOptions(rules[RULE_NAME] ?? rules[RULE_SHORT]);
+	const v = ruleValue((mod && mod.rules) || {});
+	return v === undefined || v === null ? null : pickOptions(v);
 };
 
 const loadRuleOptions = async (dir) => {

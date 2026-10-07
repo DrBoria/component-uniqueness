@@ -21,7 +21,10 @@ const renderHeader = (comp) => {
 	lines.push("# Component duplicates (component-level funnel)");
 	lines.push("");
 	lines.push(`Scanned ${comp.files} app file(s), ${comp.appCount} app component(s) against ${comp.canonCount} canonical component(s).`);
-	lines.push(`Found ${comp.matches.length} duplicate component(s)${comp.dropped && comp.dropped.length > 0 ? ` (after filtering out ${comp.dropped.length} match(es))` : ""}.`);
+	const dupCount = comp.matches.filter((m) => m.decision.tier === "duplicate").length;
+	const simCount = comp.matches.filter((m) => m.decision.tier === "similar").length;
+	const missingCount = (comp.missingClusters || []).reduce((n, c) => n + c.matches.length, 0);
+	lines.push(`Found ${dupCount} duplicate component(s) and ${simCount} similar component(s)${comp.dropped && comp.dropped.length > 0 ? ` (after filtering out ${comp.dropped.length} match(es))` : ""}${missingCount > 0 ? `, plus ${missingCount} component(s) grouped under ${(comp.missingClusters || []).length} potentially missing component(s)` : ""}.`);
 	lines.push("");
 	return lines;
 };
@@ -37,6 +40,28 @@ const renderTierSection = (tier, rows, title = TIER_LABEL[tier]) => {
 		lines.push(`| ${m.app.name} | \`${m.app.path}:${m.app.line}\` | ${m.canon.name} | \`${m.canon.path}\` | ${m.decision.confidence.toFixed(2)} | ${m.decision.reason} |`);
 	}
 	lines.push("");
+	return lines;
+};
+
+const renderMissingSection = (clusters) => {
+	if (!clusters || clusters.length === 0) return [];
+	const lines = [];
+	lines.push(`## Potentially missing component (${clusters.length})`);
+	lines.push("");
+	lines.push("Several distinct components all matched the same canonical. This usually means the codebase is missing a shared component that would unify them — not that any single one is a duplicate. Consider extracting a new canonical component for each group below.");
+	lines.push("");
+	for (const cluster of clusters) {
+		lines.push(`### ${cluster.name}`);
+		lines.push("");
+		lines.push(`All ${cluster.matches.length} components below matched canonical \`${cluster.canon.name}\` (\`${cluster.canon.path}\`). They are structurally similar to each other but distinct enough that none is a clean duplicate — a shared \`${cluster.name}\` would likely cover them.`);
+		lines.push("");
+		lines.push("| Local component | Location | Matched canonical | Confidence | Why |");
+		lines.push("| --- | --- | --- | --- | --- |");
+		for (const m of cluster.matches) {
+			lines.push(`| ${m.app.name} | \`${m.app.path}:${m.app.line}\` | ${m.canon.name} | ${m.decision.confidence.toFixed(2)} | ${m.decision.reason} |`);
+		}
+		lines.push("");
+	}
 	return lines;
 };
 
@@ -105,6 +130,8 @@ const renderComponentReport = (comp, verbose) => {
 		if (rows.length === 0) continue;
 		lines.push(...renderTierSection(tier, rows));
 	}
+	const missingClusters = (comp.missingClusters || []).filter((c) => !inLayer(c.canon.path));
+	lines.push(...renderMissingSection(missingClusters));
 	if (comp.rawHtml && comp.rawHtml.length > 0) lines.push(...renderRawHtmlSection(comp.rawHtml));
 	lines.push(...renderPartsSection(appParts));
 	for (const tier of TIERS) {

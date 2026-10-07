@@ -1,6 +1,7 @@
 "use strict";
 
 const path = require("node:path");
+const { pascalWords, GENERIC_WORDS } = require("../normalize/words.js");
 
 const FUZZY_NAME_MIN_LEN = 5;
 const FUZZY_BASENAME_MIN_LEN = 4;
@@ -14,9 +15,19 @@ const kebabToPascal = (s) =>
 
 const basenameToPascal = (file) => kebabToPascal(path.basename(file, path.extname(file)));
 
-const pascalWords = (s) => String(s || "").replace(/([a-z0-9])([A-Z])/g, "$1 $2").split(/[^A-Za-z0-9]+/).filter(Boolean);
 const kebabWords = (s) => String(s || "").split(/[^A-Za-z0-9]+/).filter(Boolean);
 const singular = (w) => (w.length > 3 && w.endsWith("s") && !w.endsWith("ss") ? w.slice(0, -1) : w);
+
+const wordSim = (a, b) => {
+	const wa = new Set(pascalWords(a).map((w) => singular(w.toLowerCase())).filter((w) => w.length >= 3 && !GENERIC_WORDS.has(w)));
+	const wb = new Set(pascalWords(b).map((w) => singular(w.toLowerCase())).filter((w) => w.length >= 3 && !GENERIC_WORDS.has(w)));
+	if (wa.size === 0 || wb.size === 0) return 0;
+	let inter = 0;
+	for (const w of wa) if (wb.has(w)) inter += 1;
+	const union = wa.size + wb.size - inter;
+
+	return union === 0 ? 0 : inter / union;
+};
 
 const fuzzyNameHit = (appName, canonNames) => {
 	const words = pascalWords(appName);
@@ -83,6 +94,8 @@ const matchName = (candidate, canon, ctx) => {
 		fuzzy = fuzzyNameHit(candidate.name, [canon.name]) || fuzzyBasenameHit(candidate.path, [canon.name]);
 	}
 
+	const word = wordSim(candidate.name, canon.name);
+
 	let score = 0;
 	let matchType = null;
 	if (exactName) {
@@ -93,14 +106,18 @@ const matchName = (candidate, canon, ctx) => {
 		matchType = "exact-basename";
 	} else if (fuzzy) {
 		const byName = !!fuzzyNameHit(candidate.name, [canon.name]);
-		score = byName ? 0.7 : 0.6;
+		score = (byName ? 0.7 : 0.6) * (0.5 + 0.5 * word);
 		matchType = byName ? "fuzzy-name" : "fuzzy-basename";
+	} else if (word > 0) {
+		score = 0.6 * word;
+		matchType = "word-overlap";
 	}
 
 	const evidence = {
 		exactName,
 		exactBasename,
 		fuzzy: fuzzy ? fuzzy.name : null,
+		wordSim: Math.round(word * 100) / 100,
 		matchType,
 	};
 	return { score, evidence };

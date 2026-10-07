@@ -60,6 +60,17 @@ const render = (tree, opts) => {
 	return pg.render(tree, { stylesheet });
 };
 
+const rawClassTokens = (tree) => {
+	const out = new Set();
+	const visit = (n) => {
+		if (!n) return;
+		if (typeof n.className === "string") for (const token of n.className.split(/\s+/)) if (token) out.add(token);
+		for (const child of n.children || []) visit(child);
+	};
+	visit(tree);
+	return out;
+};
+
 module.exports = {
 	getPlayground,
 	getFramework,
@@ -68,4 +79,5 @@ module.exports = {
 	parseParts,
 	resolveCss,
 	render,
+	rawClassTokens,
 };

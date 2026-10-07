@@ -24,10 +24,32 @@ const { getFrameworkMatcher } = require("./matcher/framework");
 const { decide, bestOf } = require("./decision-maker");
 const dropUsages = require("./filter/drop-usages");
 const dropChildElement = require("./filter/drop-child-element");
+const { findMissingComponents } = require("./filter/missing-component");
 const { renderComponentReport } = require("./report");
+const log = require("./logger");
 
 const FILTERS = [dropUsages, dropChildElement];
 const frameworkMatcher = getFrameworkMatcher("react");
+
+const treeSummary = (tree) => {
+	if (!tree) return null;
+	const walk = (n) => {
+		const kids = (n.children || []).map(walk);
+		return { tag: n.tag, css: n.css ? Object.keys(n.css).length : 0, children: kids };
+	};
+	return walk(tree);
+};
+
+const candidateSummary = (c, role) => ({
+	role,
+	name: c.name,
+	path: c.path,
+	rootTags: c.rootTags,
+	tree: treeSummary(c.tree),
+	domTree: treeSummary(c.dom && c.dom.tree),
+	framework: c.framework ? { props: c.framework.props, events: c.framework.events, names: c.framework.names, open: c.framework.open } : null,
+	a11y: c.a11y,
+});
 
 const fail = (message) => {
 	console.error(`[component-uniqueness] ${message}`);
@@ -35,7 +57,7 @@ const fail = (message) => {
 };
 
 const parseArgs = (argv) => {
-	const cfg = { roots: null, out: null, registry: null, repoRoot: null, check: false, report: null, appRoots: null, ignoreDirs: null, verbose: false };
+	const cfg = { roots: null, out: null, registry: null, repoRoot: null, check: false, report: null, appRoots: null, ignoreDirs: null, verbose: false, include: null, log: null, minCluster: 3 };
 	for (let i = 0; i < argv.length; i += 1) {
 		const a = argv[i];
 		if (a === "--check") {
@@ -67,8 +89,20 @@ const parseArgs = (argv) => {
 			cfg.ignoreDirs = argv[++i].split(":").filter(Boolean);
 		} else if (a === "--verbose") {
 			cfg.verbose = true;
+		} else if (a === "--include") {
+			if (!argv[i + 1]) fail("--include requires a value (colon-separated list of file globs, e.g. a.tsx:b.tsx)");
+			cfg.include = argv[++i].split(":").filter(Boolean);
+		} else if (a === "--log") {
+			if (!argv[i + 1]) fail("--log requires a value (path to the stage log file)");
+			cfg.log = argv[++i];
+		} else if (a === "--min-cluster") {
+			if (!argv[i + 1]) fail("--min-cluster requires a value (min app components matching one canonical to flag it as a missing component)");
+			const n = Number.parseInt(argv[i + 1], 10);
+			if (!Number.isFinite(n) || n < 2) fail("--min-cluster must be an integer >= 2");
+			cfg.minCluster = n;
+			i += 1;
 		} else if (a === "--help" || a === "-h") {
-			console.log("Usage: component-uniqueness [--roots a:b] [--out file] [--registry file] [--repo-root dir] [--check] [--report [file.md]] [--app-roots a:b] [--ignore-dirs a:b] [--verbose]");
+			console.log("Usage: component-uniqueness [--roots a:b] [--out file] [--registry file] [--repo-root dir] [--check] [--report [file.md]] [--app-roots a:b] [--ignore-dirs a:b] [--include a.tsx:b.tsx] [--log file] [--min-cluster N] [--verbose]");
 			console.log("Without --roots, the options are read from the consumer's eslint.config.js (rule md-code/component-uniqueness) or component-uniqueness.config.js.");
 			process.exit(0);
 		} else {
@@ -116,8 +150,15 @@ const parseComponents = (files, canonNames, config, role = "CANONICAL") => {
 			continue;
 		}
 		for (const c of parsed) {
+			if (log.enabled()) {
+				log.stage("normalizer:before", { role, file: rel, name: c.name, tree: treeSummary(c.tree), rootTags: c.rootTags, a11y: c.a11y });
+			}
 			const candidate = buildCandidate(c, config);
-			comps.push({ ...candidate, path: rel });
+			const withPath = { ...candidate, path: rel };
+			if (log.enabled()) {
+				log.stage("normalizer:after", { role, file: rel, name: c.name, tree: treeSummary(c.tree), domTree: treeSummary(candidate.dom && candidate.dom.tree), framework: { props: candidate.framework.props, events: candidate.framework.events, names: candidate.framework.names, open: candidate.framework.open } });
+			}
+			comps.push(withPath);
 		}
 	}
 	return comps;
@@ -130,9 +171,21 @@ const matchPairs = (appComponents, canonComponents, config) => {
 		for (const canon of canonComponents) {
 			if (canon.path === app.path && canon.name === app.name) continue;
 			if (!canSeeCanon(app.path, canon.path, config.componentsFolder)) continue;
+			if (log.enabled()) {
+				log.stage("matcher:before", { app: candidateSummary(app, "candidate"), canon: candidateSummary(canon, "canonical") });
+			}
 			const signals = matchSignals(app, canon, { canonNames, frameworkMatcher });
+			if (log.enabled()) {
+				log.stage("matcher:after", { app: { name: app.name, path: app.path }, canon: { name: canon.name, path: canon.path }, signals });
+			}
+			if (log.enabled()) {
+				log.stage("decision:before", { app: { name: app.name, path: app.path }, canon: { name: canon.name, path: canon.path }, signals });
+			}
 			const decision = decide(app, canon, { signals, weights: config.weights, thresholds: config.thresholds });
-			if (!decision.isDuplicate) continue;
+			if (log.enabled()) {
+				log.stage("decision:after", { app: { name: app.name, path: app.path }, canon: { name: canon.name, path: canon.path }, confidence: decision.confidence, tier: decision.tier, isDuplicate: decision.isDuplicate, weights: decision.weights, signals: Object.fromEntries(Object.entries(decision.signals).map(([k, s]) => [k, s.score])) });
+			}
+			if (!decision.tier) continue;
 			matches.push({ app, canon, decision, tier: decision.tier, reason: decision.reason });
 		}
 	}
@@ -143,6 +196,9 @@ const applyFilters = (matches) => {
 	const kept = [];
 	const dropped = [];
 	for (const match of matches) {
+		if (log.enabled()) {
+			log.stage("filter:before", { app: { name: match.app.name, path: match.app.path }, canon: { name: match.canon.name, path: match.canon.path }, confidence: match.decision.confidence });
+		}
 		let hit = null;
 		for (const f of FILTERS) {
 			const reason = f.test(match);
@@ -151,10 +207,27 @@ const applyFilters = (matches) => {
 				break;
 			}
 		}
-		if (hit) dropped.push(hit);
-		else kept.push(match);
+		if (hit) {
+			dropped.push(hit);
+			if (log.enabled()) log.stage("filter:after", { app: { name: match.app.name, path: match.app.path }, canon: { name: match.canon.name, path: match.canon.path }, outcome: "dropped", filter: hit.filter, reason: hit.reason });
+		} else {
+			kept.push(match);
+			if (log.enabled()) log.stage("filter:after", { app: { name: match.app.name, path: match.app.path }, canon: { name: match.canon.name, path: match.canon.path }, outcome: "kept", confidence: match.decision.confidence });
+		}
 	}
 	return { kept, dropped };
+};
+
+const pairKey = (match) => [match.app.name, match.canon.name].sort().join("::");
+
+const dedupPairs = (matches) => {
+	const best = new Map();
+	for (const match of matches) {
+		const key = pairKey(match);
+		const prev = best.get(key);
+		if (!prev || match.decision.confidence > prev.decision.confidence) best.set(key, match);
+	}
+	return [...best.values()];
 };
 
 const collectRawHtml = (appFiles, canonComponents, config, canonNames) => {
@@ -331,15 +404,22 @@ const buildComponentReport = async (args, repoRoot, roots, shouldSkip, config, r
 
 	const matches = matchPairs(appComponents, uniqueCanon, config);
 	const { kept, dropped } = applyFilters(matches);
+	const deduped = dedupPairs(kept);
 	stage("components matched");
+	const { clusters, remaining } = findMissingComponents(deduped, { minCluster: args.minCluster });
+	if (log.enabled()) {
+		log.stage("missing-component", { minCluster: args.minCluster, clusters: clusters.map((c) => ({ name: c.name, canon: c.canon.name, apps: c.matches.map((m) => m.app.name) })), remaining: remaining.length });
+	}
+	stage("missing-component clustered");
 	const rawHtml = collectRawHtml(appFiles.files, uniqueCanon, config, canonNames);
 	stage("raw html done");
 	const parts = collectParts(appFiles.files, uniqueCanon, config, canonNames);
 	stage("parts done");
 
 	return {
-		matches: kept,
+		matches: remaining,
 		dropped,
+		missingClusters: clusters,
 		rawHtml,
 		parts,
 		layerFolders: config.componentsFolder,
@@ -364,6 +444,8 @@ const main = async () => {
 	}
 
 	const config = normalizeOptions(configOptions);
+	if (args.include) config.include = [...new Set([...(config.include || []), ...args.include])];
+	if (args.log) log.enable(args.log);
 	await require("./playgrounds/style-entrypoint.js").whenReady(config);
 	const rootMarkers = config.rootMarkers;
 	const repoRoot = args.repoRoot ? path.resolve(cwd, args.repoRoot) : findRepoRoot(cwd, rootMarkers) || cwd;
@@ -414,6 +496,7 @@ const main = async () => {
 		fs.writeFileSync(reportPath, renderComponentReport(comp, args.verbose));
 		console.log(`[component-uniqueness] wrote report ${reportPath} (${comp.matches.length} duplicate component(s), ${comp.rawHtml.length} raw-html element(s) across ${comp.files} file(s))`);
 	}
+	log.flush();
 };
 
 if (require.main === module) {

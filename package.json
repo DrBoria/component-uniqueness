@@ -1,6 +1,6 @@
 {
 	"name": "@md-code/component-uniqueness",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "ESLint rule and CLI that find duplicate components, raw HTML that should be a canonical component, and copied parts of components, by comparing structure, CSS, behavior, accessibility and framework profile.",
 	"license": "MIT",
 	"keywords": [
@@ -26,6 +26,7 @@
 		"plugin.js",
 		"config.js",
 		"main.js",
+		"logger.js",
 		"utils.js",
 		"decision-maker.js",
 		"report.js",

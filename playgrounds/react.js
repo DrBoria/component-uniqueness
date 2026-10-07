@@ -5,7 +5,7 @@ const path = require("node:path");
 const ts = require("typescript");
 const { entries } = require("remeda");
 const style = require("../normalize/style.js");
-const { styleObjectToCssText, isPascalCase, isHtmlTag } = require("../normalize/dom.js");
+const { styleObjectToCssText, isPascalCase, isHtmlTag, INTERACTIVE_TAGS } = require("../normalize/dom.js");
 
 const MAX_UNFOLD_DEPTH = 3;
 const MAX_TREE_NODES = 400;
@@ -478,7 +478,7 @@ const buildTree = (node, sf, ctx) => {
 		cssText: styleObjectToCssText(styleObj),
 		children,
 	};
-	if (!isHtmlTag(tag)) {
+	if (!isHtmlTag(tag) && !ctx.noUnfold) {
 		const body = ctx.bodies.get(tag);
 		if (body && ctx.depth < MAX_UNFOLD_DEPTH) {
 			const inner = firstComponentNodeIn(body);
@@ -523,6 +523,9 @@ const childTrees = (node, sf, ctx) => {
 			if (found.length === 0 && child.expression && ts.isIdentifier(child.expression) && child.expression.text === "children") {
 				children.push({ tag: "children", attrs: {}, className: null, style: null, cssText: "", children: [] });
 			}
+		} else if (ts.isJsxText(child)) {
+			const text = child.text.replace(/\s+/g, " ").trim();
+			if (text) children.push({ tag: "text", text, attrs: {}, className: null, style: null, cssText: "", children: [] });
 		}
 	}
 	return children;
@@ -782,6 +785,32 @@ const parseParts = (fileAbs, canonicalNames, opts) => {
 	return out;
 };
 
+const declaredPropsOf = (node, sf) => {
+	let fn = null;
+	if (ts.isFunctionDeclaration(node)) fn = node;
+	else if (ts.isVariableStatement(node)) {
+		for (const d of node.declarationList.declarations) {
+			const init = d.initializer;
+			if (init && (ts.isArrowFunction(init) || ts.isFunctionExpression(init))) fn = init;
+			break;
+		}
+	}
+	if (!fn || !fn.parameters || fn.parameters.length === 0) return [];
+	const param = fn.parameters[0];
+	const out = [];
+	const visit = (n) => {
+		if (!n) return;
+		if (ts.isObjectBindingPattern(n)) {
+			for (const el of n.elements) {
+				if (ts.isIdentifier(el.name)) out.push(el.name.text);
+				else visit(el.name);
+			}
+		}
+	};
+	if (ts.isObjectBindingPattern(param.name)) visit(param.name);
+	return [...new Set(out)].sort();
+};
+
 const parseComponents = (fileAbs, canonicalNames, opts) => {
 	useConfig(opts);
 	const source = fs.readFileSync(fileAbs, "utf8");
@@ -804,13 +833,16 @@ const parseComponents = (fileAbs, canonicalNames, opts) => {
 		if (!hasComponentMarkup(d.body)) continue;
 		const root = firstComponentNodeIn(d.body);
 		const tree = root ? buildTree(root, sf, { bodies, depth: 0, nodes: 0, resolveTag: (tag, props) => resolveTag(tag, fileAbs, 0, props) }) : null;
+		const rawTree = root ? buildTree(root, sf, { bodies, depth: 0, nodes: 0, noUnfold: true }) : null;
 		const a11y = new Set();
 		gatherA11y(d.body, sf, a11y);
 		out.push({
 			name: d.name,
 			line: sf.getLineAndCharacterOfPosition(d.node.getStart(sf)).line + 1,
 			isExported: isExported(d.node, sf) || localExportNames(sf).has(d.name),
+			declProps: declaredPropsOf(d.node, sf),
 			tree,
+			rawTree,
 			rootTags: [...rootTagsOf(d.body, sf)].sort(),
 			actions: [],
 			a11y: [...a11y].sort(),
@@ -853,6 +885,10 @@ const buildDom = (tree, doc) => {
 		for (const [prop, values] of entries(tree.style)) el.style.setProperty(prop, Array.isArray(values) ? values.join(" ") : String(values));
 	}
 	for (const child of tree.children || []) {
+		if (child.tag === "text") {
+			el.appendChild(doc.createTextNode(child.text || ""));
+			continue;
+		}
 		const node = buildDom(child, doc);
 		if (node) el.appendChild(node);
 	}
@@ -869,8 +905,11 @@ const nodesOf = (el, win, baselineOf) => {
 		const value = computed.getPropertyValue(prop).trim();
 		if (value && value !== base.getPropertyValue(prop).trim()) css[prop] = value;
 	}
+	const tag = el.tagName.toLowerCase();
+	const interactive = INTERACTIVE_TAGS.has(tag) || el.getAttribute("role") === "button" || el.getAttribute("role") === "link" || [...el.attributes].some((attr) => /^(on|@)/.test(attr.name));
+	const text = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.nodeValue).join("").replace(/\s+/g, " ").trim();
 
-	return [{ tag: el.tagName.toLowerCase(), css, children: kids }];
+	return [{ tag, css, interactive, text: text || undefined, children: kids }];
 };
 
 let sharedDom = null;
