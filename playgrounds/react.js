@@ -372,7 +372,7 @@ const memberTarget = (sf, head, prop) => {
 	return found;
 };
 
-const resolveTag = (name, fileAbs, depth, props) => {
+const resolveTag = (name, fileAbs, depth, props, styledResolver) => {
 	const staticProps = Object.entries(props || {}).filter(([, v]) => typeof v === "string").sort();
 	const key = `${fileAbs}::${name}::${JSON.stringify(staticProps)}`;
 	if (resolvedTags.has(key)) return resolvedTags.get(key);
@@ -395,7 +395,7 @@ const resolveTag = (name, fileAbs, depth, props) => {
 	const inner = firstComponentNodeIn(decl.body);
 	if (!inner) return null;
 	resolvedTags.set(key, null);
-	const built = buildTree(inner, targetSf, { bodies: localComponentBodies(targetSf), depth: depth + 1, nodes: 0, props: Object.fromEntries(staticProps), resolveTag: (tag, nested) => resolveTag(tag, located.file, depth + 1, nested) });
+	const built = buildTree(inner, targetSf, { bodies: localComponentBodies(targetSf), depth: depth + 1, nodes: 0, props: Object.fromEntries(staticProps), styledResolver, resolveTag: (tag, nested) => resolveTag(tag, located.file, depth + 1, nested, styledResolver) });
 	const tree = built && { ...built, via: [declName, ...(built.via || [])] };
 	resolvedTags.set(key, tree);
 	return tree;
@@ -489,6 +489,8 @@ const buildTree = (node, sf, ctx) => {
 		}
 		const resolved = ctx.resolveTag ? ctx.resolveTag(tag, attrs) : null;
 		if (resolved) return graftChildren(resolved, children, tree);
+		const styledInfo = ctx.styledResolver ? ctx.styledResolver(tag, sf) : null;
+		if (styledInfo) return styledNode(tag, styledInfo, tree, children, sf, ctx);
 		dynamic = true;
 		dynamicRefs.push(tag);
 	}
@@ -550,6 +552,34 @@ const graftChildren = (resolved, children, usage) => {
 	const clone = { ...resolved, spread: usage.spread === true, attrs: { ...(resolved.attrs || {}), ...(usage.attrs || {}) }, className: mergeClass(resolved.className, usage.className) };
 
 	return fillSlot(clone, children).node;
+};
+
+const styledNode = (tag, info, usage, children, sf, ctx) => {
+	let base = null;
+	if (info.componentRef) {
+		const body = ctx.bodies.get(info.componentRef);
+		if (body && ctx.depth < MAX_UNFOLD_DEPTH) {
+			const inner = firstComponentNodeIn(body);
+			if (inner) base = buildTree(inner, sf, { ...ctx, depth: ctx.depth + 1, props: {} });
+		}
+		if (!base) base = ctx.resolveTag ? ctx.resolveTag(info.componentRef, {}) : null;
+	}
+	if (base) {
+		const merged = { ...(base.style || {}) };
+		for (const [k, v] of Object.entries(info.styleObj || {})) merged[k] = v;
+		const clone = { ...base, style: Object.keys(merged).length > 0 ? merged : null, cssText: styleObjectToCssText(merged), via: [tag, ...(base.via || [])] };
+		return graftChildren(clone, children, usage);
+	}
+	return {
+		tag: info.baseTag || tag,
+		spread: usage.spread,
+		attrs: usage.attrs,
+		className: usage.className,
+		style: Object.keys(info.styleObj || {}).length > 0 ? info.styleObj : null,
+		cssText: styleObjectToCssText(info.styleObj || {}),
+		children,
+		via: [tag],
+	};
 };
 
 const a11yOfOpening = (opening, sf, out) => {
@@ -711,7 +741,7 @@ const parseElements = (fileAbs, canonicalNames, opts) => {
 			const opening = openingOf(n);
 			const tag = tagOf(opening.tagName);
 			if (tag && isHtmlTag(tag)) {
-				const tree = buildTree(n, sf, { bodies, depth: 0, nodes: 0, props: {}, resolveTag: (name, props) => resolveTag(name, fileAbs, 0, props) });
+				const tree = buildTree(n, sf, { bodies, depth: 0, nodes: 0, props: {}, styledResolver: opts.styledResolver, resolveTag: (name, props) => resolveTag(name, fileAbs, 0, props, opts.styledResolver) });
 				if (tree) {
 					const a11y = new Set();
 					a11yOfOpening(opening, sf, a11y);
@@ -755,7 +785,7 @@ const parseParts = (fileAbs, canonicalNames, opts) => {
 			if (n !== root && isJsxNode(n)) {
 				const size = jsxCount(n);
 				if (size >= MIN_PART_NODES && size <= MAX_PART_NODES) {
-					const tree = buildTree(n, sf, { bodies, depth: 0, nodes: 0, props: {}, resolveTag: (name, props) => resolveTag(name, fileAbs, 0, props) });
+					const tree = buildTree(n, sf, { bodies, depth: 0, nodes: 0, props: {}, styledResolver: opts.styledResolver, resolveTag: (name, props) => resolveTag(name, fileAbs, 0, props, opts.styledResolver) });
 					if (tree && treeSize(tree) >= MIN_PART_NODES) {
 						const rootTag = tagOf(openingOf(n).tagName);
 						const a11y = new Set();
@@ -832,7 +862,7 @@ const parseComponents = (fileAbs, canonicalNames, opts) => {
 	for (const d of decls) {
 		if (!hasComponentMarkup(d.body)) continue;
 		const root = firstComponentNodeIn(d.body);
-		const tree = root ? buildTree(root, sf, { bodies, depth: 0, nodes: 0, resolveTag: (tag, props) => resolveTag(tag, fileAbs, 0, props) }) : null;
+		const tree = root ? buildTree(root, sf, { bodies, depth: 0, nodes: 0, styledResolver: opts.styledResolver, resolveTag: (tag, props) => resolveTag(tag, fileAbs, 0, props, opts.styledResolver) }) : null;
 		const rawTree = root ? buildTree(root, sf, { bodies, depth: 0, nodes: 0, noUnfold: true }) : null;
 		const a11y = new Set();
 		gatherA11y(d.body, sf, a11y);

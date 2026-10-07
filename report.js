@@ -130,14 +130,20 @@ const renderComponentReport = (comp, verbose) => {
 		if (rows.length === 0) continue;
 		lines.push(...renderTierSection(tier, rows));
 	}
-	const missingClusters = (comp.missingClusters || []).filter((c) => !inLayer(c.canon.path));
+	const missingClusters = (comp.missingClusters || []).filter((c) => c.matches.every((m) => !inLayer(m.app.path)));
 	lines.push(...renderMissingSection(missingClusters));
 	if (comp.rawHtml && comp.rawHtml.length > 0) lines.push(...renderRawHtmlSection(comp.rawHtml));
 	lines.push(...renderPartsSection(appParts));
-	for (const tier of TIERS) {
-		const rows = layerMatches.filter((m) => m.decision.tier === tier);
-		if (rows.length === 0) continue;
-		lines.push(...renderTierSection(tier, rows, `Inside canonical layers: ${TIER_LABEL[tier]}`));
+	const layerIdx = (p) => folders.findIndex((d) => p.startsWith(d));
+	const layerName = (d) => d.split("/").filter(Boolean).pop();
+	for (let li = 0; li < folders.length; li += 1) {
+		const seen = folders.slice(0, li).map(layerName);
+		const suffix = seen.length > 0 ? ` (vs ${seen.join(" + ")})` : "";
+		for (const tier of TIERS) {
+			const rows = layerMatches.filter((m) => layerIdx(m.app.path) === li && m.decision.tier === tier);
+			if (rows.length === 0) continue;
+			lines.push(...renderTierSection(tier, rows, `Inside ${layerName(folders[li])}: ${TIER_LABEL[tier]}${suffix}`));
+		}
 	}
 	lines.push(...renderPartsSection(layerParts, "Inside canonical layers: parts that duplicate a lower layer"));
 	if (verbose && comp.dropped && comp.dropped.length > 0) lines.push(...renderFilteredSection(comp.dropped));

@@ -2,6 +2,13 @@
 
 const { normalizeOptions } = require("../config.js");
 const { buildStylesheet } = require("./style-entrypoint.js");
+const { buildStyledResolver } = require("../normalize/style-resolver.js");
+
+let styledResolver = null;
+const withStyledResolver = (opts) => {
+	if (!styledResolver) styledResolver = buildStyledResolver();
+	return styledResolver ? { ...opts, styledResolver } : opts;
+};
 
 const PLAYGROUNDS = {
 	react: () => require("./react.js"),
@@ -25,19 +32,19 @@ const getFramework = (opts) => normalizeOptions(opts).framework;
 const parseComponents = (fileAbs, canonicalNames, opts) => {
 	const pg = getPlayground(getFramework(opts));
 	if (!pg.available || !pg.available()) return [];
-	return pg.parseComponents(fileAbs, canonicalNames, opts);
+	return pg.parseComponents(fileAbs, canonicalNames, withStyledResolver(opts));
 };
 
 const parseElements = (fileAbs, canonicalNames, opts) => {
 	const pg = getPlayground(getFramework(opts));
 	if (!pg.available || !pg.available() || !pg.parseElements) return [];
-	return pg.parseElements(fileAbs, canonicalNames, opts);
+	return pg.parseElements(fileAbs, canonicalNames, withStyledResolver(opts));
 };
 
 const parseParts = (fileAbs, canonicalNames, opts) => {
 	const pg = getPlayground(getFramework(opts));
 	if (!pg.available || !pg.available() || !pg.parseParts) return [];
-	return pg.parseParts(fileAbs, canonicalNames, opts);
+	return pg.parseParts(fileAbs, canonicalNames, withStyledResolver(opts));
 };
 
 const resolveCss = (tree, opts) => {

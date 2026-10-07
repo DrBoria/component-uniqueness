@@ -90,4 +90,14 @@ Options are read from the rule in `eslint.config.js`.
 | `--app-roots a:b` | Folders to scan for the report (default: repo root) |
 | `--repo-root <dir>` | Repo root (default: auto-detected) |
 | `--out <file>` | Catalog path |
+| `--include a.tsx:b.tsx` | Only scan matching app files |
+| `--ignore-dirs a:b` | Extra directories to skip |
+| `--thresholds dup:sim` | Confidence cut-offs, e.g. `0.5:0.3` |
+| `--raw-html` | Also report raw HTML that should be a canonical component |
+| `--parts` | Also report blocks inside components that duplicate a canonical |
+| `--config file` | Read rule options from a specific `eslint.config.js` or options file |
+| `--min-cluster N` | Min app components matching one canonical to flag it as a missing component (default 3) |
+| `--log file` | Write a per-stage JSON log |
 | `--verbose` | Also list what the filters dropped |
+
+Rule options (`weights`, `thresholds`, `rawHtml`, `parts`, `include`, `ignoreDirs`) are always read from the consumer's `eslint.config.js` (rule `md-code/component-uniqueness`) or `md-code-component-uniqueness.config.js`; `--config` points to a specific file. CLI flags override the config.

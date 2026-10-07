@@ -71,6 +71,7 @@ const LAYOUT_PROPS = new Set([
 	"overflow-wrap",
 	"text-overflow",
 	"white-space",
+	"font-size",
 	"box-sizing",
 	"object-fit",
 	"object-position",

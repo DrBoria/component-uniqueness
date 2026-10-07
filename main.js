@@ -57,7 +57,7 @@ const fail = (message) => {
 };
 
 const parseArgs = (argv) => {
-	const cfg = { roots: null, out: null, registry: null, repoRoot: null, check: false, report: null, appRoots: null, ignoreDirs: null, verbose: false, include: null, log: null, minCluster: 3 };
+	const cfg = { roots: null, out: null, registry: null, repoRoot: null, check: false, report: null, appRoots: null, ignoreDirs: null, verbose: false, include: null, log: null, minCluster: 3, thresholds: null, rawHtml: false, parts: false, configFile: null };
 	for (let i = 0; i < argv.length; i += 1) {
 		const a = argv[i];
 		if (a === "--check") {
@@ -87,6 +87,10 @@ const parseArgs = (argv) => {
 		} else if (a === "--ignore-dirs") {
 			if (!argv[i + 1]) fail("--ignore-dirs requires a value (colon-separated list of directory names)");
 			cfg.ignoreDirs = argv[++i].split(":").filter(Boolean);
+		} else if (a === "--raw-html") {
+			cfg.rawHtml = true;
+		} else if (a === "--parts") {
+			cfg.parts = true;
 		} else if (a === "--verbose") {
 			cfg.verbose = true;
 		} else if (a === "--include") {
@@ -95,15 +99,23 @@ const parseArgs = (argv) => {
 		} else if (a === "--log") {
 			if (!argv[i + 1]) fail("--log requires a value (path to the stage log file)");
 			cfg.log = argv[++i];
+		} else if (a === "--thresholds") {
+			if (!argv[i + 1]) fail("--thresholds requires a value (duplicate:similar, e.g. 0.5:0.2)");
+			const [dup, sim] = argv[++i].split(":").map((s) => Number.parseFloat(s));
+			if (!Number.isFinite(dup) || !Number.isFinite(sim)) fail("--thresholds must be two numbers separated by a colon (duplicate:similar)");
+			cfg.thresholds = { duplicate: dup, similar: sim };
 		} else if (a === "--min-cluster") {
 			if (!argv[i + 1]) fail("--min-cluster requires a value (min app components matching one canonical to flag it as a missing component)");
 			const n = Number.parseInt(argv[i + 1], 10);
 			if (!Number.isFinite(n) || n < 2) fail("--min-cluster must be an integer >= 2");
 			cfg.minCluster = n;
 			i += 1;
+		} else if (a === "--config") {
+			if (!argv[i + 1]) fail("--config requires a value (path to an eslint.config.js or a standalone options file)");
+			cfg.configFile = argv[++i];
 		} else if (a === "--help" || a === "-h") {
-			console.log("Usage: component-uniqueness [--roots a:b] [--out file] [--registry file] [--repo-root dir] [--check] [--report [file.md]] [--app-roots a:b] [--ignore-dirs a:b] [--include a.tsx:b.tsx] [--log file] [--min-cluster N] [--verbose]");
-			console.log("Without --roots, the options are read from the consumer's eslint.config.js (rule md-code/component-uniqueness) or component-uniqueness.config.js.");
+			console.log("Usage: component-uniqueness [--roots a:b] [--out file] [--registry file] [--repo-root dir] [--check] [--report [file.md]] [--app-roots a:b] [--ignore-dirs a:b] [--include a.tsx:b.tsx] [--thresholds dup:sim] [--raw-html] [--parts] [--config file] [--log file] [--min-cluster N] [--verbose]");
+			console.log("Rule options (weights, thresholds, rawHtml, parts, include, ignoreDirs) are read from the consumer's eslint.config.js (rule md-code/component-uniqueness) or md-code-component-uniqueness.config.js; --config points to a specific file. CLI flags override the config.");
 			process.exit(0);
 		} else {
 			fail(`unknown argument: ${a} (see --help)`);
@@ -406,7 +418,10 @@ const buildComponentReport = async (args, repoRoot, roots, shouldSkip, config, r
 	const { kept, dropped } = applyFilters(matches);
 	const deduped = dedupPairs(kept);
 	stage("components matched");
-	const { clusters, remaining } = findMissingComponents(deduped, { minCluster: args.minCluster });
+	const inLayer = (p) => (config.componentsFolder || []).some((d) => p.startsWith(d));
+	const layerMatches = deduped.filter((m) => inLayer(m.app.path));
+	const appMatches = deduped.filter((m) => !inLayer(m.app.path));
+	const { clusters, remaining } = findMissingComponents(appMatches, { minCluster: args.minCluster });
 	if (log.enabled()) {
 		log.stage("missing-component", { minCluster: args.minCluster, clusters: clusters.map((c) => ({ name: c.name, canon: c.canon.name, apps: c.matches.map((m) => m.app.name) })), remaining: remaining.length });
 	}
@@ -417,7 +432,7 @@ const buildComponentReport = async (args, repoRoot, roots, shouldSkip, config, r
 	stage("parts done");
 
 	return {
-		matches: remaining,
+		matches: [...remaining, ...layerMatches],
 		dropped,
 		missingClusters: clusters,
 		rawHtml,
@@ -433,10 +448,12 @@ const main = async () => {
 	const args = parseArgs(process.argv.slice(2));
 	const cwd = process.cwd();
 
-	const loaded = args.roots ? null : await loadRuleOptions(cwd);
+	const loaded = await loadRuleOptions(cwd, args.configFile);
 	const configOptions = loaded ? { ...loaded.options } : {};
 	if (loaded) {
 		console.log(`[component-uniqueness] config from ${loaded.source}`);
+	} else if (!args.configFile) {
+		console.log("[component-uniqueness] no rule options found in eslint.config.js / md-code-component-uniqueness.config.js; using defaults");
 	}
 	if (args.ignoreDirs) {
 		const base = Array.isArray(configOptions.ignoreDirs) ? configOptions.ignoreDirs : [];
@@ -445,6 +462,9 @@ const main = async () => {
 
 	const config = normalizeOptions(configOptions);
 	if (args.include) config.include = [...new Set([...(config.include || []), ...args.include])];
+	if (args.thresholds) config.thresholds = { ...(config.thresholds || {}), ...args.thresholds };
+	if (args.rawHtml) config.rawHtml = true;
+	if (args.parts) config.parts = true;
 	if (args.log) log.enable(args.log);
 	await require("./playgrounds/style-entrypoint.js").whenReady(config);
 	const rootMarkers = config.rootMarkers;
@@ -454,6 +474,9 @@ const main = async () => {
 	const roots = args.roots || configRoots;
 	if (!roots || roots.length === 0) {
 		fail("no scan roots: pass --roots <dir1>:<dir2> or set componentsFolder in the rule options (eslint.config.js / component-uniqueness.config.js)");
+	}
+	if (!config.componentsFolder || config.componentsFolder.length === 0) {
+		config.componentsFolder = roots;
 	}
 
 	const outPath = resolveAgainst(args.out || config.catalogPath, repoRoot);

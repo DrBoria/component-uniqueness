@@ -21,14 +21,20 @@ const suggestName = (appNames, canonName = null) => {
 	}
 	const common = order.filter((k) => counts.get(k) >= 2);
 	const meaningful = common.filter((k) => !GENERIC_WORDS.has(k));
-	const base = (meaningful.length > 0 ? meaningful : common).map((k) => k[0].toUpperCase() + k.slice(1));
+	const base = (meaningful.length > 0 ? meaningful : common).slice(0, 3).map((k) => k[0].toUpperCase() + k.slice(1));
 	if (base.length > 0) {
 		const name = pascalCase(base);
 		if (meaningful.length > 0) return name;
 		return canonName ? `${name}${canonName}` : name;
 	}
-	const first = appNames[0];
-	return first ? pascalWords(first).map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join("") : "Component";
+	if (canonName) {
+		const canonWords = pascalWords(canonName).filter((w) => !GENERIC_WORDS.has(w.toLowerCase()));
+		if (canonWords.length > 0) {
+			return pascalCase(["shared", ...canonWords.slice(0, 2)]);
+		}
+		return `Shared${canonName}`;
+	}
+	return "SharedComponent";
 };
 
 const findMissingComponents = (matches, { minCluster = DEFAULT_MIN_CLUSTER } = {}) => {

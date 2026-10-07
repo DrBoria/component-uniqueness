@@ -244,7 +244,21 @@ const loadLegacyOptions = async (file) => {
 	return v === undefined || v === null ? null : pickOptions(v);
 };
 
-const loadRuleOptions = async (dir) => {
+const loadRuleOptions = async (dir, explicitFile = null) => {
+	if (explicitFile) {
+		const file = path.isAbsolute(explicitFile) ? explicitFile : path.resolve(dir, explicitFile);
+		if (!fs.existsSync(file)) return null;
+		if (file.endsWith(".json")) {
+			const options = pickOptions(JSON.parse(fs.readFileSync(file, "utf8")));
+			return options ? { options, source: file } : null;
+		}
+		try {
+			const options = file.startsWith("eslint.config") ? await loadFlatOptions(file) : pickOptions(await loadModule(file));
+			return options ? { options, source: file } : null;
+		} catch {
+			return null;
+		}
+	}
 	let d = dir;
 	for (;;) {
 		const standalone = path.join(d, "md-code-component-uniqueness.config.js");
