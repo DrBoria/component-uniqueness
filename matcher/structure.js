@@ -4,6 +4,15 @@ const { isPascalCase, tagAffinity, GENERIC_CONTAINER_TAGS } = require("../normal
 
 const CONFLICT_PENALTY = 0.6;
 const NEAR_IDENTICAL_CEILING = 0.98;
+// A partial duplicate is a *faithful copy* of a region of the canonical: every
+// matched node must closely resemble its counterpart (tag + styling). A short
+// chain of generic containers that only shares tag names (e.g. a wireframe
+// div>span>strong matching a dynamic list's div>span) has one weakly-matched
+// node whose similarity is well below this floor, so the chain is not a real
+// copy and the structure signal is zeroed out. We check the *minimum* per-node
+// similarity, not the average: the average can be inflated by a single strong
+// node (e.g. a matching font-size) while the rest of the chain is generic.
+const MIN_PARTIAL_NODE_SIM = 0.8;
 
 const isTextNode = (node) => node.tag === "children" || node.tag === "text";
 const isIconNode = (node) => isPascalCase(node.tag);
@@ -148,7 +157,17 @@ const classTokensDiffer = (a, b) => {
 
 const treeSimilarity = (a, b) => {
 	const result = bestChain(a, b);
-	return { score: result.score, quality: result.quality, detail: { similarity: result.score, quality: result.quality, chainSize: result.chainSize, refSize: result.refSize, pairs: result.pairs.length } };
+	// A genuine partial duplicate is a *faithful copy*: every matched node closely
+	// resembles its counterpart. The average `quality` alone is not enough — a weak
+	// generic container (div>div>strong) can ride along with one strong node and push
+	// the average up while the chain as a whole is not a real copy. The minimum
+	// per-node similarity exposes that weak link.
+	let minNodeSim = 1;
+	for (const [x, y] of result.pairs) {
+		const sim = nodeSimilarity(x, y);
+		if (sim < minNodeSim) minNodeSim = sim;
+	}
+	return { score: result.score, quality: result.quality, minNodeSim, detail: { similarity: result.score, quality: result.quality, minNodeSim, chainSize: result.chainSize, refSize: result.refSize, pairs: result.pairs.length } };
 };
 
 const firstReal = (node) => {
@@ -220,11 +239,17 @@ const matchStructure = (candidate, canon) => {
 					detail = { ...d, singleton, classesDiffer };
 				}
 			} else {
-				const { quality, detail: d } = treeSimilarity(cand, target);
+				const { quality, minNodeSim, detail: d } = treeSimilarity(cand, target);
 				const sizeFactor = Math.min(1, nodeCount(target) / nodeCount(cand));
 				const base = quality * sizeFactor;
-				score = Math.min(base, classesDiffer ? NEAR_IDENTICAL_CEILING : 1);
-				detail = { ...d, singleton, sizeFactor, classesDiffer };
+
+				if (minNodeSim < MIN_PARTIAL_NODE_SIM) {
+					score = 0;
+					detail = { ...d, singleton, sizeFactor, classesDiffer, rejected: true, reason: "node-sim-below-floor" };
+				} else {
+					score = Math.min(base, classesDiffer ? NEAR_IDENTICAL_CEILING : 1);
+					detail = { ...d, singleton, sizeFactor, classesDiffer };
+				}
 			}
 		} else {
 			const result = bestChain(cand, target);
