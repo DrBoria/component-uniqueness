@@ -214,7 +214,7 @@ const pickOptions = (v) => {
 	return {};
 };
 
-const isRuleKey = (key) => key === RULE_NAME || key === RULE_SHORT || key === "component-uniqueness" || key.endsWith("/component-uniqueness");
+const isRuleKey = (key) => typeof key === "string" && (key === RULE_NAME || key === RULE_SHORT || key === "component-uniqueness" || key.endsWith("/component-uniqueness"));
 
 const ruleValue = (rules) => {
 	for (const [key, v] of Object.entries(rules)) {
@@ -225,13 +225,22 @@ const ruleValue = (rules) => {
 	return null;
 };
 
+const pluginRuleValue = (plugins) => {
+	for (const plugin of Object.values(plugins || {})) {
+		if (!plugin || typeof plugin !== "object") continue;
+		const v = ruleValue(plugin.rules || {});
+		if (v !== null && v !== undefined) return v;
+	}
+	return null;
+};
+
 const loadFlatOptions = async (file) => {
 	const mod = await loadModule(file);
 	const list = mod && mod.default !== undefined ? mod.default : mod;
 	if (!Array.isArray(list)) return null;
 	for (const entry of list) {
-		if (!entry || typeof entry !== "object" || !entry.rules) continue;
-		const v = ruleValue(entry.rules);
+		if (!entry || typeof entry !== "object") continue;
+		const v = (entry.rules && ruleValue(entry.rules)) || (entry.plugins && pluginRuleValue(entry.plugins)) || null;
 		if (v === undefined || v === null) continue;
 		return pickOptions(v);
 	}
@@ -253,7 +262,8 @@ const loadRuleOptions = async (dir, explicitFile = null) => {
 			return options ? { options, source: file } : null;
 		}
 		try {
-			const options = file.startsWith("eslint.config") ? await loadFlatOptions(file) : pickOptions(await loadModule(file));
+			const isFlat = path.basename(file).startsWith("eslint.config");
+			const options = isFlat ? await loadFlatOptions(file) : pickOptions(await loadModule(file));
 			return options ? { options, source: file } : null;
 		} catch {
 			return null;

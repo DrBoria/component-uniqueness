@@ -1,6 +1,6 @@
 {
 	"name": "@md-code/component-uniqueness",
-	"version": "0.1.3",
+	"version": "0.1.4",
 	"description": "ESLint rule and CLI that find duplicate components, raw HTML that should be a canonical component, and copied parts of components, by comparing structure, CSS, behavior, accessibility and framework profile.",
 	"license": "MIT",
 	"keywords": [
@@ -51,10 +51,21 @@
 		"typescript": ">=5.5.0 <7"
 	},
 	"scripts": {
-		"gen:catalog": "node main.js"
+		"gen:catalog": "node main.js",
+		"test": "vitest run"
 	},
 	"peerDependencies": {
 		"eslint": ">=8.40.0"
+	},
+	"devDependencies": {
+		"@mui/icons-material": "^7.0.0",
+		"@mui/material": "^7.0.0",
+		"@emotion/react": "^11.0.0",
+		"@emotion/styled": "^11.0.0",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"styled-components": "^6.1.0",
+		"vitest": "^4.1.0"
 	},
 	"publishConfig": {
 		"access": "public"

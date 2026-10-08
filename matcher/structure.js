@@ -1,16 +1,19 @@
 "use strict";
 
-const { NON_SEMANTIC_TAGS, isPascalCase } = require("../normalize/dom.js");
+const { isPascalCase, tagAffinity, GENERIC_CONTAINER_TAGS } = require("../normalize/dom.js");
 
 const CONFLICT_PENALTY = 0.6;
-const CONFLICTED_RICH_CEILING = 0.8;
-const RICH_DISTINCT_MIN = 3;
-const CEILING_LADDER = [0.3, 0.5, 0.7, 0.9, 1.0];
-const MISSING_CHILD_PENALTY = 0.15;
 const NEAR_IDENTICAL_CEILING = 0.98;
 
 const isTextNode = (node) => node.tag === "children" || node.tag === "text";
 const isIconNode = (node) => isPascalCase(node.tag);
+
+const nodeCount = (tree) => {
+	if (!tree) return 0;
+	const own = tree.tag === "fragment" || tree.tag === "children" ? 0 : 1;
+
+	return own + (tree.children || []).reduce((sum, child) => sum + nodeCount(child), 0);
+};
 
 const pairsOf = (css) => new Set(Object.entries(css || {}).map(([prop, value]) => `${prop}:${value}`));
 
@@ -22,8 +25,6 @@ const jaccard = (a, b) => {
 	return union === 0 ? 0 : overlap(a, b) / union;
 };
 
-const coverage = (a, b) => (a.size === 0 ? 0 : overlap(a, b) / a.size);
-
 const textSim = (a, b) => {
 	const ta = String(a.text || "").toLowerCase().trim();
 	const tb = String(b.text || "").toLowerCase().trim();
@@ -34,8 +35,9 @@ const textSim = (a, b) => {
 };
 
 const tagMatch = (a, b) => {
-	if (a.tag === b.tag) return 1;
 	if (a.interactive && b.interactive) return 1;
+	const affinity = tagAffinity(a.tag, b.tag);
+	if (affinity > 0) return affinity;
 
 	return 0;
 };
@@ -54,47 +56,62 @@ const nodeSimilarity = (a, b) => {
 	return score;
 };
 
-const forestOf = (node) => (node.tag === "fragment" ? (node.children || []).flatMap(forestOf) : [node]);
+const chainList = (node) => {
+	const list = [];
+	const walk = (n, parentIdx) => {
+		if (!n) return;
+		if (n.tag === "fragment" || n.tag === "children") {
+			for (const child of n.children || []) walk(child, parentIdx);
+			return;
+		}
+		if (n.tag === "text") return;
+		const idx = list.length;
+		list.push({ node: n, parent: parentIdx });
+		for (const child of n.children || []) walk(child, idx);
+	};
+	walk(node, -1);
 
-const align = (xs, ys) => {
-	const cells = xs.map((x) => ys.map((y) => compare(x, y)));
-	const table = Array.from({ length: xs.length + 1 }, () => new Array(ys.length + 1).fill(0));
-	for (let i = 1; i <= xs.length; i += 1) {
-		for (let j = 1; j <= ys.length; j += 1) {
-			table[i][j] = Math.max(table[i - 1][j], table[i][j - 1], table[i - 1][j - 1] + cells[i - 1][j - 1].score);
+	return list;
+};
+
+const bestChain = (a, b) => {
+	const xs = chainList(a);
+	const ys = chainList(b);
+	const refSize = Math.max(xs.length, ys.length);
+	if (xs.length === 0 || ys.length === 0) return { score: 0, quality: 0, chainSize: 0, refSize, pairs: [] };
+	const dp = xs.map(() => new Array(ys.length).fill(0));
+	const len = xs.map(() => new Array(ys.length).fill(0));
+	let best = { score: 0, quality: 0, chainSize: 0, i: -1, j: -1 };
+	for (let i = 0; i < xs.length; i += 1) {
+		for (let j = 0; j < ys.length; j += 1) {
+			const sim = nodeSimilarity(xs[i].node, ys[j].node);
+			let value = sim;
+			let length = 1;
+			const pi = xs[i].parent;
+			const pj = ys[j].parent;
+			if (pi >= 0 && pj >= 0 && dp[pi][pj] > 0) {
+				value += dp[pi][pj];
+				length += len[pi][pj];
+			}
+			dp[i][j] = value;
+			len[i][j] = length;
+			const quality = value / length;
+			const score = quality * (length / refSize);
+			if (score > best.score) best = { score, quality, chainSize: length, i, j };
 		}
 	}
 	const pairs = [];
-	let i = xs.length;
-	let j = ys.length;
-	while (i > 0 && j > 0) {
-		if (table[i][j] === table[i - 1][j]) i -= 1;
-		else if (table[i][j] === table[i][j - 1]) j -= 1;
-		else {
-			pairs.push(...cells[i - 1][j - 1].pairs);
-			i -= 1;
-			j -= 1;
+	if (best.i >= 0) {
+		let i = best.i;
+		let j = best.j;
+		while (i >= 0 && j >= 0) {
+			pairs.unshift([xs[i].node, ys[j].node]);
+			i = xs[i].parent;
+			j = ys[j].parent;
 		}
 	}
 
-	return { total: table[xs.length][ys.length], pairs };
-};
-
-const compare = (a, b) => {
-	const kidsA = (a.children || []).flatMap(forestOf);
-	const kidsB = (b.children || []).flatMap(forestOf);
-	const { total, pairs } = align(kidsA, kidsB);
-
-	return { score: (nodeSimilarity(a, b) + total) / (1 + Math.max(kidsA.length, kidsB.length)), pairs: [[a, b], ...pairs] };
-};
-
-const compareForests = (a, b) => {
-	const xs = forestOf(a);
-	const ys = forestOf(b);
-	const longest = Math.max(xs.length, ys.length);
-	const { total, pairs } = align(xs, ys);
-
-	return { score: longest === 0 ? 0 : total / longest, pairs };
+	return { score: best.score, quality: best.quality, chainSize: best.chainSize, refSize, pairs };
 };
 
 const cssStats = (pairs) => {
@@ -117,54 +134,7 @@ const cssStats = (pairs) => {
 	return { conflicts, ratio: comparable === 0 ? 0 : conflicts / comparable, agreement: union === 0 ? 0 : shared / union };
 };
 
-const rootNodeScore = (cand, target) => {
-	const parts = [];
-	if (!NON_SEMANTIC_TAGS.has(cand.tag)) parts.push({ w: 0.6, v: tagMatch(cand, target) });
-	const candPairs = pairsOf(cand.css);
-	if (candPairs.size > 0) parts.push({ w: 0.4, v: coverage(candPairs, pairsOf(target.css)) });
-	const totalW = parts.reduce((sum, part) => sum + part.w, 0);
-
-	return totalW === 0 ? 0 : parts.reduce((sum, part) => sum + part.w * part.v, 0) / totalW;
-};
-
 const isInformative = (node) => !!node && (node.tag !== "fragment" || (node.children || []).some(isInformative));
-
-const shapeOf = (node) => {
-	const tags = new Set();
-	let nodes = 0;
-	const visit = (n) => {
-		if (n.tag !== "fragment") {
-			tags.add(n.tag);
-			nodes += 1;
-		}
-		for (const child of n.children || []) visit(child);
-	};
-	visit(node);
-
-	return { tags, nodes };
-};
-
-const componentNamesOf = (tree, out = new Set()) => {
-	if (!tree) return out;
-	for (const name of tree.via || []) out.add(name);
-	for (const child of tree.children || []) componentNamesOf(child, out);
-
-	return out;
-};
-
-const sizeOf = (candidate) => {
-	const { tags, nodes } = shapeOf(candidate.dom.tree);
-	const distinct = new Set([...tags, ...componentNamesOf(candidate.tree)]).size;
-
-	return { nodes, distinct };
-};
-
-const ceilingOf = (nodes, distinct, stats) => {
-	const base = CEILING_LADDER[Math.min(nodes - 1, CEILING_LADDER.length - 1)];
-	if (distinct >= RICH_DISTINCT_MIN && stats.conflicts > 0) return Math.min(base, CONFLICTED_RICH_CEILING);
-
-	return base;
-};
 
 const classTokensDiffer = (a, b) => {
 	const A = new Set(a || []);
@@ -176,29 +146,93 @@ const classTokensDiffer = (a, b) => {
 	return false;
 };
 
+const treeSimilarity = (a, b) => {
+	const result = bestChain(a, b);
+	return { score: result.score, quality: result.quality, detail: { similarity: result.score, quality: result.quality, chainSize: result.chainSize, refSize: result.refSize, pairs: result.pairs.length } };
+};
+
+const firstReal = (node) => {
+	if (!node) return null;
+	if (node.tag === "fragment" || node.tag === "children" || node.tag === "text") {
+		for (const child of node.children || []) {
+			const found = firstReal(child);
+			if (found) return found;
+		}
+		return null;
+	}
+	return node;
+};
+
+const rootSimilarity = (a, b) => {
+	const ra = firstReal(a);
+	const rb = firstReal(b);
+	if (!ra || !rb) return { score: 0, detail: { rootSim: 0 } };
+
+	return { score: nodeSimilarity(ra, rb), detail: { rootSim: nodeSimilarity(ra, rb) } };
+};
+
+const MIN_CROSS_TAG_CLASS_OVERLAP = 3;
+
+const rootClassOverlap = (candidate, canon) => {
+	const rt = firstReal(candidate.tree);
+	if (!rt) return 0;
+	const partToks = new Set(String(rt.className || "").split(/\s+/).filter(Boolean));
+	const canonToks = new Set(canon.rawClasses || []);
+	let n = 0;
+	for (const t of partToks) if (canonToks.has(t)) n += 1;
+
+	return n;
+};
+
 const matchStructure = (candidate, canon) => {
 	const cand = candidate.dom && candidate.dom.tree;
 	const target = canon.dom && canon.dom.tree;
-	const mode = candidate.partial ? "root-node" : "tree";
+	const mode = candidate.partial ? "partial" : "tree";
 	const applicable = isInformative(cand) || isInformative(target);
 	let score = 0;
 	let detail = null;
 	if (applicable && cand && target) {
 		if (candidate.partial) {
+			const singleton = nodeCount(target) === 1;
+			const partNodes = nodeCount(cand);
 			const classesDiffer = classTokensDiffer(candidate.rawClasses, canon.rawClasses);
-			const base = rootNodeScore(cand, target);
-			score = Math.min(base, classesDiffer ? NEAR_IDENTICAL_CEILING : 1);
-			detail = { similarity: base, ceiling: classesDiffer ? NEAR_IDENTICAL_CEILING : 1, classesDiffer };
+			if (singleton) {
+				const ra = firstReal(cand);
+				const rb = firstReal(target);
+				const partTag = ra ? ra.tag : "";
+				const canonTag = rb ? rb.tag : "";
+				const crossTag = GENERIC_CONTAINER_TAGS.has(partTag) && GENERIC_CONTAINER_TAGS.has(canonTag) && partTag !== canonTag;
+				if (crossTag) {
+					const overlap = rootClassOverlap(candidate, canon);
+					if (overlap < MIN_CROSS_TAG_CLASS_OVERLAP) {
+						score = 0;
+						detail = { singleton, crossTag, overlap, rejected: true };
+					} else {
+						score = Math.min(0.9, 0.5 + 0.05 * overlap);
+						detail = { singleton, crossTag, overlap };
+					}
+				} else if (partNodes > 4) {
+					score = 0;
+					detail = { singleton, partNodes, leafVsWrapper: true };
+				} else {
+					const { score: q, detail: d } = rootSimilarity(cand, target);
+					score = Math.min(q, classesDiffer ? NEAR_IDENTICAL_CEILING : 1);
+					detail = { ...d, singleton, classesDiffer };
+				}
+			} else {
+				const { quality, detail: d } = treeSimilarity(cand, target);
+				const sizeFactor = Math.min(1, nodeCount(target) / nodeCount(cand));
+				const base = quality * sizeFactor;
+				score = Math.min(base, classesDiffer ? NEAR_IDENTICAL_CEILING : 1);
+				detail = { ...d, singleton, sizeFactor, classesDiffer };
+			}
 		} else {
-			const result = compareForests(cand, target);
+			const result = bestChain(cand, target);
 			const stats = cssStats(result.pairs);
-			const a = sizeOf(candidate);
-			const b = sizeOf(canon);
 			const classesDiffer = classTokensDiffer(candidate.rawClasses, canon.rawClasses);
-			const ceiling = Math.min(ceilingOf(Math.min(a.nodes, b.nodes), Math.min(a.distinct, b.distinct), stats), classesDiffer ? NEAR_IDENTICAL_CEILING : 1);
-			const missingRatio = Math.max(0, Math.max(a.nodes, b.nodes) - Math.min(a.nodes, b.nodes)) / Math.max(1, Math.max(a.nodes, b.nodes));
-			score = Math.max(0, Math.min(result.score, ceiling) - CONFLICT_PENALTY * stats.ratio - MISSING_CHILD_PENALTY * missingRatio);
-			detail = { similarity: result.score, ceiling, classesDiffer, conflicts: stats.conflicts, conflictRatio: stats.ratio, agreement: stats.agreement, missingRatio: Math.round(missingRatio * 100) / 100, nodes: Math.min(a.nodes, b.nodes), distinct: Math.min(a.distinct, b.distinct) };
+			const ceiling = classesDiffer ? NEAR_IDENTICAL_CEILING : 1;
+			score = Math.max(0, Math.min(result.score, ceiling) - CONFLICT_PENALTY * stats.ratio);
+			detail = { similarity: result.score, quality: result.quality, chainSize: result.chainSize, refSize: result.refSize, ceiling, classesDiffer, conflicts: stats.conflicts, conflictRatio: stats.ratio, agreement: stats.agreement };
 		}
 	}
 

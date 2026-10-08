@@ -87,9 +87,13 @@ const renderPartsSection = (rows, title = "Parts of components that duplicate a 
 	lines.push("");
 	lines.push("| Part | Location | Replace with | From | Why |");
 	lines.push("| --- | --- | --- | --- | --- |");
-	const sorted = [...rows].sort((a, b) => a.path.localeCompare(b.path) || a.line - b.line);
+	const primaryConf = (r) => (r.suggestions && r.suggestions[0] ? r.suggestions[0].confidence : r.confidence) || 0;
+	const sorted = [...rows].sort((a, b) => primaryConf(b) - primaryConf(a) || a.path.localeCompare(b.path) || a.line - b.line);
 	for (const r of sorted) {
-		lines.push(`| ${r.owner} \u203a <${r.tag}> | \`${r.path}:${r.line}-${r.endLine}\` | \`${r.suggestion.component}\` | ${r.suggestion.path} | ${r.reason} |`);
+		const s = r.suggestions || [r];
+		const primary = s[0];
+		const alt = s.length > 1 ? `; alt: \`${s[1].component}\` (${s[1].confidence.toFixed(2)})` : "";
+		lines.push(`| ${r.owner} \u203a <${r.tag}> | \`${r.path}:${r.line}-${r.endLine}\` | \`${primary.component}\` (${primary.confidence.toFixed(2)})${alt} | ${primary.path} | ${primary.reason} |`);
 	}
 	lines.push("");
 	return lines;
@@ -133,7 +137,6 @@ const renderComponentReport = (comp, verbose) => {
 	const missingClusters = (comp.missingClusters || []).filter((c) => c.matches.every((m) => !inLayer(m.app.path)));
 	lines.push(...renderMissingSection(missingClusters));
 	if (comp.rawHtml && comp.rawHtml.length > 0) lines.push(...renderRawHtmlSection(comp.rawHtml));
-	lines.push(...renderPartsSection(appParts));
 	const layerIdx = (p) => folders.findIndex((d) => p.startsWith(d));
 	const layerName = (d) => d.split("/").filter(Boolean).pop();
 	for (let li = 0; li < folders.length; li += 1) {
@@ -145,7 +148,7 @@ const renderComponentReport = (comp, verbose) => {
 			lines.push(...renderTierSection(tier, rows, `Inside ${layerName(folders[li])}: ${TIER_LABEL[tier]}${suffix}`));
 		}
 	}
-	lines.push(...renderPartsSection(layerParts, "Inside canonical layers: parts that duplicate a lower layer"));
+	lines.push(...renderPartsSection([...appParts, ...layerParts], "Partial duplicates (parts)"));
 	if (verbose && comp.dropped && comp.dropped.length > 0) lines.push(...renderFilteredSection(comp.dropped));
 	return lines.join("\n");
 };

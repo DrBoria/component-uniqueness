@@ -19,16 +19,18 @@ const {
 const { walk, writeCatalog } = require("./utils");
 const { parseComponents: parseComponentsViaEntrypoint, parseElements: parseElementsViaEntrypoint, parseParts: parsePartsViaEntrypoint } = require("./playgrounds/framework-entrypoint.js");
 const { buildCandidate, buildElementCandidate } = require("./normalize/candidate.js");
+const { tagAffinity } = require("./normalize/dom.js");
 const { matchSignals } = require("./matcher");
 const { getFrameworkMatcher } = require("./matcher/framework");
 const { decide, bestOf } = require("./decision-maker");
 const dropUsages = require("./filter/drop-usages");
 const dropChildElement = require("./filter/drop-child-element");
+const dropNoStructure = require("./filter/drop-no-structure");
 const { findMissingComponents } = require("./filter/missing-component");
 const { renderComponentReport } = require("./report");
 const log = require("./logger");
 
-const FILTERS = [dropUsages, dropChildElement];
+const FILTERS = [dropUsages, dropChildElement, dropNoStructure];
 const frameworkMatcher = getFrameworkMatcher("react");
 
 const treeSummary = (tree) => {
@@ -242,6 +244,23 @@ const dedupPairs = (matches) => {
 	return [...best.values()];
 };
 
+const SIMILAR_FANOUT_CAP = 2;
+
+const capSimilarFanout = (matches) => {
+	const byApp = new Map();
+	for (const m of matches) {
+		if (m.decision.tier !== "similar") continue;
+		if (!byApp.has(m.app.name)) byApp.set(m.app.name, []);
+		byApp.get(m.app.name).push(m);
+	}
+	const keep = new Set(matches.filter((m) => m.decision.tier !== "similar"));
+	for (const group of byApp.values()) {
+		group.sort((a, b) => b.decision.confidence - a.decision.confidence || a.canon.name.localeCompare(b.canon.name));
+		for (const m of group.slice(0, SIMILAR_FANOUT_CAP)) keep.add(m);
+	}
+	return [...keep];
+};
+
 const collectRawHtml = (appFiles, canonComponents, config, canonNames) => {
 	if (!config.rawHtml) return [];
 	const rows = [];
@@ -274,7 +293,7 @@ const collectRawHtml = (appFiles, canonComponents, config, canonNames) => {
 };
 
 const SIZE_RATIO = 3;
-const MIN_PART_CANON_NODES = 3;
+const MIN_PART_CANON_NODES = 1;
 const sizeCache = new WeakMap();
 
 const nodeCount = (tree) => {
@@ -318,14 +337,23 @@ const bagDice = (a, b) => {
 
 const MIN_TAG_DICE = 0.5;
 
+const rootTagMatches = (partTag, canonTag) => tagAffinity(partTag, canonTag) > 0;
+
 const comparableCanons = (part, canonComponents) => {
 	const partSize = sizeOf(part);
 	const partBag = bagOf(part);
 
 	return canonComponents.filter((canon) => {
 		const size = sizeOf(canon);
+		if (size < MIN_PART_CANON_NODES) return false;
+		const canonBag = bagOf(canon);
+		if (size === 1) {
+			const tag = [...canonBag.keys()][0];
 
-		return size >= MIN_PART_CANON_NODES && size <= partSize * SIZE_RATIO && partSize <= size * SIZE_RATIO && bagDice(partBag, bagOf(canon)) >= MIN_TAG_DICE;
+			return rootTagMatches(part.rootTag, tag) && partBag.has(tag);
+		}
+
+		return size <= partSize * SIZE_RATIO && partSize <= size * SIZE_RATIO && bagDice(partBag, canonBag) >= MIN_TAG_DICE;
 	});
 };
 
@@ -355,8 +383,9 @@ const findParts = (file, rel, canonComponents, config, canonNames) => {
 		if (pool.length === 0) continue;
 		const candidate = { ...buildCandidate(part, config), path: rel };
 		const { kept } = applyFilters(matchPairs([candidate], pool, config));
-		const best = bestOf(kept);
-		if (best) found.push({ part, best });
+		const ranked = [...kept].sort((a, b) => b.decision.confidence - a.decision.confidence);
+		if (ranked.length === 0) continue;
+		found.push({ part, best: ranked[0], alt: ranked[1] || null });
 	}
 
 	return largestParts(found);
@@ -366,16 +395,16 @@ const collectParts = (appFiles, canonComponents, config, canonNames) => {
 	if (!config.parts) return [];
 	const rows = [];
 	for (const { file, rel } of appFiles) {
-		for (const { part, best } of findParts(file, rel, canonComponents, config, canonNames)) {
+		for (const { part, best, alt } of findParts(file, rel, canonComponents, config, canonNames)) {
+			const suggestions = [{ component: best.canon.name, path: best.canon.path, confidence: best.decision.confidence, reason: best.decision.reason }];
+			if (alt) suggestions.push({ component: alt.canon.name, path: alt.canon.path, confidence: alt.decision.confidence, reason: alt.decision.reason });
 			rows.push({
 				owner: part.owner,
 				tag: part.rootTag,
 				path: rel,
 				line: part.line,
 				endLine: part.endLine,
-				suggestion: { component: best.canon.name, path: best.canon.path },
-				confidence: best.decision.confidence,
-				reason: best.decision.reason,
+				suggestions,
 			});
 		}
 	}
@@ -396,19 +425,32 @@ const stageLog = (enabled) => {
 const buildComponentReport = async (args, repoRoot, roots, shouldSkip, config, registry, catalogComponents) => {
 	const exts = config.exts || DEFAULT_EXTS;
 	const ignoreDirs = config.ignoreDirs;
-	const stage = stageLog(args.verbose);
+	const dedupeFiles = (files) => {
+	const seen = new Set();
+	const out = [];
+	for (const f of files) {
+		if (seen.has(f.file)) continue;
+		seen.add(f.file);
+		out.push(f);
+	}
+
+	return out;
+};
+
+const stage = stageLog(args.verbose);
 
 	const shouldSkipCanon = (abs) => isIgnored(relPosix(repoRoot, abs), [], config.exclude);
-	const canonFiles = collectFiles(roots, repoRoot, shouldSkipCanon, null, exts, ignoreDirs).files;
+	const canonFiles = dedupeFiles(collectFiles(roots, repoRoot, shouldSkipCanon, null, exts, ignoreDirs).files);
 	const canonComponents = parseComponents(canonFiles, null, config);
 	const canonNames = new Set(canonComponents.map((c) => c.name));
 	const uniqueCanon = parseComponents(canonFiles, canonNames, config);
 	stage(`canonical parsed (${uniqueCanon.length})`);
 
+	const appInclude = args.appRoots ? [] : config.include;
 	const appShouldSkip = (abs) => {
 		const rel = relPosix(repoRoot, abs);
 
-		return isIgnored(rel, inComponentsFolder(rel, config.componentsFolder) ? [] : config.include, config.exclude);
+		return isIgnored(rel, appInclude, config.exclude);
 	};
 	const appFiles = collectFiles(args.appRoots || ["."], repoRoot, appShouldSkip, null, exts, ignoreDirs);
 	const appComponents = parseComponents(appFiles.files, canonNames, config, "CANDIDATE");
@@ -419,9 +461,10 @@ const buildComponentReport = async (args, repoRoot, roots, shouldSkip, config, r
 	const deduped = dedupPairs(kept);
 	stage("components matched");
 	const inLayer = (p) => (config.componentsFolder || []).some((d) => p.startsWith(d));
-	const layerMatches = deduped.filter((m) => inLayer(m.app.path));
+	const layerMatches = capSimilarFanout(deduped.filter((m) => inLayer(m.app.path)));
 	const appMatches = deduped.filter((m) => !inLayer(m.app.path));
-	const { clusters, remaining } = findMissingComponents(appMatches, { minCluster: args.minCluster });
+	const cappedAppMatches = capSimilarFanout(appMatches);
+	const { clusters, remaining } = findMissingComponents(cappedAppMatches, { minCluster: args.minCluster });
 	if (log.enabled()) {
 		log.stage("missing-component", { minCluster: args.minCluster, clusters: clusters.map((c) => ({ name: c.name, canon: c.canon.name, apps: c.matches.map((m) => m.app.name) })), remaining: remaining.length });
 	}
@@ -536,4 +579,6 @@ module.exports = {
 	collectRawHtml,
 	findParts,
 	frameworkMatcher,
+	comparableCanons,
+	buildComponentReport,
 };

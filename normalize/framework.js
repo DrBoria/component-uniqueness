@@ -84,31 +84,12 @@ const smallSetDiscount = (arrA, arrB) => {
 	return union === 0 ? 1 : Math.min(1, union / 2);
 };
 
-const setEqual = (a, b) => {
-	const A = new Set(a || []);
-	const B = new Set(b || []);
-	if (A.size !== B.size) return false;
-	for (const item of A) if (!B.has(item)) return false;
-
-	return true;
-};
-
-const SAME_NAMES_PROP_FLOOR = 0.95;
-const SAME_NAMES_PROP_SPAN = 0.04;
-
 const frameworkSimilarity = (a, b, label) => {
 	const A = a || { props: [], events: [], names: [] };
 	const B = b || { props: [], events: [], names: [] };
 	const props = jaccard(A.props, B.props) * smallSetDiscount(A.props, B.props);
 	const events = jaccard(A.events, B.events) * smallSetDiscount(A.events, B.events);
 	const names = jaccard(A.names, B.names);
-	const passed = (p) => [...new Set([...p.props, ...p.events])];
-	const passedA = passed(A);
-	const passedB = passed(B);
-	if (A.names.length > 0 && names >= 1) {
-		if (setEqual(passedA, passedB)) return { score: 1, props, events, names };
-		return { score: SAME_NAMES_PROP_FLOOR + SAME_NAMES_PROP_SPAN * jaccard(passedA, passedB), props, events, names };
-	}
 	const parts = [];
 	if (A.props.length || B.props.length) parts.push({ w: 0.5, v: props });
 	if (A.events.length || B.events.length) parts.push({ w: 0.2, v: events });

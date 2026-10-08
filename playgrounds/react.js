@@ -801,8 +801,7 @@ const parseParts = (fileAbs, canonicalNames, opts) => {
 							endLine: end.line + 1,
 							tree,
 							rootTags: [rootTag],
-							a11y: [...a11y].sort(),
-							usesCanonical: names.size > 0 ? [...new Set([...canonicalTagsUsed(n, names), ...viaNames(tree, names)])].sort() : [],
+							a11y: [...a11y].sort(),						partial: true,							usesCanonical: names.size > 0 ? [...new Set([...canonicalTagsUsed(n, names), ...viaNames(tree, names)])].sort() : [],
 						});
 					}
 				}
@@ -906,6 +905,7 @@ const buildDom = (tree, doc) => {
 	}
 	const tag = String(tree.tag || "").toLowerCase();
 	const el = isHtmlTag(tag) ? doc.createElement(tag) : doc.createElement("cu-root");
+	if (!isHtmlTag(tag)) el.__cuTag = String(tree.tag);
 	for (const [key, value] of entries(tree.attrs || {})) {
 		if (value === true) el.setAttribute(key, "");
 		else if (value !== null && value !== undefined) el.setAttribute(key, String(value));
@@ -927,7 +927,8 @@ const buildDom = (tree, doc) => {
 
 const nodesOf = (el, win, baselineOf) => {
 	const kids = [...el.children].flatMap((child) => nodesOf(child, win, baselineOf));
-	if (el.tagName === "CU-ROOT") return kids;
+	const compTag = el.tagName === "CU-ROOT" ? el.__cuTag || null : null;
+	if (el.tagName === "CU-ROOT" && !compTag) return kids;
 	const computed = win.getComputedStyle(el);
 	const base = baselineOf(el);
 	const css = {};
@@ -935,7 +936,7 @@ const nodesOf = (el, win, baselineOf) => {
 		const value = computed.getPropertyValue(prop).trim();
 		if (value && value !== base.getPropertyValue(prop).trim()) css[prop] = value;
 	}
-	const tag = el.tagName.toLowerCase();
+	const tag = compTag || el.tagName.toLowerCase();
 	const interactive = INTERACTIVE_TAGS.has(tag) || el.getAttribute("role") === "button" || el.getAttribute("role") === "link" || [...el.attributes].some((attr) => /^(on|@)/.test(attr.name));
 	const text = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.nodeValue).join("").replace(/\s+/g, " ").trim();
 

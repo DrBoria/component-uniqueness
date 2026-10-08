@@ -2,6 +2,7 @@
 
 const test = (match) => {
 	if (match.tier === "name" || match.tier === "name-fuzzy" || match.tier === "jsx-block") return null;
+	if (match.app.partial) return null;
 	const appEls = (match.app.elementProps || []).length;
 	const canonEls = (match.canon.elementProps || []).length;
 	if (canonEls > 0 && appEls > 3 * canonEls) {

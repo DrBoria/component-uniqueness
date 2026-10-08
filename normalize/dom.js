@@ -126,6 +126,23 @@ const HTML_TAGS = new Set([
 
 const INTERACTIVE_TAGS = new Set(["a", "area", "audio", "button", "details", "embed", "iframe", "input", "label", "optgroup", "option", "select", "summary", "textarea", "video"]);
 const NON_SEMANTIC_TAGS = new Set(["div", "span"]);
+const SEMANTIC_CONTAINER_TAGS = new Set(["section", "header", "footer", "article", "aside", "nav"]);
+const GENERIC_CONTAINER_TAGS = new Set([...NON_SEMANTIC_TAGS, ...SEMANTIC_CONTAINER_TAGS]);
+const TAG_SYNONYMS = new Map([
+	["b", "strong"],
+	["strong", "b"],
+	["i", "em"],
+	["em", "i"],
+]);
+
+const tagAffinity = (a, b) => {
+	const ta = String(a || "").toLowerCase();
+	const tb = String(b || "").toLowerCase();
+	if (ta === tb) return 1;
+	if (TAG_SYNONYMS.get(ta) === tb) return 1;
+	if (GENERIC_CONTAINER_TAGS.has(ta) && GENERIC_CONTAINER_TAGS.has(tb)) return 0.75;
+	return 0;
+};
 
 const isPascalCase = (name) => /^[A-Z][A-Za-z0-9]*$/.test(name);
 
@@ -160,6 +177,9 @@ module.exports = {
 	HTML_TAGS,
 	INTERACTIVE_TAGS,
 	NON_SEMANTIC_TAGS,
+	SEMANTIC_CONTAINER_TAGS,
+	GENERIC_CONTAINER_TAGS,
+	tagAffinity,
 	isPascalCase,
 	isHtmlTag,
 	styleObjectToCssText,
