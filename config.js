@@ -12,7 +12,9 @@ const DEFAULT_EXCLUDE = [
 	"**/__tests__/**",
 ];
 const DEFAULT_EXTS = [".tsx", ".ts", ".jsx", ".js"];
-const DEFAULT_IGNORE_DIRS = ["node_modules", "dist", "build"];
+// The walker does not read .gitignore, so common build-artifact names must be
+// listed here explicitly ("out" is the default VS Code extension build dir).
+const DEFAULT_IGNORE_DIRS = ["node_modules", "dist", "build", "out", "coverage"];
 const DEFAULT_ROOT_MARKERS = [".git"];
 
 const findRepoRoot = (startDir, markers = DEFAULT_ROOT_MARKERS) => {
@@ -108,6 +110,9 @@ const normalizeOptions = (opts) => {
 		exts: o.exts || DEFAULT_EXTS,
 		ignoreDirs: o.ignoreDirs ? [...new Set([...DEFAULT_IGNORE_DIRS, ...o.ignoreDirs])] : DEFAULT_IGNORE_DIRS,
 		rootMarkers,
+		compareAll: o.compareAll === true,
+		proposeFromLib: o.proposeFromLib === true,
+		cache: o.cache !== false,
 	};
 };
 
@@ -133,7 +138,10 @@ const layerOf = (relPath, componentsFolder) => {
 	return componentsFolder.findIndex((d) => relPath.startsWith(d));
 };
 
-const canSeeCanon = (appPath, canonPath, componentsFolder) => {
+const canSeeCanon = (appPath, canonPath, componentsFolder, compareAll = false) => {
+	// compareAll mode: every file sees every canon in the catalog, so a
+	// single-layer componentsFolder (all files in layer 0) still flags duplicates.
+	if (compareAll) return true;
 	const appLayer = layerOf(appPath, componentsFolder);
 
 	return appLayer < 0 || layerOf(canonPath, componentsFolder) < appLayer;

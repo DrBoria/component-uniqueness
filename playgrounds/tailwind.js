@@ -149,10 +149,25 @@ const substituteVars = (value, depth = 0) =>
 		return resolved && String(resolved) !== match ? substituteVars(String(resolved), depth + 1) : match;
 	});
 
+// Tokens the design system cannot parse (e.g. a `$preset` prop name leaked
+// from a template literal) make it throw an uncaught DOMException inside its
+// own promise chain — the sync catch below cannot see it, and the design
+// system is left wedged: every later candidatesToCss call hangs forever.
+// So such tokens must be filtered out BEFORE the call, not caught after.
+const cssSafeToken = (t) => /^[a-zA-Z0-9_&[\]:.\-*]+$/.test(t) && !t.includes("$") && !t.includes("@");
+
 const classStyles = (classes) => {
 	const list = [...new Set(classes || [])];
 	if (!designSystem) return { byClass: {}, unresolved: list };
-	const out = designSystem.candidatesToCss(list);
+	const unsafe = list.filter((t) => !cssSafeToken(t));
+	const list2 = list.filter(cssSafeToken);
+	if (list2.length === 0) return { byClass: {}, unresolved: list };
+	let out;
+	try {
+		out = designSystem.candidatesToCss(list2);
+	} catch {
+		return { byClass: {}, unresolved: list };
+	}
 	const vars = new Map();
 	for (const m of String(out).matchAll(/--([a-z0-9-]+)\s*:\s*([^;{}]+);/g)) vars.set(m[1], m[2].trim());
 	const styles = {};

@@ -292,9 +292,23 @@ const resolveModuleFile = (fromFile, spec) => {
 
 const sourceFiles = new Map();
 
+// The editor lints the in-memory buffer (ESLint `lintText`), which can differ
+// from the on-disk file. The rule sets the live source here before parsing.
+let liveSource = null;
+
+const setLiveSource = (fileAbs, text) => {
+	liveSource = { fileAbs, text };
+	sourceFiles.delete(fileAbs);
+};
+
+const readSource = (fileAbs) => {
+	if (liveSource && liveSource.fileAbs === fileAbs) return liveSource.text;
+	return fs.readFileSync(fileAbs, "utf8");
+};
+
 const sourceFileOf = (fileAbs) => {
 	if (sourceFiles.has(fileAbs)) return sourceFiles.get(fileAbs);
-	const source = fs.readFileSync(fileAbs, "utf8");
+	const source = readSource(fileAbs);
 	const kind = fileAbs.endsWith(".tsx") || fileAbs.endsWith(".jsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
 	const sf = ts.createSourceFile(fileAbs, source, ts.ScriptTarget.ES2020, true, kind);
 	sourceFiles.set(fileAbs, sf);
@@ -842,7 +856,7 @@ const declaredPropsOf = (node, sf) => {
 
 const parseComponents = (fileAbs, canonicalNames, opts) => {
 	useConfig(opts);
-	const source = fs.readFileSync(fileAbs, "utf8");
+	const source = readSource(fileAbs);
 	const kind = fileAbs.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
 	const sf = ts.createSourceFile(fileAbs, source, ts.ScriptTarget.ES2020, true, kind);
 	const canonNameSet = canonicalNames || new Set();
@@ -907,12 +921,30 @@ const buildDom = (tree, doc) => {
 	const el = isHtmlTag(tag) ? doc.createElement(tag) : doc.createElement("cu-root");
 	if (!isHtmlTag(tag)) el.__cuTag = String(tree.tag);
 	for (const [key, value] of entries(tree.attrs || {})) {
+		// JSDOM throws InvalidCharacterError for names that are not XML Names
+		// (e.g. a `$preset` prop leaked from a template literal); skip those.
+		if (!/^[a-zA-Z_:][-a-zA-Z0-9_:.]*$/.test(String(key))) continue;
 		if (value === true) el.setAttribute(key, "");
 		else if (value !== null && value !== undefined) el.setAttribute(key, String(value));
 	}
-	if (tree.className) el.className = tree.className;
+	// JSDOM throws InvalidCharacterError when assigning className tokens that
+	// are not valid CSS identifiers (e.g. `$preset` leaked from a template
+	// literal). Such tokens carry no styling signal — drop them.
+	if (tree.className) {
+		const safe = tree.className
+			.split(/\s+/)
+			.filter((t) => /^[a-zA-Z0-9_-]+$/.test(t))
+			.join(" ");
+		if (safe) el.className = safe;
+	}
 	if (tree.style) {
-		for (const [prop, values] of entries(tree.style)) el.style.setProperty(prop, Array.isArray(values) ? values.join(" ") : String(values));
+		for (const [prop, values] of entries(tree.style)) {
+			try {
+				el.style.setProperty(prop, Array.isArray(values) ? values.join(" ") : String(values));
+			} catch {
+				// invalid property name/value — skip, no styling signal
+			}
+		}
 	}
 	for (const child of tree.children || []) {
 		if (child.tag === "text") {
@@ -994,5 +1026,6 @@ module.exports = {
 	parseParts,
 	render,
 	resolveCss,
+	setLiveSource,
 	available: () => !!loadJSDOM(),
 };

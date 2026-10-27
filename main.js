@@ -59,7 +59,7 @@ const fail = (message) => {
 };
 
 const parseArgs = (argv) => {
-	const cfg = { roots: null, out: null, registry: null, repoRoot: null, check: false, report: null, appRoots: null, ignoreDirs: null, verbose: false, include: null, log: null, minCluster: 3, thresholds: null, rawHtml: false, parts: false, configFile: null };
+	const cfg = { roots: null, out: null, registry: null, repoRoot: null, check: false, report: null, appRoots: null, files: null, ignoreDirs: null, verbose: false, include: null, log: null, minCluster: 3, thresholds: null, rawHtml: false, parts: false, configFile: null };
 	for (let i = 0; i < argv.length; i += 1) {
 		const a = argv[i];
 		if (a === "--check") {
@@ -86,6 +86,9 @@ const parseArgs = (argv) => {
 		} else if (a === "--app-roots") {
 			if (!argv[i + 1]) fail("--app-roots requires a value (colon-separated list of directories)");
 			cfg.appRoots = argv[++i].split(":").filter(Boolean);
+		} else if (a === "--files") {
+			if (!argv[i + 1]) fail("--files requires a value (colon-separated list of files)");
+			cfg.files = argv[++i].split(":").filter(Boolean);
 		} else if (a === "--ignore-dirs") {
 			if (!argv[i + 1]) fail("--ignore-dirs requires a value (colon-separated list of directory names)");
 			cfg.ignoreDirs = argv[++i].split(":").filter(Boolean);
@@ -116,7 +119,7 @@ const parseArgs = (argv) => {
 			if (!argv[i + 1]) fail("--config requires a value (path to an eslint.config.js or a standalone options file)");
 			cfg.configFile = argv[++i];
 		} else if (a === "--help" || a === "-h") {
-			console.log("Usage: component-uniqueness [--roots a:b] [--out file] [--registry file] [--repo-root dir] [--check] [--report [file.md]] [--app-roots a:b] [--ignore-dirs a:b] [--include a.tsx:b.tsx] [--thresholds dup:sim] [--raw-html] [--parts] [--config file] [--log file] [--min-cluster N] [--verbose]");
+			console.log("Usage: component-uniqueness [--roots a:b] [--out file] [--registry file] [--repo-root dir] [--check] [--report [file.md]] [--app-roots a:b] [--files a.tsx:b.tsx] [--ignore-dirs a:b] [--include a.tsx:b.tsx] [--thresholds dup:sim] [--raw-html] [--parts] [--config file] [--log file] [--min-cluster N] [--verbose]");
 			console.log("Rule options (weights, thresholds, rawHtml, parts, include, ignoreDirs) are read from the consumer's eslint.config.js (rule md-code/component-uniqueness) or md-code-component-uniqueness.config.js; --config points to a specific file. CLI flags override the config.");
 			process.exit(0);
 		} else {
@@ -184,7 +187,7 @@ const matchPairs = (appComponents, canonComponents, config) => {
 	for (const app of appComponents) {
 		for (const canon of canonComponents) {
 			if (canon.path === app.path && canon.name === app.name) continue;
-			if (!canSeeCanon(app.path, canon.path, config.componentsFolder)) continue;
+			if (!canSeeCanon(app.path, canon.path, config.componentsFolder, config.compareAll)) continue;
 			if (log.enabled()) {
 				log.stage("matcher:before", { app: candidateSummary(app, "candidate"), canon: candidateSummary(canon, "canonical") });
 			}
@@ -452,7 +455,15 @@ const stage = stageLog(args.verbose);
 
 		return isIgnored(rel, appInclude, config.exclude);
 	};
-	const appFiles = collectFiles(args.appRoots || ["."], repoRoot, appShouldSkip, null, exts, ignoreDirs);
+	// --files restricts the app-side candidate scan to the given files (agent
+	// stop-hooks lint only changed files); the canonical (roots) scan stays folder-based.
+	const appFiles = args.files
+		? (() => {
+			const files = args.files.map((rel) => ({ file: resolveAgainst(rel, repoRoot), rel: rel.split(path.sep).join("/") })).filter((f) => fs.existsSync(f.file) && fs.statSync(f.file).isFile());
+
+			return { files, count: files.length };
+		})()
+		: collectFiles(args.appRoots || ["."], repoRoot, appShouldSkip, null, exts, ignoreDirs);
 	const appComponents = parseComponents(appFiles.files, canonNames, config, "CANDIDATE");
 	stage(`app parsed (${appComponents.length})`);
 
@@ -515,6 +526,27 @@ const main = async () => {
 
 	const configRoots = (config.componentsFolder || []).map((d) => String(d).replace(/\\/g, "/").replace(/\/+$/, ""));
 	const roots = args.roots || configRoots;
+	const include = config.include;
+	const exclude = config.exclude;
+	const shouldSkip = (abs) => isIgnored(relPosix(repoRoot, abs), include, exclude);
+	const exts = config.exts;
+	const ignoreDirs = config.ignoreDirs;
+
+	// --files is a partial scan (agent stop-hooks) — skip the catalog entirely
+	// so a single-file scan does not clobber the folder-based catalog. Roots
+	// may be empty (the catalog is only read for the canonical name set).
+	if (args.files?.length) {
+		const reportPath = args.report ? (path.isAbsolute(args.report) ? args.report : path.resolve(process.cwd(), args.report)) : null;
+		if (reportPath) {
+			const comp = await buildComponentReport(args, repoRoot, roots, shouldSkip, config, loadRegistry(config), ((loadCatalog(config) || {}).components) || []);
+			fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+			fs.writeFileSync(reportPath, renderComponentReport(comp, args.verbose));
+			console.log(`[component-uniqueness] wrote report ${reportPath} (${comp.matches.length} duplicate component(s), ${comp.files} file(s))`);
+		}
+		log.flush();
+		return;
+	}
+
 	if (!roots || roots.length === 0) {
 		fail("no scan roots: pass --roots <dir1>:<dir2> or set componentsFolder in the rule options (eslint.config.js / component-uniqueness.config.js)");
 	}
@@ -525,12 +557,6 @@ const main = async () => {
 	const outPath = resolveAgainst(args.out || config.catalogPath, repoRoot);
 	const registry = args.registry ? loadRegistry({ ...config, registry: null, registryPath: args.registry }) : loadRegistry(config);
 	const catalogComponents = ((loadCatalog(config) || {}).components) || [];
-
-	const include = config.include;
-	const exclude = config.exclude;
-	const shouldSkip = (abs) => isIgnored(relPosix(repoRoot, abs), include, exclude);
-	const exts = config.exts;
-	const ignoreDirs = config.ignoreDirs;
 
 	const shouldSkipCanon = (abs) => isIgnored(relPosix(repoRoot, abs), [], config.exclude);
 	const canonFiles = collectFiles(roots, repoRoot, shouldSkipCanon, null, exts, ignoreDirs).files;

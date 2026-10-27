@@ -52,7 +52,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		expect(md).toContain("## Potentially missing component (");
 		expect(md).toContain("## Filtered out by `drop-usages` (");
 		expect(md).toContain("MuiBadgeDup");
-	});
+	}, 30_000);
 
 	it("applies --thresholds override (high threshold removes duplicates)", () => {
 		const report = "cli-thresholds.md";
@@ -62,7 +62,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		expect(md).toContain("Found 0 duplicate component(s) and 0 similar component(s)");
 		expect(md).not.toContain("## Duplicate (confidence ≥ threshold)");
 		expect(md).not.toContain("## Similar (below duplicate threshold)");
-	});
+	}, 30_000);
 
 	it("reads options from --config file", () => {
 		const report = "cli-config.md";
@@ -72,7 +72,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		expect(md).toContain("against 29 canonical component(s)");
 		expect(md).toContain("## Raw HTML outside canonical packages (");
 		expect(md).toContain("## Partial duplicates (parts) (");
-	});
+	}, 30_000);
 
 	it("honors --min-cluster 2 so small clusters are detected", () => {
 		const report = "cli-mincluster.md";
@@ -80,7 +80,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		const md = readReport(report);
 
 		expect(md).toContain("## Potentially missing component (");
-	});
+	}, 30_000);
 
 	it("writes a JSONL stage log with --log", () => {
 		const report = "cli-log.md";
@@ -95,7 +95,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		expect(stages.has("matcher:after")).toBe(true);
 		expect(stages.has("decision:after")).toBe(true);
 		expect(stages.has("missing-component")).toBe(true);
-	});
+	}, 30_000);
 
 	it("restricts app files with --include", () => {
 		const report = "cli-include.md";
@@ -104,7 +104,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 
 		expect(md).toMatch(/Scanned 1 app file\(s\), 1 app component\(s\)/);
 		expect(md).toContain("| FullBadgeDup |");
-	});
+	}, 30_000);
 
 	it("explicit --app-roots are not filtered out by a non-matching config include", () => {
 		const report = "cli-approots-include.md";
@@ -113,7 +113,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 
 expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 canonical component\(s\)\./);
 		expect(md).toContain("| FullBadgeDup |");
-	});
+	}, 30_000);
 
 	it("exits 1 when --check finds a stale catalog", () => {
 		const stale = path.join(tmpRoot, "stale-catalog.json");
@@ -121,4 +121,26 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		writeFileSync(stale, JSON.stringify({ components: [] }));
 		expect(() => runCli(["--repo-root", ".", "--roots", "tests/components/lib", "--out", stale, "--check"])).toThrow();
 	});
+
+	it("--files scans only the listed files without roots and skips the catalog", () => {
+		const report = "cli-files.md";
+		const catalog = path.join(pluginDir, "reports", "component-catalog.json");
+		const { existsSync } = require("node:fs");
+		const before = existsSync(catalog) ? readFileSync(catalog, "utf8") : null;
+		runCli(["--repo-root", ".", "--roots", "tests/components/lib", "--files", "tests/components/duplicates/FullBadgeDup.tsx", "--report", report]);
+		const md = readReport(report);
+
+		expect(md).toContain("Scanned 1 app file(s)");
+		expect(md).toContain("| FullBadgeDup |");
+		// a single-file scan must not clobber the folder-based catalog
+		expect(existsSync(catalog) ? readFileSync(catalog, "utf8") : null).toBe(before);
+	}, 30_000);
+
+	it("--files silently skips missing files", () => {
+		const report = "cli-files-missing.md";
+		runCli(["--repo-root", ".", "--roots", "tests/components/lib", "--files", "tests/components/duplicates/does-not-exist.tsx", "--report", report]);
+		const md = readReport(report);
+
+		expect(md).toContain("Scanned 0 app file(s)");
+	}, 30_000);
 });

@@ -12,12 +12,14 @@ const {
 	RULE_NAME,
 	RULE_SHORT,
 } = require("./config");
-const { parseComponents, parseElements } = require("./playgrounds/framework-entrypoint.js");
+const { refreshCatalog } = require("./self-catalog");
+const { parseComponents, parseElements, setLiveSource } = require("./playgrounds/framework-entrypoint.js");
 const { buildCandidate, buildElementCandidate } = require("./normalize/candidate.js");
 const { matchSignals } = require("./matcher");
 const { getFrameworkMatcher } = require("./matcher/framework");
 const { decide, bestOf } = require("./decision-maker");
 const { matchPairs, applyFilters, findParts } = require("./main");
+const { buildLibRegistry, fileImportSpecifiers, suggestFromLib } = require("./lib-registry");
 
 const frameworkMatcher = getFrameworkMatcher("react");
 
@@ -51,7 +53,7 @@ const createRule = () => {
 				description: "Flag components that duplicate a canonical component, and raw HTML elements that should use the canonical packages.",
 			},
 			messages: {
-				duplicateComponent: "Component \"{{name}}\" duplicates the canonical \"{{canonName}}\" ({{reason}}).",
+				duplicateComponent: "Component \"{{name}}\" duplicates the canonical \"{{canonName}}\" ({{reason}}).{{libHint}}",
 				rawHtml: "Raw <{{tag}}> outside the canonical packages → replace with `{{component}}` from {{path}} ({{reason}}).",
 				partOfComponent: "This <{{tag}}> block in {{owner}} duplicates `{{component}}` from {{path}} ({{reason}}).",
 			},
@@ -72,11 +74,19 @@ const createRule = () => {
 						weights: { type: "object" },
 						thresholds: { type: "object" },
 						componentsFolder: { type: "array" },
+						compareAll: { type: "boolean" },
+						proposeFromLib: {
+							type: "boolean",
+							description:
+								"When a duplicate is found, also check the project's installed dependencies (read dynamically from package.json) for an export with the same name and suggest it in the message. Skipped for libs the file already imports (the local component is likely extending the lib, not duplicating it). Default false.",
+						},
 						include: { type: "array" },
 						exclude: { type: "array" },
 						exts: { type: "array" },
 						ignoreDirs: { type: "array" },
 						rootMarkers: { type: "array" },
+						cache: { type: "boolean" },
+						root: { type: "string" },
 					},
 					additionalProperties: false,
 				},
@@ -86,18 +96,42 @@ const createRule = () => {
 			const options = context.options && context.options[0] ? context.options[0] : {};
 			const config = normalizeOptions(options);
 			const filename = context.filename || (context.getFilename ? context.getFilename() : "");
-			const relPath = path.relative(context.cwd || process.cwd(), filename).split(path.sep).join("/");
+			const relPath = path.relative(config.root, filename).split(path.sep).join("/");
 
 			const isInComponentsFolder = inComponentsFolder(relPath, config.componentsFolder);
 			if (isIgnored(relPath, isInComponentsFolder ? [] : config.include, config.exclude)) return {};
 
 			const registry = loadRegistry(config);
+			// Self-maintain the on-disk catalog (per-file mtime+size cache in
+			// os.tmpdir()). Fast path (~0ms) when nothing changed.
+			if (config.cache !== false) refreshCatalog(config);
 			const catalogComponents = ((loadCatalog(config) || {}).components) || [];
 			const canonNames = [...new Set(catalogComponents.map((c) => c.name))];
+			// proposeFromLib: inventory of the project's installed dependency
+			// exports, so a duplicate report can suggest "use `Accordion` from
+			// `radix-ui`". Built lazily once per lint; cached in os.tmpdir()
+			// and invalidated when package.json changes.
+			let libRegistry = null;
+			const libHint = (name, sourceText) => {
+				if (!config.proposeFromLib) return "";
+				if (!libRegistry) libRegistry = buildLibRegistry(config.root);
+				if (libRegistry.size === 0) return "";
+				const imports = fileImportSpecifiers(sourceText);
+				const suggestions = suggestFromLib(name, libRegistry, imports);
+				if (suggestions.length === 0) return "";
+				const list = suggestions.map((s) => `\`${s.name}\` from \`${s.lib}\``).join(", ");
+				return ` Consider using ${list} instead of a local implementation.`;
+			};
 
 			const checkDuplicates = () => {
 				let parsed;
 				try {
+					// Parse the LIVE source (the editor buffer), not the disk
+					// state: on save the ESLint extension lints the buffer via
+					// lintText, and the file on disk may not match it yet.
+					const sourceCode = context.sourceCode || (context.getSourceCode ? context.getSourceCode() : null);
+					const liveText = sourceCode === null ? null : typeof sourceCode === "string" ? sourceCode : typeof sourceCode.text === "string" ? sourceCode.text : null;
+					if (liveText !== null) setLiveSource(filename, liveText, config);
 					parsed = parseComponents(filename, canonNames, config);
 				} catch {
 					return;
@@ -110,7 +144,7 @@ const createRule = () => {
 					const pairs = [];
 					for (const canon of catalogComponents) {
 						if (canon.name === candidate.name) continue;
-						if (!canSeeCanon(relPath, canon.path, config.componentsFolder)) continue;
+						if (!canSeeCanon(relPath, canon.path, config.componentsFolder, config.compareAll)) continue;
 						const normCanon = normalizeCanon(canon, config);
 						const signals = matchSignals(candidate, normCanon, { canonNames, frameworkMatcher });
 						const decision = decide(candidate, normCanon, { signals, weights: config.weights, thresholds: config.thresholds });
@@ -125,7 +159,7 @@ const createRule = () => {
 						context.report({
 							loc: { start: { line, column: 0 }, end: { line, column: 0 } },
 							messageId: "duplicateComponent",
-							data: { name: candidate.name, canonName: p.canon.name, reason: p.decision.reason },
+							data: { name: candidate.name, canonName: p.canon.name, reason: p.decision.reason, libHint: libHint(candidate.name, liveText) },
 						});
 					}
 				}

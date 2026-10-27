@@ -35,6 +35,11 @@ const parseComponents = (fileAbs, canonicalNames, opts) => {
 	return pg.parseComponents(fileAbs, canonicalNames, withStyledResolver(opts));
 };
 
+const setLiveSource = (fileAbs, text, opts) => {
+	const pg = getPlayground(getFramework(opts));
+	if (pg.setLiveSource) pg.setLiveSource(fileAbs, text);
+};
+
 const parseElements = (fileAbs, canonicalNames, opts) => {
 	const pg = getPlayground(getFramework(opts));
 	if (!pg.available || !pg.available() || !pg.parseElements) return [];
@@ -82,6 +87,7 @@ module.exports = {
 	getPlayground,
 	getFramework,
 	parseComponents,
+	setLiveSource,
 	parseElements,
 	parseParts,
 	resolveCss,
