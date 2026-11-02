@@ -101,3 +101,7 @@ Options are read from the rule in `eslint.config.js`.
 | `--verbose` | Also list what the filters dropped |
 
 Rule options (`weights`, `thresholds`, `rawHtml`, `parts`, `include`, `ignoreDirs`) are always read from the consumer's `eslint.config.js` (rule `md-code/component-uniqueness`) or `md-code-component-uniqueness.config.js`; `--config` points to a specific file. CLI flags override the config.
+
+## License
+
+[Apache License 2.0](./LICENSE)
