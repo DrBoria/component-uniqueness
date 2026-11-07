@@ -93,7 +93,9 @@ const normalizeOptions = (opts) => {
 		registry: o.registry || null,
 		registryPath: o.registryPath || "reports/component-registry.json",
 		catalog: o.catalog || null,
-		catalogPath: o.catalogPath || "reports/component-catalog.json",
+		// `exportPath` is THE name for "where this rule writes its catalog",
+		// shared by every rule in the family; `catalogPath` is its old name.
+		exportPath: o.exportPath || o.catalogPath || "reports/component-catalog.json",
 		includeDynamic: o.includeDynamic === true,
 		dynamicCatalog: o.dynamicCatalog || null,
 		dynamicCatalogPath: o.dynamicCatalogPath || "reports/component-catalog-dynamic.json",
@@ -347,7 +349,7 @@ const loadRegistry = (config) => {
 
 const loadCatalog = (config) => {
 	if (config.catalog) return config.catalog;
-	return loadJson(resolveAgainst(config.catalogPath, config.root), "component catalog");
+	return loadJson(resolveAgainst(config.exportPath, config.root), "component catalog");
 };
 
 const loadDynamicCatalog = (config) => {

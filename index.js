@@ -64,7 +64,11 @@ const createRule = () => {
 						registry: { type: "string" },
 						registryPath: { type: "string" },
 						catalog: { type: "array" },
-						catalogPath: { type: "string" },
+						exportPath: {
+							type: "string",
+							description: "Where the catalog is written, relative to `root`. Default `reports/component-catalog.json`.",
+						},
+						catalogPath: { type: "string", description: "Deprecated alias of `exportPath`." },
 						includeDynamic: { type: "boolean" },
 						dynamicCatalog: { type: "array" },
 						dynamicCatalogPath: { type: "string" },

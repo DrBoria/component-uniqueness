@@ -53,7 +53,7 @@ const refreshCatalog = (config, { budgetMs = 30000 } = {}) => {
 	if (!root) return false;
 	const folders = config.componentsFolder || [];
 	if (folders.length === 0) return false;
-	const catalogPath = path.isAbsolute(config.catalogPath) ? config.catalogPath : path.join(root, config.catalogPath);
+	const catalogPath = path.isAbsolute(config.exportPath) ? config.exportPath : path.join(root, config.exportPath);
 	const cachePath = cachePathFor(root);
 	const started = Date.now();
 	const cache = readCache(cachePath);

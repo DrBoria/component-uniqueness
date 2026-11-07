@@ -554,7 +554,7 @@ const main = async () => {
 		config.componentsFolder = roots;
 	}
 
-	const outPath = resolveAgainst(args.out || config.catalogPath, repoRoot);
+	const outPath = resolveAgainst(args.out || config.exportPath, repoRoot);
 	const registry = args.registry ? loadRegistry({ ...config, registry: null, registryPath: args.registry }) : loadRegistry(config);
 	const catalogComponents = ((loadCatalog(config) || {}).components) || [];
 
