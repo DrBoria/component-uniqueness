@@ -3,10 +3,10 @@ import { createRequire } from "node:module";
 import path from "node:path";
 
 const require = createRequire(import.meta.url);
-const main = require("../main.js");
-const { matchStructure } = require("../matcher/structure.js");
-const { normalizeOptions, isIgnored } = require("../config.js");
-const whenReady = require("../playgrounds/style-entrypoint.js").whenReady;
+const main = require("../dist/main.js");
+const { matchStructure } = require("../dist/matcher/structure.js");
+const { normalizeOptions, isIgnored } = require("../dist/config.js");
+const whenReady = require("../dist/playgrounds/style-entrypoint.js").whenReady;
 
 const pluginDir = path.resolve(__dirname, "..");
 const relPosix = (abs: string) => path.relative(pluginDir, abs).split(path.sep).join("/");

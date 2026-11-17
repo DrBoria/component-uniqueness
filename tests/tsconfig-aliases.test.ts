@@ -5,7 +5,7 @@ import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const require = createRequire(import.meta.url);
-const { parseComponents } = require("../playgrounds/react.js");
+const { parseComponents } = require("../dist/playgrounds/react.js");
 
 // A component that renders an imported one is UNFOLDED: the parser resolves the
 // import to a file and inlines its tree, marking the node with `via`. Resolution

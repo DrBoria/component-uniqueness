@@ -1,6 +1,6 @@
 {
   "name": "@md-code/component-uniqueness",
-  "version": "0.1.6",
+  "version": "0.19.1",
   "description": "ESLint rule and CLI that find duplicate components, raw HTML that should be a canonical component, and copied parts of components, by comparing structure, CSS, behavior, accessibility and framework profile.",
   "license": "Apache-2.0",
   "author": "DrBoria <dr.boria@gmail.com>",
@@ -22,35 +22,26 @@
   "engines": {
     "node": ">=18"
   },
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "bin": {
-    "component-uniqueness": "main.js"
+    "component-uniqueness": "dist/main.js"
   },
   "files": [
-    "index.js",
-    "plugin.js",
-    "config.js",
-    "main.js",
-    "logger.js",
-    "utils.js",
-    "decision-maker.js",
-    "report.js",
-    "normalize/",
-    "matcher/",
-    "filter/",
-    "playgrounds/",
-    "README.md",
-    "self-catalog.js",
-    "lib-registry.js"
+    "dist/",
+    "report/user-report/src/",
+    "README.md"
   ],
   "exports": {
-    ".": "./index.js",
-    "./plugin": "./index.js",
-    "./config": "./config.js",
-    "./report": "./report.js",
+    ".": "./dist/index.js",
+    "./plugin": "./dist/index.js",
+    "./config": "./dist/config.js",
+    "./report": "./dist/report.js",
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@md-code/code-diff": "file:../code-diff",
+    "esbuild": "^0.28.2",
     "jsdom": "^29.1.1",
     "minimatch": "^9.0.4",
     "remeda": "^2.50.0",
@@ -59,17 +50,26 @@
     "typescript": ">=5.5.0 <7"
   },
   "scripts": {
-    "gen:catalog": "node main.js",
-    "test": "vitest run"
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "build": "pnpm clean && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "gen:catalog": "node dist/main.js",
+    "overview": "node dist/main.js --overview",
+    "test": "vitest run",
+    "prepublishOnly": "pnpm build && pnpm test"
   },
   "peerDependencies": {
     "eslint": ">=8.40.0"
   },
   "devDependencies": {
-    "@mui/icons-material": "^7.0.0",
-    "@mui/material": "^7.0.0",
     "@emotion/react": "^11.0.0",
     "@emotion/styled": "^11.0.0",
+    "@mui/icons-material": "^7.0.0",
+    "@mui/material": "^7.0.0",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "prismjs": "^1.30.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "styled-components": "^6.1.0",

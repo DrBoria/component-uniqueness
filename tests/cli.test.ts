@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 
 const pluginDir = path.resolve(__dirname, "..");
-const mainJs = path.join(pluginDir, "main.js");
+const mainJs = path.join(pluginDir, "dist", "main.js");
 const tmpRoot = mkdtempSync(path.join(os.tmpdir(), "cu-cli-"));
 
 const runCli = (args: string[], opts: { cwd?: string } = {}) => {
@@ -42,7 +42,7 @@ describe("CLI", () => {
 
 		expect(md).toContain("# Component duplicates (component-level funnel)");
 expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 canonical component\(s\)\./);
-		expect(md).toContain("## Duplicate (confidence ≥ threshold) (");
+		expect(md).toContain("## High-confidence duplicates (confidence ≥ duplicate threshold) (");
 		expect(md).toContain("| FullBadgeDup |");
 		expect(md).toContain("| Badge |");
 		expect(md).toContain("## Raw HTML outside canonical packages (");
@@ -50,8 +50,13 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		expect(md).toContain("## Partial duplicates (parts) (");
 		expect(md).toContain("MuiFormOverrideDup");
 		expect(md).toContain("## Potentially missing component (");
-		expect(md).toContain("## Filtered out by `drop-usages` (");
+		expect(md).toContain("## Filtered out (");
 		expect(md).toContain("MuiBadgeDup");
+		// The rich report carries every tab the page draws, with locations and
+		// each matcher's own lines — like utils, not a prose summary.
+		expect(md).toContain("### Why each one matched");
+		expect(md).toMatch(/Structure\s+\d+%/);
+		expect(md).toMatch(/Styles\s+\d+%/);
 	}, 30_000);
 
 	it("applies --thresholds override (high threshold removes duplicates)", () => {
@@ -60,8 +65,8 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		const md = readReport(report);
 
 		expect(md).toContain("Found 0 duplicate component(s) and 0 similar component(s)");
-		expect(md).not.toContain("## Duplicate (confidence ≥ threshold)");
-		expect(md).not.toContain("## Similar (below duplicate threshold)");
+		expect(md).not.toContain("## High-confidence duplicates");
+		expect(md).not.toContain("## Weak similarity");
 	}, 30_000);
 
 	it("reads options from --config file", () => {
