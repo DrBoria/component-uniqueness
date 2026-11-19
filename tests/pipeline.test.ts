@@ -10,8 +10,8 @@ const whenReady = require("../dist/playgrounds/style-entrypoint.js").whenReady;
 const pluginDir = path.resolve(__dirname, "..");
 const relPosix = (abs: string) => path.relative(pluginDir, abs).split(path.sep).join("/");
 
-const CANON_ROOTS = ["tests/components/lib", "tests/components/lib/styled", "tests/components/lib/mui"];
-const APP_ROOTS = ["tests/components/duplicates", "tests/components/NOT_duplicates"];
+const CANON_ROOTS = ["tests/NOT_duplicates", "tests/NOT_duplicates/styled", "tests/NOT_duplicates/mui"];
+const APP_ROOTS = ["tests/duplicates", "tests/NOT_duplicates"];
 
 const buildConfig = () => {
 	const config = normalizeOptions({
@@ -30,7 +30,7 @@ describe("normalizeOptions", () => {
 		const config = buildConfig();
 
 		expect(config.root).toBe(pluginDir);
-		expect(config.componentsFolder).toEqual(["tests/components/lib/", "tests/components/lib/styled/", "tests/components/lib/mui/"]);
+		expect(config.componentsFolder).toEqual(["tests/NOT_duplicates/", "tests/NOT_duplicates/styled/", "tests/NOT_duplicates/mui/"]);
 		expect(config.rawHtml).toBe(true);
 		expect(config.parts).toBe(true);
 		expect(config.framework).toBe("react");
@@ -61,8 +61,11 @@ describe("buildComponentReport", () => {
 			[],
 		);
 
-		expect(comp.files).toBe(31);
-		expect(comp.canonCount).toBe(29);
+		// Counts grew with the merged adversarial fixture: the two app roots
+		// (tests/duplicates + tests/NOT_duplicates) now hold 57 + 108 = 165 files
+		// and the canon roots yield 109 unique components (was 31 files / 29).
+		expect(comp.files).toBe(165);
+		expect(comp.canonCount).toBe(109);
 
 		const dupMatches = comp.matches.filter((m: any) => m.decision.tier === "duplicate");
 		const dupApps = dupMatches.map((m: any) => m.app.name);

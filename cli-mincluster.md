@@ -1,23 +1,88 @@
 # Component duplicates (component-level funnel)
 
-Scanned 31 app file(s), 32 app component(s) against 29 canonical component(s).
+Scanned 165 app file(s), 165 app component(s) against 109 canonical component(s).
 
-Found 8 duplicate component(s) and 9 similar component(s), plus 15 component(s) grouped under 5 potentially missing component(s).
+Found 40 duplicate component(s) and 38 similar component(s), plus 33 component(s) grouped under 13 potentially missing component(s).
 
-## High-confidence duplicates (confidence ≥ duplicate threshold) (8)
+## High-confidence duplicates (confidence ≥ duplicate threshold) (40)
 
 | Id | Local component | Location | Canonical | Canonical location | Confidence | Top signal | Fix |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `duplicate:tests/components/duplicates/mui/MuiFormOverrideDup.tsx#MuiFormOverrideDup=>tests/components/lib/mui/MuiFormOverride.tsx#MuiFormOverride` | MuiFormOverrideDup | `tests/components/duplicates/mui/MuiFormOverrideDup.tsx:36` | MuiFormOverride | `tests/components/lib/mui/MuiFormOverride.tsx:36` | 0.68 | Structure | Replace `MuiFormOverrideDup` with `MuiFormOverride` from `tests/components/lib/mui/MuiFormOverride.tsx` — they are the same component. |
-| `duplicate:tests/components/duplicates/mui/MuiFormOverrideDup.tsx#MuiFormOverrideDup=>tests/components/lib/mui/MuiForm.tsx#MuiForm` | MuiFormOverrideDup | `tests/components/duplicates/mui/MuiFormOverrideDup.tsx:36` | MuiForm | `tests/components/lib/mui/MuiForm.tsx:23` | 0.65 | Structure | Replace `MuiFormOverrideDup` with `MuiForm` from `tests/components/lib/mui/MuiForm.tsx` — they are the same component. |
-| `duplicate:tests/components/duplicates/PaperDup.tsx#PaperDup=>tests/components/lib/Paper.tsx#Paper` | PaperDup | `tests/components/duplicates/PaperDup.tsx:8` | Paper | `tests/components/lib/Paper.tsx:3` | 0.53 | Structure | Replace `PaperDup` with `Paper` from `tests/components/lib/Paper.tsx` — they are the same component. |
-| `duplicate:tests/components/duplicates/FullBadgeDup.tsx#FullBadgeDup=>tests/components/lib/Badge.tsx#Badge` | FullBadgeDup | `tests/components/duplicates/FullBadgeDup.tsx:3` | Badge | `tests/components/lib/Badge.tsx:3` | 0.48 | Structure | Replace `FullBadgeDup` with `Badge` from `tests/components/lib/Badge.tsx` — they are the same component. |
-| `duplicate:tests/components/duplicates/styled/StyledBadgeDup.tsx#StyledBadgeDup=>tests/components/lib/styled/StyledBadge.tsx#StyledBadgeComponent` | StyledBadgeDup | `tests/components/duplicates/styled/StyledBadgeDup.tsx:15` | StyledBadgeComponent | `tests/components/lib/styled/StyledBadge.tsx:15` | 0.47 | Structure | Replace `StyledBadgeDup` with `StyledBadgeComponent` from `tests/components/lib/styled/StyledBadge.tsx` — they are the same component. |
-| `duplicate:tests/components/duplicates/PaperDup.tsx#PaperDup=>tests/components/lib/Panel.tsx#Panel` | PaperDup | `tests/components/duplicates/PaperDup.tsx:8` | Panel | `tests/components/lib/Panel.tsx:3` | 0.46 | Structure | Replace `PaperDup` with `Panel` from `tests/components/lib/Panel.tsx` — they are the same component. |
-| `duplicate:tests/components/duplicates/PaperDup.tsx#PaperDup=>tests/components/lib/Passthrough.tsx#Passthrough` | PaperDup | `tests/components/duplicates/PaperDup.tsx:8` | Passthrough | `tests/components/lib/Passthrough.tsx:3` | 0.46 | Structure | Replace `PaperDup` with `Passthrough` from `tests/components/lib/Passthrough.tsx` — they are the same component. |
-| `duplicate:tests/components/duplicates/PaperDup.tsx#PaperDup=>tests/components/lib/Section.tsx#Section` | PaperDup | `tests/components/duplicates/PaperDup.tsx:8` | Section | `tests/components/lib/Section.tsx:3` | 0.46 | Structure | Replace `PaperDup` with `Section` from `tests/components/lib/Section.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/flow/ZeroState.tsx#ZeroState=>tests/NOT_duplicates/structure/flow/EmptyInbox.tsx#EmptyInbox` | ZeroState | `tests/duplicates/structure/flow/ZeroState.tsx:12` | EmptyInbox | `tests/NOT_duplicates/structure/flow/EmptyInbox.tsx:9` | 0.77 | Structure | Replace `ZeroState` with `EmptyInbox` from `tests/NOT_duplicates/structure/flow/EmptyInbox.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/a11y/PressableAction.tsx#PressableAction=>tests/NOT_duplicates/a11y/PrimaryAction.tsx#PrimaryAction` | PressableAction | `tests/duplicates/a11y/PressableAction.tsx:11` | PrimaryAction | `tests/NOT_duplicates/a11y/PrimaryAction.tsx:8` | 0.74 | Structure | Replace `PressableAction` with `PrimaryAction` from `tests/NOT_duplicates/a11y/PrimaryAction.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/mui/MuiFormOverrideDup.tsx#MuiFormOverrideDup=>tests/NOT_duplicates/mui/MuiFormOverride.tsx#MuiFormOverride` | MuiFormOverrideDup | `tests/duplicates/mui/MuiFormOverrideDup.tsx:36` | MuiFormOverride | `tests/NOT_duplicates/mui/MuiFormOverride.tsx:36` | 0.68 | Structure | Replace `MuiFormOverrideDup` with `MuiFormOverride` from `tests/NOT_duplicates/mui/MuiFormOverride.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/mui/MuiFormOverrideDup.tsx#MuiFormOverrideDup=>tests/NOT_duplicates/mui/MuiForm.tsx#MuiForm` | MuiFormOverrideDup | `tests/duplicates/mui/MuiFormOverrideDup.tsx:36` | MuiForm | `tests/NOT_duplicates/mui/MuiForm.tsx:23` | 0.65 | Structure | Replace `MuiFormOverrideDup` with `MuiForm` from `tests/NOT_duplicates/mui/MuiForm.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/DeliveryTracks.tsx#DeliveryTracks=>tests/NOT_duplicates/flagship/content/main/MilestoneCard.tsx#MilestoneCard` | DeliveryTracks | `tests/duplicates/flagship/DeliveryTracks.tsx:49` | MilestoneCard | `tests/NOT_duplicates/flagship/content/main/MilestoneCard.tsx:5` | 0.65 | Structure | Replace `DeliveryTracks` with `MilestoneCard` from `tests/NOT_duplicates/flagship/content/main/MilestoneCard.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/banner/BannerShell.tsx#BannerShell=>tests/NOT_duplicates/structure/callout/CalloutFrame.tsx#CalloutFrame` | BannerShell | `tests/duplicates/structure/banner/BannerShell.tsx:8` | CalloutFrame | `tests/NOT_duplicates/structure/callout/CalloutFrame.tsx:8` | 0.65 | Structure | Replace `BannerShell` with `CalloutFrame` from `tests/NOT_duplicates/structure/callout/CalloutFrame.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/behavior/EmailInput.tsx#EmailInput=>tests/NOT_duplicates/behavior/SignupField.tsx#SignupField` | EmailInput | `tests/duplicates/behavior/EmailInput.tsx:7` | SignupField | `tests/NOT_duplicates/behavior/SignupField.tsx:7` | 0.60 | Structure | Replace `EmailInput` with `SignupField` from `tests/NOT_duplicates/behavior/SignupField.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/banner/BannerAccent.tsx#BannerAccent=>tests/NOT_duplicates/structure/callout/CalloutGlyph.tsx#CalloutGlyph` | BannerAccent | `tests/duplicates/structure/banner/BannerAccent.tsx:5` | CalloutGlyph | `tests/NOT_duplicates/structure/callout/CalloutGlyph.tsx:5` | 0.59 | Structure | Replace `BannerAccent` with `CalloutGlyph` from `tests/NOT_duplicates/structure/callout/CalloutGlyph.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/a11y/InvoiceSection.tsx#InvoiceSection=>tests/NOT_duplicates/a11y/BillingRegion.tsx#BillingRegion` | InvoiceSection | `tests/duplicates/a11y/InvoiceSection.tsx:21` | BillingRegion | `tests/NOT_duplicates/a11y/BillingRegion.tsx:7` | 0.57 | Structure | Replace `InvoiceSection` with `BillingRegion` from `tests/NOT_duplicates/a11y/BillingRegion.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/MetricTiles.tsx#MetricTiles=>tests/NOT_duplicates/flagship/tiles/BlockedTile.tsx#BlockedTile` | MetricTiles | `tests/duplicates/flagship/MetricTiles.tsx:45` | BlockedTile | `tests/NOT_duplicates/flagship/tiles/BlockedTile.tsx:7` | 0.56 | Structure | Replace `MetricTiles` with `BlockedTile` from `tests/NOT_duplicates/flagship/tiles/BlockedTile.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/MetricTiles.tsx#MetricTiles=>tests/NOT_duplicates/flagship/tiles/CoverageTile.tsx#CoverageTile` | MetricTiles | `tests/duplicates/flagship/MetricTiles.tsx:45` | CoverageTile | `tests/NOT_duplicates/flagship/tiles/CoverageTile.tsx:7` | 0.56 | Structure | Replace `MetricTiles` with `CoverageTile` from `tests/NOT_duplicates/flagship/tiles/CoverageTile.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/MetricTiles.tsx#MetricTiles=>tests/NOT_duplicates/flagship/tiles/DeploysTile.tsx#DeploysTile` | MetricTiles | `tests/duplicates/flagship/MetricTiles.tsx:45` | DeploysTile | `tests/NOT_duplicates/flagship/tiles/DeploysTile.tsx:7` | 0.56 | Structure | Replace `MetricTiles` with `DeploysTile` from `tests/NOT_duplicates/flagship/tiles/DeploysTile.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/MetricTiles.tsx#MetricTiles=>tests/NOT_duplicates/flagship/tiles/IssuesTile.tsx#IssuesTile` | MetricTiles | `tests/duplicates/flagship/MetricTiles.tsx:45` | IssuesTile | `tests/NOT_duplicates/flagship/tiles/IssuesTile.tsx:7` | 0.56 | Structure | Replace `MetricTiles` with `IssuesTile` from `tests/NOT_duplicates/flagship/tiles/IssuesTile.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/MetricTiles.tsx#MetricTiles=>tests/NOT_duplicates/flagship/tiles/ShippedTile.tsx#ShippedTile` | MetricTiles | `tests/duplicates/flagship/MetricTiles.tsx:45` | ShippedTile | `tests/NOT_duplicates/flagship/tiles/ShippedTile.tsx:7` | 0.56 | Structure | Replace `MetricTiles` with `ShippedTile` from `tests/NOT_duplicates/flagship/tiles/ShippedTile.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/MetricTiles.tsx#MetricTiles=>tests/NOT_duplicates/flagship/tiles/VelocityTile.tsx#VelocityTile` | MetricTiles | `tests/duplicates/flagship/MetricTiles.tsx:45` | VelocityTile | `tests/NOT_duplicates/flagship/tiles/VelocityTile.tsx:7` | 0.56 | Structure | Replace `MetricTiles` with `VelocityTile` from `tests/NOT_duplicates/flagship/tiles/VelocityTile.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/MetricTiles.tsx#MetricTiles=>tests/NOT_duplicates/flagship/tiles/CycleTimeTile.tsx#CycleTimeTile` | MetricTiles | `tests/duplicates/flagship/MetricTiles.tsx:45` | CycleTimeTile | `tests/NOT_duplicates/flagship/tiles/CycleTimeTile.tsx:7` | 0.55 | Structure | Replace `MetricTiles` with `CycleTimeTile` from `tests/NOT_duplicates/flagship/tiles/CycleTimeTile.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/MetricTiles.tsx#MetricTiles=>tests/NOT_duplicates/flagship/tiles/ReviewLatencyTile.tsx#ReviewLatencyTile` | MetricTiles | `tests/duplicates/flagship/MetricTiles.tsx:45` | ReviewLatencyTile | `tests/NOT_duplicates/flagship/tiles/ReviewLatencyTile.tsx:7` | 0.55 | Structure | Replace `MetricTiles` with `ReviewLatencyTile` from `tests/NOT_duplicates/flagship/tiles/ReviewLatencyTile.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/banner/AlertBanner.tsx#AlertBanner=>tests/NOT_duplicates/structure/callout/NoticeCallout.tsx#NoticeCallout` | AlertBanner | `tests/duplicates/structure/banner/AlertBanner.tsx:18` | NoticeCallout | `tests/NOT_duplicates/structure/callout/NoticeCallout.tsx:17` | 0.55 | Structure | Replace `AlertBanner` with `NoticeCallout` from `tests/NOT_duplicates/structure/callout/NoticeCallout.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/banner/BannerInner.tsx#BannerInner=>tests/NOT_duplicates/structure/callout/CalloutBody.tsx#CalloutBody` | BannerInner | `tests/duplicates/structure/banner/BannerInner.tsx:3` | CalloutBody | `tests/NOT_duplicates/structure/callout/CalloutBody.tsx:3` | 0.55 | Structure | Replace `BannerInner` with `CalloutBody` from `tests/NOT_duplicates/structure/callout/CalloutBody.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/banner/BannerLead.tsx#BannerLead=>tests/NOT_duplicates/structure/callout/CalloutRow.tsx#CalloutRow` | BannerLead | `tests/duplicates/structure/banner/BannerLead.tsx:9` | CalloutRow | `tests/NOT_duplicates/structure/callout/CalloutRow.tsx:9` | 0.55 | Structure | Replace `BannerLead` with `CalloutRow` from `tests/NOT_duplicates/structure/callout/CalloutRow.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/media/PhotoTile.tsx#PhotoTile=>tests/NOT_duplicates/structure/media/MediaCard.tsx#MediaCard` | PhotoTile | `tests/duplicates/structure/media/PhotoTile.tsx:12` | MediaCard | `tests/NOT_duplicates/structure/media/MediaCard.tsx:15` | 0.54 | Structure | Replace `PhotoTile` with `MediaCard` from `tests/NOT_duplicates/structure/media/MediaCard.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/styles/TestimonialPanel.tsx#TestimonialPanel=>tests/NOT_duplicates/styles/QuoteCard.tsx#QuoteCard` | TestimonialPanel | `tests/duplicates/styles/TestimonialPanel.tsx:8` | QuoteCard | `tests/NOT_duplicates/styles/QuoteCard.tsx:20` | 0.54 | Structure | Replace `TestimonialPanel` with `QuoteCard` from `tests/NOT_duplicates/styles/QuoteCard.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/WorkQueue.tsx#WorkQueue=>tests/NOT_duplicates/flagship/content/main/TaskRow.tsx#TaskRow` | WorkQueue | `tests/duplicates/flagship/WorkQueue.tsx:34` | TaskRow | `tests/NOT_duplicates/flagship/content/main/TaskRow.tsx:8` | 0.54 | Structure | Replace `WorkQueue` with `TaskRow` from `tests/NOT_duplicates/flagship/content/main/TaskRow.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/PaperDup.tsx#PaperDup=>tests/NOT_duplicates/Paper.tsx#Paper` | PaperDup | `tests/duplicates/PaperDup.tsx:8` | Paper | `tests/NOT_duplicates/Paper.tsx:3` | 0.53 | Structure | Replace `PaperDup` with `Paper` from `tests/NOT_duplicates/Paper.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/DashboardSidebar.tsx#DashboardSidebar=>tests/NOT_duplicates/flagship/content/aside/OverviewAside.tsx#OverviewAside` | DashboardSidebar | `tests/duplicates/flagship/DashboardSidebar.tsx:49` | OverviewAside | `tests/NOT_duplicates/flagship/content/aside/OverviewAside.tsx:11` | 0.52 | Structure | Replace `DashboardSidebar` with `OverviewAside` from `tests/NOT_duplicates/flagship/content/aside/OverviewAside.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/DashboardColophon.tsx#DashboardColophon=>tests/NOT_duplicates/flagship/content/OverviewFooter.tsx#OverviewFooter` | DashboardColophon | `tests/duplicates/flagship/DashboardColophon.tsx:11` | OverviewFooter | `tests/NOT_duplicates/flagship/content/OverviewFooter.tsx:10` | 0.51 | Structure | Replace `DashboardColophon` with `OverviewFooter` from `tests/NOT_duplicates/flagship/content/OverviewFooter.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/MetricTiles.tsx#MetricTiles=>tests/NOT_duplicates/structure/StatCard.tsx#StatCard` | MetricTiles | `tests/duplicates/flagship/MetricTiles.tsx:45` | StatCard | `tests/NOT_duplicates/structure/StatCard.tsx:10` | 0.51 | Structure | Replace `MetricTiles` with `StatCard` from `tests/NOT_duplicates/structure/StatCard.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/styles/CornerCounter.tsx#CornerCounter=>tests/NOT_duplicates/styles/FloatingBadge.tsx#FloatingBadge` | CornerCounter | `tests/duplicates/styles/CornerCounter.tsx:6` | FloatingBadge | `tests/NOT_duplicates/styles/FloatingBadge.tsx:6` | 0.50 | Structure | Replace `CornerCounter` with `FloatingBadge` from `tests/NOT_duplicates/styles/FloatingBadge.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/FullBadgeDup.tsx#FullBadgeDup=>tests/NOT_duplicates/Badge.tsx#Badge` | FullBadgeDup | `tests/duplicates/FullBadgeDup.tsx:3` | Badge | `tests/NOT_duplicates/Badge.tsx:3` | 0.48 | Structure | Replace `FullBadgeDup` with `Badge` from `tests/NOT_duplicates/Badge.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/styled/StyledBadgeDup.tsx#StyledBadgeDup=>tests/NOT_duplicates/styled/StyledBadge.tsx#StyledBadgeComponent` | StyledBadgeDup | `tests/duplicates/styled/StyledBadgeDup.tsx:15` | StyledBadgeComponent | `tests/NOT_duplicates/styled/StyledBadge.tsx:15` | 0.47 | Structure | Replace `StyledBadgeDup` with `StyledBadgeComponent` from `tests/NOT_duplicates/styled/StyledBadge.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/DashboardMasthead.tsx#DashboardMasthead=>tests/NOT_duplicates/flagship/header/OverviewHeader.tsx#OverviewHeader` | DashboardMasthead | `tests/duplicates/flagship/DashboardMasthead.tsx:31` | OverviewHeader | `tests/NOT_duplicates/flagship/header/OverviewHeader.tsx:13` | 0.47 | Structure | Replace `DashboardMasthead` with `OverviewHeader` from `tests/NOT_duplicates/flagship/header/OverviewHeader.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/styles/AmountBadge.tsx#AmountBadge=>tests/NOT_duplicates/styles/PriceTag.tsx#PriceTag` | AmountBadge | `tests/duplicates/styles/AmountBadge.tsx:27` | PriceTag | `tests/NOT_duplicates/styles/PriceTag.tsx:7` | 0.47 | Structure | Replace `AmountBadge` with `PriceTag` from `tests/NOT_duplicates/styles/PriceTag.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/PaperDup.tsx#PaperDup=>tests/NOT_duplicates/Panel.tsx#Panel` | PaperDup | `tests/duplicates/PaperDup.tsx:8` | Panel | `tests/NOT_duplicates/Panel.tsx:3` | 0.46 | Structure | Replace `PaperDup` with `Panel` from `tests/NOT_duplicates/Panel.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/PaperDup.tsx#PaperDup=>tests/NOT_duplicates/Passthrough.tsx#Passthrough` | PaperDup | `tests/duplicates/PaperDup.tsx:8` | Passthrough | `tests/NOT_duplicates/Passthrough.tsx:3` | 0.46 | Structure | Replace `PaperDup` with `Passthrough` from `tests/NOT_duplicates/Passthrough.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/PaperDup.tsx#PaperDup=>tests/NOT_duplicates/Section.tsx#Section` | PaperDup | `tests/duplicates/PaperDup.tsx:8` | Section | `tests/NOT_duplicates/Section.tsx:3` | 0.46 | Structure | Replace `PaperDup` with `Section` from `tests/NOT_duplicates/Section.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/flagship/DeliveryTracks.tsx#DeliveryTracks=>tests/NOT_duplicates/flagship/content/main/MilestoneBoard.tsx#MilestoneBoard` | DeliveryTracks | `tests/duplicates/flagship/DeliveryTracks.tsx:49` | MilestoneBoard | `tests/NOT_duplicates/flagship/content/main/MilestoneBoard.tsx:35` | 0.45 | Structure | Replace `DeliveryTracks` with `MilestoneBoard` from `tests/NOT_duplicates/flagship/content/main/MilestoneBoard.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/banner/BannerHeadline.tsx#BannerHeadline=>tests/NOT_duplicates/structure/callout/CalloutTitle.tsx#CalloutTitle` | BannerHeadline | `tests/duplicates/structure/banner/BannerHeadline.tsx:3` | CalloutTitle | `tests/NOT_duplicates/structure/callout/CalloutTitle.tsx:3` | 0.45 | Structure | Replace `BannerHeadline` with `CalloutTitle` from `tests/NOT_duplicates/structure/callout/CalloutTitle.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/banner/BannerParagraph.tsx#BannerParagraph=>tests/NOT_duplicates/structure/callout/CalloutText.tsx#CalloutText` | BannerParagraph | `tests/duplicates/structure/banner/BannerParagraph.tsx:3` | CalloutText | `tests/NOT_duplicates/structure/callout/CalloutText.tsx:3` | 0.45 | Structure | Replace `BannerParagraph` with `CalloutText` from `tests/NOT_duplicates/structure/callout/CalloutText.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/behavior/SubscribePanel.tsx#SubscribePanel=>tests/NOT_duplicates/behavior/NewsletterSignup.tsx#NewsletterSignup` | SubscribePanel | `tests/duplicates/behavior/SubscribePanel.tsx:16` | NewsletterSignup | `tests/NOT_duplicates/behavior/NewsletterSignup.tsx:15` | 0.45 | Structure | Replace `SubscribePanel` with `NewsletterSignup` from `tests/NOT_duplicates/behavior/NewsletterSignup.tsx` — they are the same component. |
+| `duplicate:tests/duplicates/structure/banner/BannerShell.tsx#BannerShell=>tests/NOT_duplicates/flagship/tiles/TileFrame.tsx#TileFrame` | BannerShell | `tests/duplicates/structure/banner/BannerShell.tsx:8` | TileFrame | `tests/NOT_duplicates/flagship/tiles/TileFrame.tsx:4` | 0.41 | Structure | Replace `BannerShell` with `TileFrame` from `tests/NOT_duplicates/flagship/tiles/TileFrame.tsx` — they are the same component. |
 
 ### Why each one matched
+
+- **ZeroState** — `ZeroState` duplicates canonical `EmptyInbox` — 0.77 (77%) confidence. Use the canonical component instead.
+  scores  Structure 94%  ·  Styles 100%  ·  Behavior 50%  ·  Accessibility 67%  ·  Framework 100%  ·  Name 0%
+  Structure  94%  structure (tree)
+    chain 5/5  ·  quality 94%  ·  CSS agreement 100%
+    matched nodes  div, svg, h3, p, button
+  Styles  100%  styles (6/6 properties agree across 2 node pair(s))
+    div  align-items: center, display: flex, flex-direction: column, gap: 12px, padding-block: 40px, padding-inline: 32px
+  Behavior  50%  1 shared event(s)  (1↔1)
+    shared  click
+  Accessibility  67%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  100%  1 shared component usage(s)  (1↔1)
+    shared  Inbox
+    passed props  Inbox: aria-hidden
+  **Fix** — Replace `ZeroState` with `EmptyInbox` from `tests/NOT_duplicates/structure/flow/EmptyInbox.tsx` — they are the same component.
+
+- **PressableAction** — `PressableAction` duplicates canonical `PrimaryAction` — 0.74 (75%) confidence. Use the canonical component instead.
+  scores  Structure 100%  ·  Styles 100%  ·  Behavior 50%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 20%
+  Structure  100%  structure (tree)
+    chain 3/3  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  div↔button, svg, span
+  Styles  100%  styles (6/6 properties agree across 2 node pair(s))
+    div  align-items: center, display: inline-flex, font-size: 13px, gap: 8px, padding-block: 8px, padding-inline: 16px
+  Behavior  50%  1 shared event(s)  (2↔1)
+    shared  click
+    only local  keydown
+  Accessibility  100%  1 shared a11y token(s)  (3↔1)
+    shared  aria-hidden:true
+    only local  aria-disabled:true, role:button
+  Name  20%  PressableAction ↔ PrimaryAction
+    match  word-overlap  ·  word overlap 33%
+  **Fix** — Replace `PressableAction` with `PrimaryAction` from `tests/NOT_duplicates/a11y/PrimaryAction.tsx` — they are the same component.
 
 - **MuiFormOverrideDup** — `MuiFormOverrideDup` duplicates canonical `MuiFormOverride` — 0.68 (68%) confidence. Use the canonical component instead.
   scores  Structure 94%  ·  Behavior 50%  ·  Accessibility 0%  ·  Framework 90%  ·  Name 40%
@@ -33,7 +98,7 @@ Found 8 duplicate component(s) and 9 similar component(s), plus 15 component(s) 
     only canonical  CardForm
   Name  40%  MuiFormOverrideDup ↔ MuiFormOverride
     match  word-overlap  ·  word overlap 67%
-  **Fix** — Replace `MuiFormOverrideDup` with `MuiFormOverride` from `tests/components/lib/mui/MuiFormOverride.tsx` — they are the same component.
+  **Fix** — Replace `MuiFormOverrideDup` with `MuiFormOverride` from `tests/NOT_duplicates/mui/MuiFormOverride.tsx` — they are the same component.
 
 - **MuiFormOverrideDup** — `MuiFormOverrideDup` duplicates canonical `MuiForm` — 0.65 (65%) confidence. Use the canonical component instead.
   scores  Structure 92%  ·  Behavior 50%  ·  Accessibility 0%  ·  Framework 90%  ·  Name 20%
@@ -49,7 +114,297 @@ Found 8 duplicate component(s) and 9 similar component(s), plus 15 component(s) 
     only canonical  Box
   Name  20%  MuiFormOverrideDup ↔ MuiForm
     match  word-overlap  ·  word overlap 33%
-  **Fix** — Replace `MuiFormOverrideDup` with `MuiForm` from `tests/components/lib/mui/MuiForm.tsx` — they are the same component.
+  **Fix** — Replace `MuiFormOverrideDup` with `MuiForm` from `tests/NOT_duplicates/mui/MuiForm.tsx` — they are the same component.
+
+- **DeliveryTracks** — `DeliveryTracks` duplicates canonical `MilestoneCard` — 0.65 (65%) confidence. Use the canonical component instead.
+  scores  Structure 92%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 35%  ·  Name 0%
+  Structure  92%  structure (tree)
+    chain 11/12  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  article, img, h3, p, div, div, div, span, footer, span, a
+  Styles  100%  styles (17/17 properties agree across 4 node pair(s))
+    article  display: flex, flex-direction: column, gap: 8px, padding: 14px, padding-bottom: 14px, padding-left: 14px, padding-right: 14px, padding-top: 14px
+    div  align-items: center, display: flex, gap: 8px, flex: 1 1 0%, flex-basis: 0%, flex-grow: 1, height: 6px, overflow: hidden
+  Accessibility  100%  5 shared a11y token(s)  (5↔5)
+    shared  aria-label: progress, aria-valuemax:true, aria-valuemin:true, aria-valuenow:true, role:progressbar
+  Framework  35%  1 shared component usage(s)  (12↔2)
+    shared  Image
+    passed props  Image: alt, height, src, width
+    only local  BoardGrid, BoardCard, CardTitle, CardText, MeterRow, MeterTrack, MeterFill, MeterValue, CardFoot, TinyMuted, TinyLink
+    only canonical  Link
+  **Fix** — Replace `DeliveryTracks` with `MilestoneCard` from `tests/NOT_duplicates/flagship/content/main/MilestoneCard.tsx` — they are the same component.
+
+- **BannerShell** — `BannerShell` duplicates canonical `CalloutFrame` — 0.65 (65%) confidence. Use the canonical component instead.
+  scores  Structure 100%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 0%
+  Structure  100%  structure (tree)
+    chain 1/1  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  div
+  Styles  100%  styles (8/8 properties agree across 1 node pair(s))
+    div  display: flex, flex-direction: column, gap: 8px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  role:alert
+  **Fix** — Replace `BannerShell` with `CalloutFrame` from `tests/NOT_duplicates/structure/callout/CalloutFrame.tsx` — they are the same component.
+
+- **EmailInput** — `EmailInput` duplicates canonical `SignupField` — 0.60 (60%) confidence. Use the canonical component instead.
+  scores  Structure 100%  ·  Styles 33%  ·  Behavior 100%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  100%  structure (tree)
+    chain 2/2  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  label, input
+  Styles  33%  styles (1/1 properties agree across 1 node pair(s))
+    label  font-size: 12px
+  Behavior  100%  2 shared event(s)  (2↔2)
+    shared  change, click
+  **Fix** — Replace `EmailInput` with `SignupField` from `tests/NOT_duplicates/behavior/SignupField.tsx` — they are the same component.
+
+- **BannerAccent** — `BannerAccent` duplicates canonical `CalloutGlyph` — 0.59 (59%) confidence. Use the canonical component instead.
+  scores  Structure 100%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 100%  ·  Name 0%
+  Structure  100%  structure (tree)
+    chain 1/1  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  svg
+  Accessibility  0%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  100%  1 shared component usage(s)  (1↔1)
+    shared  Info
+    passed props  Info: aria-hidden
+  **Fix** — Replace `BannerAccent` with `CalloutGlyph` from `tests/NOT_duplicates/structure/callout/CalloutGlyph.tsx` — they are the same component.
+
+- **InvoiceSection** — `InvoiceSection` duplicates canonical `BillingRegion` — 0.57 (57%) confidence. Use the canonical component instead.
+  scores  Structure 93%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 50%  ·  Framework 0%  ·  Name 0%
+  Structure  93%  structure (tree)
+    chain 9/9  ·  quality 93%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  section, h2, dl, div, dt, dd, div, dt, dd
+  Styles  100%  styles (12/12 properties agree across 4 node pair(s))
+    section  padding: 20px, padding-bottom: 20px, padding-left: 20px, padding-right: 20px, padding-top: 20px
+    dl  margin: 12px 0 0, margin-bottom: 0, margin-left: 0, margin-right: 0, margin-top: 12px
+    div  display: flex, justify-content: space-between
+  Accessibility  50%  0 shared a11y token(s)  (1↔1)
+    only local  aria-label:billing
+    only canonical  aria-labelledby:billing-heading
+  Framework  0%  0 shared component usage(s)  (2↔0)
+    only local  SummaryRow, SummaryRow
+  **Fix** — Replace `InvoiceSection` with `BillingRegion` from `tests/NOT_duplicates/a11y/BillingRegion.tsx` — they are the same component.
+
+- **MetricTiles** — `MetricTiles` duplicates canonical `BlockedTile` — 0.56 (56%) confidence. Use the canonical component instead.
+  scores  Structure 71%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 20%
+  Structure  71%  structure (tree)
+    chain 5/7  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  article, header, h3, p, span
+  Styles  100%  styles (12/12 properties agree across 3 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    header  align-items: center, display: flex, gap: 6px
+    h3  font-size: 12px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (7↔4)
+    only local  TileGrid, Tile, TileHead, Icon, TileLabel, TileNumber, TileTrend
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  Name  20%  MetricTiles ↔ BlockedTile
+    match  word-overlap  ·  word overlap 33%
+  **Fix** — Replace `MetricTiles` with `BlockedTile` from `tests/NOT_duplicates/flagship/tiles/BlockedTile.tsx` — they are the same component.
+
+- **MetricTiles** — `MetricTiles` duplicates canonical `CoverageTile` — 0.56 (56%) confidence. Use the canonical component instead.
+  scores  Structure 71%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 20%
+  Structure  71%  structure (tree)
+    chain 5/7  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  article, header, h3, p, span
+  Styles  100%  styles (12/12 properties agree across 3 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    header  align-items: center, display: flex, gap: 6px
+    h3  font-size: 12px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (7↔4)
+    only local  TileGrid, Tile, TileHead, Icon, TileLabel, TileNumber, TileTrend
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  Name  20%  MetricTiles ↔ CoverageTile
+    match  word-overlap  ·  word overlap 33%
+  **Fix** — Replace `MetricTiles` with `CoverageTile` from `tests/NOT_duplicates/flagship/tiles/CoverageTile.tsx` — they are the same component.
+
+- **MetricTiles** — `MetricTiles` duplicates canonical `DeploysTile` — 0.56 (56%) confidence. Use the canonical component instead.
+  scores  Structure 71%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 20%
+  Structure  71%  structure (tree)
+    chain 5/7  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  article, header, h3, p, span
+  Styles  100%  styles (12/12 properties agree across 3 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    header  align-items: center, display: flex, gap: 6px
+    h3  font-size: 12px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (7↔4)
+    only local  TileGrid, Tile, TileHead, Icon, TileLabel, TileNumber, TileTrend
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  Name  20%  MetricTiles ↔ DeploysTile
+    match  word-overlap  ·  word overlap 33%
+  **Fix** — Replace `MetricTiles` with `DeploysTile` from `tests/NOT_duplicates/flagship/tiles/DeploysTile.tsx` — they are the same component.
+
+- **MetricTiles** — `MetricTiles` duplicates canonical `IssuesTile` — 0.56 (56%) confidence. Use the canonical component instead.
+  scores  Structure 71%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 20%
+  Structure  71%  structure (tree)
+    chain 5/7  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  article, header, h3, p, span
+  Styles  100%  styles (12/12 properties agree across 3 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    header  align-items: center, display: flex, gap: 6px
+    h3  font-size: 12px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (7↔4)
+    only local  TileGrid, Tile, TileHead, Icon, TileLabel, TileNumber, TileTrend
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  Name  20%  MetricTiles ↔ IssuesTile
+    match  word-overlap  ·  word overlap 33%
+  **Fix** — Replace `MetricTiles` with `IssuesTile` from `tests/NOT_duplicates/flagship/tiles/IssuesTile.tsx` — they are the same component.
+
+- **MetricTiles** — `MetricTiles` duplicates canonical `ShippedTile` — 0.56 (56%) confidence. Use the canonical component instead.
+  scores  Structure 71%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 20%
+  Structure  71%  structure (tree)
+    chain 5/7  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  article, header, h3, p, span
+  Styles  100%  styles (12/12 properties agree across 3 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    header  align-items: center, display: flex, gap: 6px
+    h3  font-size: 12px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (7↔4)
+    only local  TileGrid, Tile, TileHead, Icon, TileLabel, TileNumber, TileTrend
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  Name  20%  MetricTiles ↔ ShippedTile
+    match  word-overlap  ·  word overlap 33%
+  **Fix** — Replace `MetricTiles` with `ShippedTile` from `tests/NOT_duplicates/flagship/tiles/ShippedTile.tsx` — they are the same component.
+
+- **MetricTiles** — `MetricTiles` duplicates canonical `VelocityTile` — 0.56 (56%) confidence. Use the canonical component instead.
+  scores  Structure 71%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 20%
+  Structure  71%  structure (tree)
+    chain 5/7  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  article, header, h3, p, span
+  Styles  100%  styles (12/12 properties agree across 3 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    header  align-items: center, display: flex, gap: 6px
+    h3  font-size: 12px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (7↔4)
+    only local  TileGrid, Tile, TileHead, Icon, TileLabel, TileNumber, TileTrend
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  Name  20%  MetricTiles ↔ VelocityTile
+    match  word-overlap  ·  word overlap 33%
+  **Fix** — Replace `MetricTiles` with `VelocityTile` from `tests/NOT_duplicates/flagship/tiles/VelocityTile.tsx` — they are the same component.
+
+- **MetricTiles** — `MetricTiles` duplicates canonical `CycleTimeTile` — 0.55 (55%) confidence. Use the canonical component instead.
+  scores  Structure 71%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 15%
+  Structure  71%  structure (tree)
+    chain 5/7  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  article, header, h3, p, span
+  Styles  100%  styles (12/12 properties agree across 3 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    header  align-items: center, display: flex, gap: 6px
+    h3  font-size: 12px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (7↔4)
+    only local  TileGrid, Tile, TileHead, Icon, TileLabel, TileNumber, TileTrend
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  Name  15%  MetricTiles ↔ CycleTimeTile
+    match  word-overlap  ·  word overlap 25%
+  **Fix** — Replace `MetricTiles` with `CycleTimeTile` from `tests/NOT_duplicates/flagship/tiles/CycleTimeTile.tsx` — they are the same component.
+
+- **MetricTiles** — `MetricTiles` duplicates canonical `ReviewLatencyTile` — 0.55 (55%) confidence. Use the canonical component instead.
+  scores  Structure 71%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 15%
+  Structure  71%  structure (tree)
+    chain 5/7  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  article, header, h3, p, span
+  Styles  100%  styles (12/12 properties agree across 3 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    header  align-items: center, display: flex, gap: 6px
+    h3  font-size: 12px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (7↔4)
+    only local  TileGrid, Tile, TileHead, Icon, TileLabel, TileNumber, TileTrend
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  Name  15%  MetricTiles ↔ ReviewLatencyTile
+    match  word-overlap  ·  word overlap 25%
+  **Fix** — Replace `MetricTiles` with `ReviewLatencyTile` from `tests/NOT_duplicates/flagship/tiles/ReviewLatencyTile.tsx` — they are the same component.
+
+- **AlertBanner** — `AlertBanner` duplicates canonical `NoticeCallout` — 0.55 (55%) confidence. Use the canonical component instead.
+  scores  Structure 100%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  100%  structure (tree)
+    chain 6/6  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  div, div, svg, div, strong, p
+  Styles  100%  styles (18/18 properties agree across 4 node pair(s))
+    div  display: flex, flex-direction: column, gap: 8px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px, align-items: flex-start, gap: 10px, flex: 1 1 0%, flex-basis: 0%, flex-grow: 1, gap: 2px
+    strong  font-size: 13px
+  Framework  0%  0 shared component usage(s)  (6↔5)
+    only local  BannerShell, BannerLead, BannerInner, BannerCopy, BannerHeadline, BannerParagraph
+    only canonical  CalloutFrame, CalloutRow, CalloutBody, CalloutTitle, CalloutText
+  **Fix** — Replace `AlertBanner` with `NoticeCallout` from `tests/NOT_duplicates/structure/callout/NoticeCallout.tsx` — they are the same component.
+
+- **BannerInner** — `BannerInner` duplicates canonical `CalloutBody` — 0.55 (55%) confidence. Use the canonical component instead.
+  scores  Structure 100%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  100%  structure (tree)
+    chain 1/1  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  div
+  Styles  100%  styles (6/6 properties agree across 1 node pair(s))
+    div  display: flex, flex: 1 1 0%, flex-basis: 0%, flex-direction: column, flex-grow: 1, gap: 2px
+  **Fix** — Replace `BannerInner` with `CalloutBody` from `tests/NOT_duplicates/structure/callout/CalloutBody.tsx` — they are the same component.
+
+- **BannerLead** — `BannerLead` duplicates canonical `CalloutRow` — 0.55 (55%) confidence. Use the canonical component instead.
+  scores  Structure 100%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  100%  structure (tree)
+    chain 2/2  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  div, svg
+  Styles  100%  styles (3/3 properties agree across 2 node pair(s))
+    div  align-items: flex-start, display: flex, gap: 10px
+  Framework  0%  0 shared component usage(s)  (1↔1)
+    only local  BannerAccent
+    only canonical  CalloutGlyph
+  **Fix** — Replace `BannerLead` with `CalloutRow` from `tests/NOT_duplicates/structure/callout/CalloutRow.tsx` — they are the same component.
+
+- **PhotoTile** — `PhotoTile` duplicates canonical `MediaCard` — 0.54 (54%) confidence. Use the canonical component instead.
+  scores  Structure 98%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  98%  structure (tree)
+    chain 6/6  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  figure, div, img, figcaption, h3, p
+  Styles  100%  styles (10/10 properties agree across 3 node pair(s))
+    figure  margin: 0, margin-bottom: 0, margin-left: 0, margin-right: 0, margin-top: 0, overflow: hidden, width: 280px
+    div  height: 160px, position: relative, width: 100%
+  Framework  0%  0 shared component usage(s)  (0↔5)
+    only canonical  MediaFigure, MediaFrame, MediaCaption, MediaHeading, MediaNote
+  **Fix** — Replace `PhotoTile` with `MediaCard` from `tests/NOT_duplicates/structure/media/MediaCard.tsx` — they are the same component.
+
+- **TestimonialPanel** — `TestimonialPanel` duplicates canonical `QuoteCard` — 0.54 (54%) confidence. Use the canonical component instead.
+  scores  Structure 98%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  98%  structure (tree)
+    chain 4/4  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  section, blockquote, footer, span
+  Styles  100%  styles (11/11 properties agree across 3 node pair(s))
+    section  padding: 24px, padding-bottom: 24px, padding-left: 24px, padding-right: 24px, padding-top: 24px
+    footer  margin: 12px 0 0, margin-bottom: 0, margin-left: 0, margin-right: 0, margin-top: 12px
+    span  font-size: 12px
+  Framework  0%  0 shared component usage(s)  (0↔1)
+    only canonical  Surface
+  **Fix** — Replace `TestimonialPanel` with `QuoteCard` from `tests/NOT_duplicates/styles/QuoteCard.tsx` — they are the same component.
+
+- **WorkQueue** — `WorkQueue` duplicates canonical `TaskRow` — 0.54 (54%) confidence. Use the canonical component instead.
+  scores  Structure 75%  ·  Styles 56%  ·  Behavior 50%  ·  Accessibility 75%  ·  Framework 0%  ·  Name 0%
+  Structure  75%  structure (tree)
+    chain 7/8  ·  quality 86%  ·  CSS agreement 42%  ·  class names differ
+    matched nodes  li, input, div, span, span, span, span
+  Styles  56%  styles (9/16 properties agree across 3 node pair(s))
+    li  align-items: center, display: flex, gap: 12px
+    div  display: flex, flex: 1 1 0%, flex-basis: 0%, flex-direction: column, flex-grow: 1
+    span  font-size: 13px
+    only local  li padding: 12px 20px, li padding-bottom: 12px, li padding-left: 20px, li padding-right: 20px, li padding-top: 12px
+    only canonical  li padding-block: 12px, li padding-inline: 20px
+  Behavior  50%  1 shared event(s)  (1↔2)
+    shared  change
+    only canonical  click
+  Accessibility  75%  1 shared a11y token(s)  (1↔1)
+    shared  aria-label:mark 
+  Framework  0%  0 shared component usage(s)  (8↔0)
+    only local  RowList, Row, RowCheck, RowMain, RowTitle, RowMeta, OutlinePill, StatusPill
+  **Fix** — Replace `WorkQueue` with `TaskRow` from `tests/NOT_duplicates/flagship/content/main/TaskRow.tsx` — they are the same component.
 
 - **PaperDup** — `PaperDup` duplicates canonical `Paper` — 0.53 (53%) confidence. Use the canonical component instead.
   scores  Structure 100%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 52%
@@ -58,7 +413,75 @@ Found 8 duplicate component(s) and 9 similar component(s), plus 15 component(s) 
     matched nodes  div
   Name  52%  PaperDup ↔ Paper
     match  fuzzy-name  ·  word overlap 50%
-  **Fix** — Replace `PaperDup` with `Paper` from `tests/components/lib/Paper.tsx` — they are the same component.
+  **Fix** — Replace `PaperDup` with `Paper` from `tests/NOT_duplicates/Paper.tsx` — they are the same component.
+
+- **DashboardSidebar** — `DashboardSidebar` duplicates canonical `OverviewAside` — 0.52 (52%) confidence. Use the canonical component instead.
+  scores  Structure 94%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  94%  structure (tree)
+    chain 23/24  ·  quality 98%  ·  CSS agreement 88%  ·  class names differ
+    matched nodes  section, h2, form, label, input, button, section, h2, ol, li, Icon, div, span, span, section, h2, ul, li, img, div, …+3 more
+  Styles  100%  styles (24/24 properties agree across 5 node pair(s))
+    section  padding: 20px, padding-bottom: 20px, padding-left: 20px, padding-right: 20px, padding-top: 20px
+    ol  display: flex, flex-direction: column, gap: 12px, margin: 12px 0 0, margin-bottom: 0, margin-left: 0, margin-right: 0, margin-top: 12px, padding: 0, padding-bottom: 0, padding-left: 0, padding-right: 0, padding-top: 0
+    li  align-items: flex-start, display: flex, gap: 8px
+    div  display: flex, flex-direction: column
+    span  font-size: 12px
+  Behavior  0%  0 shared event(s)  (2↔2)
+    only local  change, submit
+    only canonical  invite, inviteemailchange
+  Accessibility  0%  0 shared a11y token(s)  (1↔0)
+    only local  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (23↔3)
+    only local  PaddedPanel, PanelTitle, InviteForm, FieldLabel, TextField, DarkAction, PaddedPanel, PanelTitle, Feed, FeedRow, Icon, FeedMain, FeedText, TinyMuted, PaddedPanel, PanelTitle, Roster, RosterRow, Image, RowMain, RosterName, TinyMuted, TinyLink
+    only canonical  InviteTeammate, ActivityFeed, TeamRoster
+  **Fix** — Replace `DashboardSidebar` with `OverviewAside` from `tests/NOT_duplicates/flagship/content/aside/OverviewAside.tsx` — they are the same component.
+
+- **DashboardColophon** — `DashboardColophon` duplicates canonical `OverviewFooter` — 0.51 (51%) confidence. Use the canonical component instead.
+  scores  Structure 87%  ·  Styles 38%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 0%
+  Structure  87%  structure (tree)
+    chain 5/5  ·  quality 87%  ·  CSS agreement 52%  ·  class names differ
+    matched nodes  footer, div, p, nav, a
+  Styles  38%  styles (8/21 properties agree across 4 node pair(s))
+    div  align-items: center, display: flex, justify-content: space-between, max-width: 1120px
+    nav  align-items: center, display: flex, gap: 16px
+    a  font-size: 12px
+    only local  footer padding: 16px 24px, footer padding-bottom: 16px, footer padding-left: 24px, footer padding-right: 24px, footer padding-top: 16px, div margin: 0 auto, div margin-bottom: 0, div margin-left: auto, div margin-right: auto, div margin-top: 0
+    only canonical  footer padding-block: 16px, footer padding-inline: 24px, div margin-inline: auto
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-label:footer
+  Framework  0%  0 shared component usage(s)  (5↔1)
+    only local  PageFoot, FootInner, Copyright, NavBar, FootLink
+    only canonical  Link
+  **Fix** — Replace `DashboardColophon` with `OverviewFooter` from `tests/NOT_duplicates/flagship/content/OverviewFooter.tsx` — they are the same component.
+
+- **MetricTiles** — `MetricTiles` duplicates canonical `StatCard` — 0.51 (51%) confidence. Use the canonical component instead.
+  scores  Structure 67%  ·  Styles 92%  ·  Behavior 0%  ·  Accessibility 100%  ·  Framework 0%  ·  Name 0%
+  Structure  67%  structure (tree)
+    chain 5/7  ·  quality 97%  ·  CSS agreement 89%  ·  1 CSS conflict(s)  ·  class names differ
+    matched nodes  article, header, h3, p, span
+  Styles  92%  styles (12/13 properties agree across 3 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    header  align-items: center, display: flex, gap: 6px
+    h3  font-size: 12px
+    only canonical  article width: 220px
+  Accessibility  100%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (7↔1)
+    only local  TileGrid, Tile, TileHead, Icon, TileLabel, TileNumber, TileTrend
+    only canonical  TrendingUp
+  **Fix** — Replace `MetricTiles` with `StatCard` from `tests/NOT_duplicates/structure/StatCard.tsx` — they are the same component.
+
+- **CornerCounter** — `CornerCounter` duplicates canonical `FloatingBadge` — 0.50 (50%) confidence. Use the canonical component instead.
+  scores  Structure 95%  ·  Styles 79%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  95%  structure (tree)
+    chain 2/2  ·  quality 95%  ·  CSS agreement 79%  ·  class names differ
+    matched nodes  div, span
+  Styles  79%  styles (11/14 properties agree across 2 node pair(s))
+    div  height: 64px, position: relative, width: 64px
+    span  align-items: center, display: inline-flex, font-size: 11px, height: 20px, justify-content: center, min-width: 20px, padding-inline: 6px, position: absolute
+    only local  span inset: 12px auto auto 16px
+    only canonical  span left: 16px, span top: 12px
+  **Fix** — Replace `CornerCounter` with `FloatingBadge` from `tests/NOT_duplicates/styles/FloatingBadge.tsx` — they are the same component.
 
 - **FullBadgeDup** — `FullBadgeDup` duplicates canonical `Badge` — 0.48 (49%) confidence. Use the canonical component instead.
   scores  Structure 100%  ·  Styles 33%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 35%
@@ -69,7 +492,7 @@ Found 8 duplicate component(s) and 9 similar component(s), plus 15 component(s) 
     span  font-size: var(--text-xs)
   Name  35%  FullBadgeDup ↔ Badge
     match  fuzzy-name  ·  word overlap 0%
-  **Fix** — Replace `FullBadgeDup` with `Badge` from `tests/components/lib/Badge.tsx` — they are the same component.
+  **Fix** — Replace `FullBadgeDup` with `Badge` from `tests/NOT_duplicates/Badge.tsx` — they are the same component.
 
 - **StyledBadgeDup** — `StyledBadgeDup` duplicates canonical `StyledBadgeComponent` — 0.47 (47%) confidence. Use the canonical component instead.
   scores  Structure 100%  ·  Styles 33%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 20%
@@ -83,54 +506,517 @@ Found 8 duplicate component(s) and 9 similar component(s), plus 15 component(s) 
     only canonical  StyledBadge
   Name  20%  StyledBadgeDup ↔ StyledBadgeComponent
     match  word-overlap  ·  word overlap 33%
-  **Fix** — Replace `StyledBadgeDup` with `StyledBadgeComponent` from `tests/components/lib/styled/StyledBadge.tsx` — they are the same component.
+  **Fix** — Replace `StyledBadgeDup` with `StyledBadgeComponent` from `tests/NOT_duplicates/styled/StyledBadge.tsx` — they are the same component.
+
+- **DashboardMasthead** — `DashboardMasthead` duplicates canonical `OverviewHeader` — 0.47 (47%) confidence. Use the canonical component instead.
+  scores  Structure 90%  ·  Styles 71%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  90%  structure (tree)
+    chain 13/14  ·  quality 97%  ·  CSS agreement 84%  ·  class names differ
+    matched nodes  header, a, nav, a, form, label, input, button, svg, button, svg, span, img
+  Styles  71%  styles (15/21 properties agree across 4 node pair(s))
+    header  align-items: center, display: flex, gap: 24px, height: 64px, position: sticky, top: 0, z-index: 10
+    form  align-items: center, display: flex, gap: 8px, margin: 0 0 0 auto, margin-bottom: 0, margin-left: auto, margin-right: 0, margin-top: 0
+    only local  header padding: 0 24px, header padding-bottom: 0, header padding-left: 24px, header padding-right: 24px, header padding-top: 0
+    only canonical  header padding-inline: 24px
+  Behavior  0%  0 shared event(s)  (3↔3)
+    only local  change, click, submit
+    only canonical  open, querychange, search
+  Accessibility  0%  0 shared a11y token(s)  (6↔0)
+    only local  aria-current:page, aria-hidden:true, aria-label:main, aria-label:notifications, aria-label:search, role:search
+  Framework  0%  0 shared component usage(s)  (14↔5)
+    only local  TopBar, Wordmark, NavBar, CurrentNavItem, NavItem, SearchForm, ScreenReaderText, SearchField, IconSubmit, Search, RoundIcon, Bell, UnreadDot, Image
+    only canonical  BrandMark, PrimaryNav, SearchBox, NotificationBell, HeaderAvatar
+  **Fix** — Replace `DashboardMasthead` with `OverviewHeader` from `tests/NOT_duplicates/flagship/header/OverviewHeader.tsx` — they are the same component.
+
+- **AmountBadge** — `AmountBadge` duplicates canonical `PriceTag` — 0.47 (47%) confidence. Use the canonical component instead.
+  scores  Structure 92%  ·  Styles 67%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  92%  structure (tree)
+    chain 3/3  ·  quality 92%  ·  CSS agreement 46%  ·  class names differ
+    matched nodes  span, span, span
+  Styles  67%  styles (2/2 properties agree across 2 node pair(s))
+    span  font-size: 18px
+  Framework  0%  0 shared component usage(s)  (2↔0)
+    only local  Tag, Unit
+  **Fix** — Replace `AmountBadge` with `PriceTag` from `tests/NOT_duplicates/styles/PriceTag.tsx` — they are the same component.
 
 - **PaperDup** — `PaperDup` duplicates canonical `Panel` — 0.46 (46%) confidence. Use the canonical component instead.
   scores  Structure 98%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
   Structure  98%  structure (tree)
     chain 1/1  ·  quality 100%  ·  CSS agreement 0%  ·  class names differ
     matched nodes  div
-  **Fix** — Replace `PaperDup` with `Panel` from `tests/components/lib/Panel.tsx` — they are the same component.
+  **Fix** — Replace `PaperDup` with `Panel` from `tests/NOT_duplicates/Panel.tsx` — they are the same component.
 
 - **PaperDup** — `PaperDup` duplicates canonical `Passthrough` — 0.46 (46%) confidence. Use the canonical component instead.
   scores  Structure 98%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
   Structure  98%  structure (tree)
     chain 1/1  ·  quality 100%  ·  CSS agreement 0%  ·  class names differ
     matched nodes  div
-  **Fix** — Replace `PaperDup` with `Passthrough` from `tests/components/lib/Passthrough.tsx` — they are the same component.
+  **Fix** — Replace `PaperDup` with `Passthrough` from `tests/NOT_duplicates/Passthrough.tsx` — they are the same component.
 
 - **PaperDup** — `PaperDup` duplicates canonical `Section` — 0.46 (46%) confidence. Use the canonical component instead.
   scores  Structure 98%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
   Structure  98%  structure (tree)
     chain 1/1  ·  quality 100%  ·  CSS agreement 0%  ·  class names differ
     matched nodes  div
-  **Fix** — Replace `PaperDup` with `Section` from `tests/components/lib/Section.tsx` — they are the same component.
+  **Fix** — Replace `PaperDup` with `Section` from `tests/NOT_duplicates/Section.tsx` — they are the same component.
 
-## Weak similarity (similar ≤ confidence < duplicate) (9)
+- **DeliveryTracks** — `DeliveryTracks` duplicates canonical `MilestoneBoard` — 0.45 (45%) confidence. Use the canonical component instead.
+  scores  Structure 75%  ·  Styles 100%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  75%  structure (tree)
+    chain 12/16  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  div, article, img, h3, p, div, div, div, span, footer, span, a
+  Styles  100%  styles (25/25 properties agree across 5 node pair(s))
+    div  display: grid, gap: 12px, grid-template-columns: repeat(3, minmax(0, 1fr)), padding: 20px, padding-bottom: 20px, padding-left: 20px, padding-right: 20px, padding-top: 20px, align-items: center, display: flex, gap: 8px, flex: 1 1 0%, flex-basis: 0%, flex-grow: 1, height: 6px, overflow: hidden
+    article  display: flex, flex-direction: column, gap: 8px, padding: 14px, padding-bottom: 14px, padding-left: 14px, padding-right: 14px, padding-top: 14px
+  Accessibility  0%  0 shared a11y token(s)  (5↔0)
+    only local  aria-label: progress, aria-valuemax:true, aria-valuemin:true, aria-valuenow:true, role:progressbar
+  Framework  0%  0 shared component usage(s)  (12↔1)
+    only local  BoardGrid, BoardCard, Image, CardTitle, CardText, MeterRow, MeterTrack, MeterFill, MeterValue, CardFoot, TinyMuted, TinyLink
+    only canonical  MilestoneCard
+  **Fix** — Replace `DeliveryTracks` with `MilestoneBoard` from `tests/NOT_duplicates/flagship/content/main/MilestoneBoard.tsx` — they are the same component.
+
+- **BannerHeadline** — `BannerHeadline` duplicates canonical `CalloutTitle` — 0.45 (45%) confidence. Use the canonical component instead.
+  scores  Structure 100%  ·  Styles 33%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  100%  structure (tree)
+    chain 1/1  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  strong
+  Styles  33%  styles (1/1 properties agree across 1 node pair(s))
+    strong  font-size: 13px
+  **Fix** — Replace `BannerHeadline` with `CalloutTitle` from `tests/NOT_duplicates/structure/callout/CalloutTitle.tsx` — they are the same component.
+
+- **BannerParagraph** — `BannerParagraph` duplicates canonical `CalloutText` — 0.45 (45%) confidence. Use the canonical component instead.
+  scores  Structure 100%  ·  Styles 33%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  100%  structure (tree)
+    chain 1/1  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  p
+  Styles  33%  styles (1/1 properties agree across 1 node pair(s))
+    p  font-size: 13px
+  **Fix** — Replace `BannerParagraph` with `CalloutText` from `tests/NOT_duplicates/structure/callout/CalloutText.tsx` — they are the same component.
+
+- **SubscribePanel** — `SubscribePanel` duplicates canonical `NewsletterSignup` — 0.45 (45%) confidence. Use the canonical component instead.
+  scores  Structure 61%  ·  Styles 100%  ·  Behavior 33%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  61%  structure (tree)
+    chain 4/6  ·  quality 96%  ·  CSS agreement 81%  ·  1 CSS conflict(s)
+    matched nodes  form, label, input, button
+  Styles  100%  styles (10/10 properties agree across 2 node pair(s))
+    form  display: flex, flex-direction: column, gap: 8px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px, width: 360px
+    label  font-size: 12px
+  Behavior  33%  1 shared event(s)  (1↔3)
+    shared  submit
+    only canonical  edit, press
+  Framework  0%  0 shared component usage(s)  (2↔2)
+    only local  EmailInput, ActionButton
+    only canonical  SignupField, SubmitControl
+  **Fix** — Replace `SubscribePanel` with `NewsletterSignup` from `tests/NOT_duplicates/behavior/NewsletterSignup.tsx` — they are the same component.
+
+- **BannerShell** — `BannerShell` duplicates canonical `TileFrame` — 0.41 (41%) confidence. Use the canonical component instead.
+  scores  Structure 69%  ·  Styles 88%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  69%  structure (tree)
+    chain 1/1  ·  quality 76%  ·  CSS agreement 78%  ·  1 CSS conflict(s)  ·  class names differ
+    matched nodes  div↔article
+  Styles  88%  styles (7/8 properties agree across 1 node pair(s))
+    div  display: flex, flex-direction: column, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    differ  div gap: 8px ≠ 6px
+  Accessibility  0%  0 shared a11y token(s)  (1↔0)
+    only local  role:alert
+  **Fix** — Replace `BannerShell` with `TileFrame` from `tests/NOT_duplicates/flagship/tiles/TileFrame.tsx` — they are the same component.
+
+## Weak similarity (similar ≤ confidence < duplicate) (38)
 
 | Id | Local component | Location | Canonical | Canonical location | Confidence | Top signal | Fix |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `similar:tests/components/NOT_duplicates/SaveButton.tsx#SaveButton=>tests/components/lib/MiniButton.tsx#MiniButton` | SaveButton | `tests/components/NOT_duplicates/SaveButton.tsx:3` | MiniButton | `tests/components/lib/MiniButton.tsx:3` | 0.27 | Structure | No action needed beyond the note. |
-| `similar:tests/components/duplicates/PaperDup.tsx#PaperDup=>tests/components/lib/Box.tsx#Box` | PaperDup | `tests/components/duplicates/PaperDup.tsx:8` | Box | `tests/components/lib/Box.tsx:3` | 0.24 | Structure | No action needed beyond the note. |
-| `similar:tests/components/duplicates/PaperDup.tsx#PaperDup=>tests/components/lib/Container.tsx#Container` | PaperDup | `tests/components/duplicates/PaperDup.tsx:8` | Container | `tests/components/lib/Container.tsx:3` | 0.24 | Structure | No action needed beyond the note. |
-| `similar:tests/components/NOT_duplicates/GenericBlock.tsx#GenericBlock=>tests/components/lib/Box.tsx#Box` | GenericBlock | `tests/components/NOT_duplicates/GenericBlock.tsx:8` | Box | `tests/components/lib/Box.tsx:3` | 0.24 | Structure | No action needed beyond the note. |
-| `similar:tests/components/NOT_duplicates/GenericBlock.tsx#GenericBlock=>tests/components/lib/Container.tsx#Container` | GenericBlock | `tests/components/NOT_duplicates/GenericBlock.tsx:8` | Container | `tests/components/lib/Container.tsx:3` | 0.24 | Structure | No action needed beyond the note. |
-| `similar:tests/components/duplicates/styled/StyledBadgeDup.tsx#StyledBadgeDup=>tests/components/lib/Badge.tsx#Badge` | StyledBadgeDup | `tests/components/duplicates/styled/StyledBadgeDup.tsx:15` | Badge | `tests/components/lib/Badge.tsx:3` | 0.22 | Structure | No action needed beyond the note. |
-| `similar:tests/components/duplicates/LabResultCard.tsx#LabResultCard=>tests/components/lib/Accordion.tsx#Accordion` | LabResultCard | `tests/components/duplicates/LabResultCard.tsx:3` | Accordion | `tests/components/lib/Accordion.tsx:9` | 0.20 | Structure | No action needed beyond the note. |
-| `similar:tests/components/duplicates/PatientCard.tsx#PatientCard=>tests/components/lib/Accordion.tsx#Accordion` | PatientCard | `tests/components/duplicates/PatientCard.tsx:3` | Accordion | `tests/components/lib/Accordion.tsx:9` | 0.20 | Structure | No action needed beyond the note. |
-| `similar:tests/components/duplicates/VitalsCard.tsx#VitalsCard=>tests/components/lib/Accordion.tsx#Accordion` | VitalsCard | `tests/components/duplicates/VitalsCard.tsx:3` | Accordion | `tests/components/lib/Accordion.tsx:9` | 0.20 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/a11y/RailCollapse.tsx#RailCollapse=>tests/NOT_duplicates/a11y/NavToggle.tsx#NavToggle` | RailCollapse | `tests/duplicates/a11y/RailCollapse.tsx:14` | NavToggle | `tests/NOT_duplicates/a11y/NavToggle.tsx:9` | 0.57 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/behavior/PlaylistPager.tsx#PlaylistPager=>tests/NOT_duplicates/behavior/TransportControls.tsx#TransportControls` | PlaylistPager | `tests/duplicates/behavior/PlaylistPager.tsx:18` | TransportControls | `tests/NOT_duplicates/behavior/TransportControls.tsx:14` | 0.51 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/behavior/ActionButton.tsx#ActionButton=>tests/NOT_duplicates/a11y/PrimaryAction.tsx#PrimaryAction` | ActionButton | `tests/duplicates/behavior/ActionButton.tsx:9` | PrimaryAction | `tests/NOT_duplicates/a11y/PrimaryAction.tsx:8` | 0.41 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/flagship/WorkspaceDashboard.tsx#WorkspaceDashboard=>tests/NOT_duplicates/flagship/ProjectOverview.tsx#ProjectOverview` | WorkspaceDashboard | `tests/duplicates/flagship/WorkspaceDashboard.tsx:36` | ProjectOverview | `tests/NOT_duplicates/flagship/ProjectOverview.tsx:21` | 0.38 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/flagship/DashboardMasthead.tsx#DashboardMasthead=>tests/NOT_duplicates/flagship/header/SearchBox.tsx#SearchBox` | DashboardMasthead | `tests/duplicates/flagship/DashboardMasthead.tsx:31` | SearchBox | `tests/NOT_duplicates/flagship/header/SearchBox.tsx:9` | 0.37 | Styles | No action needed beyond the note. |
+| `similar:tests/duplicates/flagship/WorkspaceDashboard.tsx#WorkspaceDashboard=>tests/NOT_duplicates/flagship/content/OverviewContent.tsx#OverviewContent` | WorkspaceDashboard | `tests/duplicates/flagship/WorkspaceDashboard.tsx:36` | OverviewContent | `tests/NOT_duplicates/flagship/content/OverviewContent.tsx:12` | 0.36 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/flagship/WorkQueue.tsx#WorkQueue=>tests/NOT_duplicates/flagship/content/main/TaskList.tsx#TaskList` | WorkQueue | `tests/duplicates/flagship/WorkQueue.tsx:34` | TaskList | `tests/NOT_duplicates/flagship/content/main/TaskList.tsx:24` | 0.35 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/banner/BannerParagraph.tsx#BannerParagraph=>tests/NOT_duplicates/structure/media/MediaNote.tsx#MediaNote` | BannerParagraph | `tests/duplicates/structure/banner/BannerParagraph.tsx:3` | MediaNote | `tests/NOT_duplicates/structure/media/MediaNote.tsx:3` | 0.31 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/banner/BannerParagraph.tsx#BannerParagraph=>tests/NOT_duplicates/flagship/tiles/TileValue.tsx#TileValue` | BannerParagraph | `tests/duplicates/structure/banner/BannerParagraph.tsx:3` | TileValue | `tests/NOT_duplicates/flagship/tiles/TileValue.tsx:1` | 0.31 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/AuthorCard.tsx#AuthorCard=>tests/NOT_duplicates/flagship/tiles/BlockedTile.tsx#BlockedTile` | AuthorCard | `tests/duplicates/structure/AuthorCard.tsx:16` | BlockedTile | `tests/NOT_duplicates/flagship/tiles/BlockedTile.tsx:7` | 0.31 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/AuthorCard.tsx#AuthorCard=>tests/NOT_duplicates/flagship/tiles/CoverageTile.tsx#CoverageTile` | AuthorCard | `tests/duplicates/structure/AuthorCard.tsx:16` | CoverageTile | `tests/NOT_duplicates/flagship/tiles/CoverageTile.tsx:7` | 0.31 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/a11y/SheetClose.tsx#SheetClose=>tests/NOT_duplicates/a11y/PrimaryAction.tsx#PrimaryAction` | SheetClose | `tests/duplicates/a11y/SheetClose.tsx:8` | PrimaryAction | `tests/NOT_duplicates/a11y/PrimaryAction.tsx:8` | 0.30 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/flow/FilterDrawer.tsx#FilterDrawer=>tests/NOT_duplicates/structure/flow/CollapsibleFilters.tsx#CollapsibleFilters` | FilterDrawer | `tests/duplicates/structure/flow/FilterDrawer.tsx:14` | CollapsibleFilters | `tests/NOT_duplicates/structure/flow/CollapsibleFilters.tsx:9` | 0.29 | Styles | No action needed beyond the note. |
+| `similar:tests/duplicates/a11y/RailCollapse.tsx#RailCollapse=>tests/NOT_duplicates/flagship/header/NotificationBell.tsx#NotificationBell` | RailCollapse | `tests/duplicates/a11y/RailCollapse.tsx:14` | NotificationBell | `tests/NOT_duplicates/flagship/header/NotificationBell.tsx:3` | 0.29 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/a11y/menu/OptionRow.tsx#OptionRow=>tests/NOT_duplicates/behavior/SignupField.tsx#SignupField` | OptionRow | `tests/duplicates/a11y/menu/OptionRow.tsx:9` | SignupField | `tests/NOT_duplicates/behavior/SignupField.tsx:7` | 0.27 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/banner/BannerInner.tsx#BannerInner=>tests/NOT_duplicates/Box.tsx#Box` | BannerInner | `tests/duplicates/structure/banner/BannerInner.tsx:3` | Box | `tests/NOT_duplicates/Box.tsx:3` | 0.26 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/banner/BannerInner.tsx#BannerInner=>tests/NOT_duplicates/Stack.tsx#Stack` | BannerInner | `tests/duplicates/structure/banner/BannerInner.tsx:3` | Stack | `tests/NOT_duplicates/Stack.tsx:3` | 0.26 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/behavior/ActionButton.tsx#ActionButton=>tests/NOT_duplicates/behavior/NewsletterSignup.tsx#NewsletterSignup` | ActionButton | `tests/duplicates/behavior/ActionButton.tsx:9` | NewsletterSignup | `tests/NOT_duplicates/behavior/NewsletterSignup.tsx:15` | 0.25 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/behavior/SubscribePanel.tsx#SubscribePanel=>tests/NOT_duplicates/behavior/SignupField.tsx#SignupField` | SubscribePanel | `tests/duplicates/behavior/SubscribePanel.tsx:16` | SignupField | `tests/NOT_duplicates/behavior/SignupField.tsx:7` | 0.25 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/flagship/DashboardSidebar.tsx#DashboardSidebar=>tests/NOT_duplicates/flagship/content/aside/InviteTeammate.tsx#InviteTeammate` | DashboardSidebar | `tests/duplicates/flagship/DashboardSidebar.tsx:49` | InviteTeammate | `tests/NOT_duplicates/flagship/content/aside/InviteTeammate.tsx:7` | 0.25 | Styles | No action needed beyond the note. |
+| `similar:tests/duplicates/behavior/SubscribePanel.tsx#SubscribePanel=>tests/NOT_duplicates/flagship/content/aside/InviteTeammate.tsx#InviteTeammate` | SubscribePanel | `tests/duplicates/behavior/SubscribePanel.tsx:16` | InviteTeammate | `tests/NOT_duplicates/flagship/content/aside/InviteTeammate.tsx:7` | 0.25 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/flagship/DashboardMasthead.tsx#DashboardMasthead=>tests/NOT_duplicates/flagship/header/NotificationBell.tsx#NotificationBell` | DashboardMasthead | `tests/duplicates/flagship/DashboardMasthead.tsx:31` | NotificationBell | `tests/NOT_duplicates/flagship/header/NotificationBell.tsx:3` | 0.24 | Styles | No action needed beyond the note. |
+| `similar:tests/duplicates/PaperDup.tsx#PaperDup=>tests/NOT_duplicates/Box.tsx#Box` | PaperDup | `tests/duplicates/PaperDup.tsx:8` | Box | `tests/NOT_duplicates/Box.tsx:3` | 0.24 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/PaperDup.tsx#PaperDup=>tests/NOT_duplicates/structure/callout/CalloutBody.tsx#CalloutBody` | PaperDup | `tests/duplicates/PaperDup.tsx:8` | CalloutBody | `tests/NOT_duplicates/structure/callout/CalloutBody.tsx:3` | 0.24 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/banner/BannerShell.tsx#BannerShell=>tests/NOT_duplicates/Container.tsx#Container` | BannerShell | `tests/duplicates/structure/banner/BannerShell.tsx:8` | Container | `tests/NOT_duplicates/Container.tsx:3` | 0.24 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/banner/BannerShell.tsx#BannerShell=>tests/NOT_duplicates/Panel.tsx#Panel` | BannerShell | `tests/duplicates/structure/banner/BannerShell.tsx:8` | Panel | `tests/NOT_duplicates/Panel.tsx:3` | 0.24 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/banner/BannerAccent.tsx#BannerAccent=>tests/NOT_duplicates/structure/callout/CalloutRow.tsx#CalloutRow` | BannerAccent | `tests/duplicates/structure/banner/BannerAccent.tsx:5` | CalloutRow | `tests/NOT_duplicates/structure/callout/CalloutRow.tsx:9` | 0.24 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/banner/BannerLead.tsx#BannerLead=>tests/NOT_duplicates/structure/callout/CalloutGlyph.tsx#CalloutGlyph` | BannerLead | `tests/duplicates/structure/banner/BannerLead.tsx:9` | CalloutGlyph | `tests/NOT_duplicates/structure/callout/CalloutGlyph.tsx:5` | 0.24 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/flagship/WorkQueue.tsx#WorkQueue=>tests/NOT_duplicates/flagship/content/aside/TeamRoster.tsx#TeamRoster` | WorkQueue | `tests/duplicates/flagship/WorkQueue.tsx:34` | TeamRoster | `tests/NOT_duplicates/flagship/content/aside/TeamRoster.tsx:18` | 0.23 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/PrimaryAction.tsx#PrimaryAction=>tests/NOT_duplicates/a11y/NavToggle.tsx#NavToggle` | PrimaryAction | `tests/duplicates/PrimaryAction.tsx:3` | NavToggle | `tests/NOT_duplicates/a11y/NavToggle.tsx:9` | 0.23 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/SecondaryAction.tsx#SecondaryAction=>tests/NOT_duplicates/a11y/NavToggle.tsx#NavToggle` | SecondaryAction | `tests/duplicates/SecondaryAction.tsx:3` | NavToggle | `tests/NOT_duplicates/a11y/NavToggle.tsx:9` | 0.23 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/TertiaryAction.tsx#TertiaryAction=>tests/NOT_duplicates/a11y/NavToggle.tsx#NavToggle` | TertiaryAction | `tests/duplicates/TertiaryAction.tsx:3` | NavToggle | `tests/NOT_duplicates/a11y/NavToggle.tsx:9` | 0.23 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/styled/StyledBadgeDup.tsx#StyledBadgeDup=>tests/NOT_duplicates/Badge.tsx#Badge` | StyledBadgeDup | `tests/duplicates/styled/StyledBadgeDup.tsx:15` | Badge | `tests/NOT_duplicates/Badge.tsx:3` | 0.22 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/behavior/EmailInput.tsx#EmailInput=>tests/NOT_duplicates/a11y/NavToggle.tsx#NavToggle` | EmailInput | `tests/duplicates/behavior/EmailInput.tsx:7` | NavToggle | `tests/NOT_duplicates/a11y/NavToggle.tsx:9` | 0.21 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/structure/banner/AlertBanner.tsx#AlertBanner=>tests/NOT_duplicates/structure/StatCard.tsx#StatCard` | AlertBanner | `tests/duplicates/structure/banner/AlertBanner.tsx:18` | StatCard | `tests/NOT_duplicates/structure/StatCard.tsx:10` | 0.21 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/LabResultCard.tsx#LabResultCard=>tests/NOT_duplicates/Accordion.tsx#Accordion` | LabResultCard | `tests/duplicates/LabResultCard.tsx:3` | Accordion | `tests/NOT_duplicates/Accordion.tsx:9` | 0.20 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/PatientCard.tsx#PatientCard=>tests/NOT_duplicates/Accordion.tsx#Accordion` | PatientCard | `tests/duplicates/PatientCard.tsx:3` | Accordion | `tests/NOT_duplicates/Accordion.tsx:9` | 0.20 | Structure | No action needed beyond the note. |
+| `similar:tests/duplicates/VitalsCard.tsx#VitalsCard=>tests/NOT_duplicates/Accordion.tsx#Accordion` | VitalsCard | `tests/duplicates/VitalsCard.tsx:3` | Accordion | `tests/NOT_duplicates/Accordion.tsx:9` | 0.20 | Structure | No action needed beyond the note. |
 
 ### Why each one matched
 
-- **SaveButton** — `SaveButton` looks like canonical `MiniButton`, but not closely enough to call it a copy — 0.27 (27%).
-  scores  Structure 36%  ·  Styles 33%  ·  Behavior 50%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
-  Structure  36%  structure (tree)
-    chain 1/1  ·  quality 56%  ·  CSS agreement 50%  ·  1 CSS conflict(s)  ·  class names differ
-    matched nodes  button
-  Styles  33%  styles (1/1 properties agree across 1 node pair(s))
-    button  font-size: var(--text-xs)
+- **RailCollapse** — `RailCollapse` looks like canonical `NavToggle`, but not closely enough to call it a copy — 0.57 (57%).
+  scores  Structure 67%  ·  Styles 100%  ·  Behavior 50%  ·  Accessibility 10%  ·  Framework 70%  ·  Name 0%
+  Structure  67%  structure (tree)
+    chain 2/3  ·  quality 100%  ·  CSS agreement 100%
+    matched nodes  div↔button, svg
+  Styles  100%  styles (5/5 properties agree across 1 node pair(s))
+    div  align-items: center, display: inline-flex, height: 36px, justify-content: center, width: 36px
   Behavior  50%  1 shared event(s)  (1↔1)
     shared  click
+  Accessibility  10%  0 shared a11y token(s)  (6↔4)
+    only local  aria-label:collapse sidebar, aria-label:sidebar glyph, aria-pressed:true, role:button, role:img, role:presentation
+    only canonical  aria-controls:primary-nav, aria-expanded:true, aria-hidden:true, aria-label:open navigation menu
+  Framework  70%  1 shared component usage(s)  (1↔1)
+    shared  Menu
+  **Fix** — No action needed beyond the note.
+
+- **PlaylistPager** — `PlaylistPager` looks like canonical `TransportControls`, but not closely enough to call it a copy — 0.51 (51%).
+  scores  Structure 51%  ·  Styles 100%  ·  Behavior 100%  ·  Accessibility 3%  ·  Framework 0%  ·  Name 0%
+  Structure  51%  structure (tree)
+    chain 6/10  ·  quality 91%  ·  CSS agreement 73%  ·  1 CSS conflict(s)  ·  class names differ
+    matched nodes  nav↔div, a↔button, svg, a↔button, svg, select↔input
+  Styles  100%  styles (5/5 properties agree across 3 node pair(s))
+    nav  align-items: center, display: flex, gap: 12px, padding-block: 12px, padding-inline: 16px
+  Behavior  100%  2 shared event(s)  (2↔2)
+    shared  change, click
+  Accessibility  3%  1 shared a11y token(s)  (5↔8)
+    shared  aria-hidden:true
+    only local  aria-label:next page, aria-label:pagination, aria-label:previous page, aria-label:rows per page
+    only canonical  aria-label:next track, aria-label:pause, aria-label:playback, aria-label:previous track, aria-label:seek, aria-pressed:true, role:group
+  Framework  0%  0 shared component usage(s)  (4↔3)
+    only local  Link, ChevronLeft, Link, ChevronRight
+    only canonical  SkipBack, Play, SkipForward
+  **Fix** — No action needed beyond the note.
+
+- **ActionButton** — `ActionButton` looks like canonical `PrimaryAction`, but not closely enough to call it a copy — 0.41 (41%).
+  scores  Structure 46%  ·  Styles 67%  ·  Behavior 50%  ·  Accessibility 25%  ·  Framework 0%  ·  Name 30%
+  Structure  46%  structure (tree)
+    chain 3/3  ·  quality 70%  ·  CSS agreement 30%  ·  4 CSS conflict(s)  ·  class names differ
+    matched nodes  button, svg, span
+  Styles  67%  styles (2/2 properties agree across 2 node pair(s))
+    button  font-size: 13px
+    span  font-size: 13px
+  Behavior  50%  1 shared event(s)  (1↔1)
+    shared  click
+  Accessibility  25%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (1↔0)
+    only local  Loader2
+  Name  30%  ActionButton ↔ PrimaryAction
+    match  word-overlap  ·  word overlap 50%
+  **Fix** — No action needed beyond the note.
+
+- **WorkspaceDashboard** — `WorkspaceDashboard` looks like canonical `ProjectOverview`, but not closely enough to call it a copy — 0.38 (38%).
+  scores  Structure 67%  ·  Styles 76%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  67%  structure (tree)
+    chain 83/118  ·  quality 95%  ·  CSS agreement 75%  ·  class names differ
+    matched nodes  div, header, a, nav, a, form, label, input, button, svg, button, svg, span, img, div, main, section, header, h2, button, …+63 more
+  Styles  76%  styles (41/54 properties agree across 9 node pair(s))
+    div  display: flex, flex-direction: column, min-height: 100vh, flex: 1 1 0%, flex-basis: 0%, flex-grow: 1, gap: 24px, max-width: 1120px, width: 100%, display: grid, gap: 12px, grid-template-columns: repeat(3, minmax(0, 1fr)), padding: 20px, padding-bottom: 20px, padding-left: 20px, padding-right: 20px, padding-top: 20px, align-items: center, gap: 8px, height: 6px, overflow: hidden
+    main  display: flex, flex: 1 1 0%, flex-basis: 0%, flex-direction: column, flex-grow: 1, gap: 24px
+    article  display: flex, flex-direction: column, gap: 8px, padding: 14px, padding-bottom: 14px, padding-left: 14px, padding-right: 14px, padding-top: 14px
+    only local  div margin: 0 auto, div margin-bottom: 0, div margin-left: auto, div margin-right: auto, div margin-top: 0, div padding: 24px, div padding-bottom: 24px, div padding-left: 24px, div padding-right: 24px, div padding-top: 24px
+    only canonical  div margin-inline: auto, div padding-block: 24px, div padding-inline: 24px
+  Behavior  0%  0 shared event(s)  (6↔6)
+    only local  click, email, runsearch, sendinvite, term, toggle
+    only canonical  invite, inviteemailchange, newtask, querychange, search, toggletask
+  Framework  0%  0 shared component usage(s)  (22↔3)
+    only local  Shell, DashboardMasthead, Body, Primary, Panel, PanelHead, PanelTitle, PrimaryAction, MetricTiles, Panel, PanelHead, PanelTitle, CountPill, WorkQueue, Panel, PanelHead, PanelTitle, MutedNote, DeliveryTracks, Secondary, DashboardSidebar, DashboardColophon
+    only canonical  OverviewHeader, OverviewContent, OverviewFooter
+  **Fix** — No action needed beyond the note.
+
+- **DashboardMasthead** — `DashboardMasthead` looks like canonical `SearchBox`, but not closely enough to call it a copy — 0.37 (37%).
+  scores  Structure 0%  ·  Styles 100%  ·  Behavior 100%  ·  Accessibility 36%  ·  Framework 35%  ·  Name 0%
+  Structure  0%  structure (tree)
+    chain 5/14  ·  quality 95%  ·  CSS agreement 85%  ·  class names differ
+    matched nodes  form, label, input, button, svg
+  Styles  100%  styles (8/8 properties agree across 3 node pair(s))
+    form  align-items: center, display: flex, gap: 8px, margin: 0 0 0 auto, margin-bottom: 0, margin-left: auto, margin-right: 0, margin-top: 0
+  Behavior  100%  3 shared event(s)  (3↔3)
+    shared  change, click, submit
+  Accessibility  36%  3 shared a11y token(s)  (6↔3)
+    shared  aria-hidden:true, aria-label:search, role:search
+    only local  aria-current:page, aria-label:main, aria-label:notifications
+  Framework  35%  1 shared component usage(s)  (14↔1)
+    shared  Search
+    passed props  Search: aria-hidden
+    only local  TopBar, Wordmark, NavBar, CurrentNavItem, NavItem, SearchForm, ScreenReaderText, SearchField, IconSubmit, RoundIcon, Bell, UnreadDot, Image
+  **Fix** — No action needed beyond the note.
+
+- **WorkspaceDashboard** — `WorkspaceDashboard` looks like canonical `OverviewContent`, but not closely enough to call it a copy — 0.36 (36%).
+  scores  Structure 62%  ·  Styles 75%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  62%  structure (tree)
+    chain 64/99  ·  quality 95%  ·  CSS agreement 75%  ·  class names differ
+    matched nodes  div, main, section, header, h2, button, div, article, header, h3, p, span, section, header, h2, span, ul, li, input, div, …+44 more
+  Styles  75%  styles (38/51 properties agree across 8 node pair(s))
+    div  display: flex, flex: 1 1 0%, flex-basis: 0%, flex-grow: 1, gap: 24px, max-width: 1120px, width: 100%, display: grid, gap: 12px, grid-template-columns: repeat(3, minmax(0, 1fr)), padding: 20px, padding-bottom: 20px, padding-left: 20px, padding-right: 20px, padding-top: 20px, align-items: center, gap: 8px, height: 6px, overflow: hidden
+    main  display: flex, flex: 1 1 0%, flex-basis: 0%, flex-direction: column, flex-grow: 1, gap: 24px
+    article  display: flex, flex-direction: column, gap: 8px, padding: 14px, padding-bottom: 14px, padding-left: 14px, padding-right: 14px, padding-top: 14px
+    only local  div margin: 0 auto, div margin-bottom: 0, div margin-left: auto, div margin-right: auto, div margin-top: 0, div padding: 24px, div padding-bottom: 24px, div padding-left: 24px, div padding-right: 24px, div padding-top: 24px
+    only canonical  div margin-inline: auto, div padding-block: 24px, div padding-inline: 24px
+  Behavior  0%  0 shared event(s)  (6↔4)
+    only local  click, email, runsearch, sendinvite, term, toggle
+    only canonical  invite, inviteemailchange, newtask, toggletask
+  Framework  0%  0 shared component usage(s)  (22↔2)
+    only local  Shell, DashboardMasthead, Body, Primary, Panel, PanelHead, PanelTitle, PrimaryAction, MetricTiles, Panel, PanelHead, PanelTitle, CountPill, WorkQueue, Panel, PanelHead, PanelTitle, MutedNote, DeliveryTracks, Secondary, DashboardSidebar, DashboardColophon
+    only canonical  OverviewMain, OverviewAside
+  **Fix** — No action needed beyond the note.
+
+- **WorkQueue** — `WorkQueue` looks like canonical `TaskList`, but not closely enough to call it a copy — 0.35 (35%).
+  scores  Structure 59%  ·  Styles 75%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  59%  structure (tree)
+    chain 8/12  ·  quality 88%  ·  CSS agreement 56%  ·  class names differ
+    matched nodes  ul, li, input, div, span, span, span, span
+  Styles  75%  styles (21/28 properties agree across 4 node pair(s))
+    ul  display: flex, flex-direction: column, margin: 0, margin-bottom: 0, margin-left: 0, margin-right: 0, margin-top: 0, padding: 0, padding-bottom: 0, padding-left: 0, padding-right: 0, padding-top: 0
+    li  align-items: center, display: flex, gap: 12px
+    div  display: flex, flex: 1 1 0%, flex-basis: 0%, flex-direction: column, flex-grow: 1
+    span  font-size: 13px
+    only local  li padding: 12px 20px, li padding-bottom: 12px, li padding-left: 20px, li padding-right: 20px, li padding-top: 12px
+    only canonical  li padding-block: 12px, li padding-inline: 20px
+  Behavior  0%  0 shared event(s)  (1↔1)
+    only local  change
+    only canonical  toggletask
+  Accessibility  0%  0 shared a11y token(s)  (1↔0)
+    only local  aria-label:mark 
+  Framework  0%  0 shared component usage(s)  (8↔1)
+    only local  RowList, Row, RowCheck, RowMain, RowTitle, RowMeta, OutlinePill, StatusPill
+    only canonical  TaskRow
+  **Fix** — No action needed beyond the note.
+
+- **BannerParagraph** — `BannerParagraph` looks like canonical `MediaNote`, but not closely enough to call it a copy — 0.31 (31%).
+  scores  Structure 79%  ·  Styles 0%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  79%  structure (tree)
+    chain 1/1  ·  quality 89%  ·  CSS agreement 71%  ·  1 CSS conflict(s)  ·  class names differ
+    matched nodes  p
+  Styles  0%  styles (0/1 properties agree across 1 node pair(s))
+    differ  p font-size: 13px ≠ 12px
+  **Fix** — No action needed beyond the note.
+
+- **BannerParagraph** — `BannerParagraph` looks like canonical `TileValue`, but not closely enough to call it a copy — 0.31 (31%).
+  scores  Structure 79%  ·  Styles 0%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  79%  structure (tree)
+    chain 1/1  ·  quality 89%  ·  CSS agreement 71%  ·  1 CSS conflict(s)  ·  class names differ
+    matched nodes  p
+  Styles  0%  styles (0/1 properties agree across 1 node pair(s))
+    differ  p font-size: 13px ≠ 24px
+  **Fix** — No action needed beyond the note.
+
+- **AuthorCard** — `AuthorCard` looks like canonical `BlockedTile`, but not closely enough to call it a copy — 0.31 (31%).
+  scores  Structure 49%  ·  Styles 80%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  49%  structure (tree)
+    chain 3/5  ·  quality 91%  ·  CSS agreement 78%  ·  2 CSS conflict(s)  ·  class names differ
+    matched nodes  article, h3, p
+  Styles  80%  styles (8/10 properties agree across 2 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    differ  p font-size: 12px ≠ 24px
+    only local  article width: 220px
+  Accessibility  0%  0 shared a11y token(s)  (0↔1)
+    only canonical  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (2↔4)
+    only local  Image, Link
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  **Fix** — No action needed beyond the note.
+
+- **AuthorCard** — `AuthorCard` looks like canonical `CoverageTile`, but not closely enough to call it a copy — 0.31 (31%).
+  scores  Structure 49%  ·  Styles 80%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  49%  structure (tree)
+    chain 3/5  ·  quality 91%  ·  CSS agreement 78%  ·  2 CSS conflict(s)  ·  class names differ
+    matched nodes  article, h3, p
+  Styles  80%  styles (8/10 properties agree across 2 node pair(s))
+    article  display: flex, flex-direction: column, gap: 6px, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    differ  p font-size: 12px ≠ 24px
+    only local  article width: 220px
+  Accessibility  0%  0 shared a11y token(s)  (0↔1)
+    only canonical  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (2↔4)
+    only local  Image, Link
+    only canonical  TileFrame, TileHeading, TileValue, TileDelta
+  **Fix** — No action needed beyond the note.
+
+- **SheetClose** — `SheetClose` looks like canonical `PrimaryAction`, but not closely enough to call it a copy — 0.30 (30%).
+  scores  Structure 49%  ·  Styles 0%  ·  Behavior 50%  ·  Accessibility 25%  ·  Framework 0%  ·  Name 0%
+  Structure  49%  structure (tree)
+    chain 2/3  ·  quality 73%  ·  CSS agreement 12%  ·  class names differ
+    matched nodes  button, svg
+  Styles  0%  styles (0/14 properties agree across 2 node pair(s))
+    only local  button padding: 6px, button padding-bottom: 6px, button padding-left: 6px, button padding-right: 6px, button padding-top: 6px, button position: absolute, button right: 12px, button top: 12px
+    only canonical  button align-items: center, button display: inline-flex, button font-size: 13px, button gap: 8px, button padding-block: 8px, button padding-inline: 16px
+  Behavior  50%  1 shared event(s)  (1↔1)
+    shared  click
+  Accessibility  25%  1 shared a11y token(s)  (1↔1)
+    shared  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (1↔0)
+    only local  X
+  **Fix** — No action needed beyond the note.
+
+- **FilterDrawer** — `FilterDrawer` looks like canonical `CollapsibleFilters`, but not closely enough to call it a copy — 0.29 (30%).
+  scores  Structure 0%  ·  Styles 100%  ·  Behavior 50%  ·  Accessibility 50%  ·  Framework 0%  ·  Name 20%
+  Structure  0%  structure (tree)
+    chain 6/14  ·  quality 98%  ·  CSS agreement 93%  ·  class names differ
+    matched nodes  div, label, input, label, input, button
+  Styles  100%  styles (15/15 properties agree across 4 node pair(s))
+    div  padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px, display: flex, flex-direction: column, gap: 8px, margin: 12px 0 0, margin-bottom: 0, margin-left: 0, margin-right: 0, margin-top: 12px
+    label  font-size: 13px
+    input  font-size: 13px
+  Behavior  50%  1 shared event(s)  (1↔1)
+    shared  click
+  Accessibility  50%  1 shared a11y token(s)  (3↔1)
+    shared  aria-expanded:true
+    only local  aria-label:product filters, role:region
+  Name  20%  FilterDrawer ↔ CollapsibleFilters
+    match  word-overlap  ·  word overlap 33%
+  **Fix** — No action needed beyond the note.
+
+- **RailCollapse** — `RailCollapse` looks like canonical `NotificationBell`, but not closely enough to call it a copy — 0.29 (29%).
+  scores  Structure 34%  ·  Styles 45%  ·  Behavior 50%  ·  Accessibility 10%  ·  Framework 0%  ·  Name 0%
+  Structure  34%  structure (tree)
+    chain 2/3  ·  quality 77%  ·  CSS agreement 50%  ·  2 CSS conflict(s)  ·  class names differ
+    matched nodes  div↔button, svg
+  Styles  45%  styles (5/11 properties agree across 2 node pair(s))
+    div  align-items: center, display: inline-flex, height: 36px, justify-content: center, width: 36px
+    only canonical  div position: relative, span height: 8px, span position: absolute, span right: 6px, span top: 6px, span width: 8px
+  Behavior  50%  1 shared event(s)  (1↔1)
+    shared  click
+  Accessibility  10%  0 shared a11y token(s)  (6↔2)
+    only local  aria-label:collapse sidebar, aria-label:sidebar glyph, aria-pressed:true, role:button, role:img, role:presentation
+    only canonical  aria-hidden:true, aria-label:notifications
+  Framework  0%  0 shared component usage(s)  (1↔1)
+    only local  Menu
+    only canonical  Bell
+  **Fix** — No action needed beyond the note.
+
+- **OptionRow** — `OptionRow` looks like canonical `SignupField`, but not closely enough to call it a copy — 0.27 (27%).
+  scores  Structure 36%  ·  Styles 33%  ·  Behavior 50%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  36%  structure (tree)
+    chain 1/2  ·  quality 71%  ·  CSS agreement 29%  ·  class names differ
+    matched nodes  button↔input
+  Styles  33%  styles (1/1 properties agree across 1 node pair(s))
+    button  font-size: 13px
+  Behavior  50%  1 shared event(s)  (1↔2)
+    shared  click
+    only canonical  change
+  Accessibility  0%  0 shared a11y token(s)  (2↔0)
+    only local  role:menuitem, role:none
+  **Fix** — No action needed beyond the note.
+
+- **BannerInner** — `BannerInner` looks like canonical `Box`, but not closely enough to call it a copy — 0.26 (26%).
+  scores  Structure 51%  ·  Styles 33%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  51%  structure (tree)
+    chain 1/1  ·  quality 71%  ·  CSS agreement 29%  ·  1 CSS conflict(s)  ·  class names differ
+    matched nodes  div
+  Styles  33%  styles (2/6 properties agree across 1 node pair(s))
+    div  display: flex, flex-direction: column
+    differ  div gap: 2px ≠ calc(var(--spacing) * 2)
+    only local  div flex: 1 1 0%, div flex-basis: 0%, div flex-grow: 1
+  **Fix** — No action needed beyond the note.
+
+- **BannerInner** — `BannerInner` looks like canonical `Stack`, but not closely enough to call it a copy — 0.26 (26%).
+  scores  Structure 51%  ·  Styles 33%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  51%  structure (tree)
+    chain 1/1  ·  quality 71%  ·  CSS agreement 29%  ·  1 CSS conflict(s)  ·  class names differ
+    matched nodes  div
+  Styles  33%  styles (2/6 properties agree across 1 node pair(s))
+    div  display: flex, flex-direction: column
+    differ  div gap: 2px ≠ calc(var(--spacing) * 3)
+    only local  div flex: 1 1 0%, div flex-basis: 0%, div flex-grow: 1
+  **Fix** — No action needed beyond the note.
+
+- **ActionButton** — `ActionButton` looks like canonical `NewsletterSignup`, but not closely enough to call it a copy — 0.25 (25%).
+  scores  Structure 50%  ·  Styles 33%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  50%  structure (tree)
+    chain 3/6  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  button, svg, span
+  Styles  33%  styles (1/1 properties agree across 2 node pair(s))
+    button  font-size: 13px
+  Behavior  0%  0 shared event(s)  (1↔3)
+    only local  click
+    only canonical  edit, press, submit
+  Accessibility  0%  0 shared a11y token(s)  (1↔0)
+    only local  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (1↔2)
+    only local  Loader2
+    only canonical  SignupField, SubmitControl
+  **Fix** — No action needed beyond the note.
+
+- **SubscribePanel** — `SubscribePanel` looks like canonical `SignupField`, but not closely enough to call it a copy — 0.25 (25%).
+  scores  Structure 50%  ·  Styles 33%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  50%  structure (tree)
+    chain 2/4  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  label, input
+  Styles  33%  styles (1/1 properties agree across 1 node pair(s))
+    label  font-size: 12px
+  Behavior  0%  0 shared event(s)  (1↔2)
+    only local  submit
+    only canonical  change, click
+  Framework  0%  0 shared component usage(s)  (2↔0)
+    only local  EmailInput, ActionButton
+  **Fix** — No action needed beyond the note.
+
+- **DashboardSidebar** — `DashboardSidebar` looks like canonical `InviteTeammate`, but not closely enough to call it a copy — 0.25 (25%).
+  scores  Structure 0%  ·  Styles 100%  ·  Behavior 67%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  0%  structure (tree)
+    chain 6/23  ·  quality 91%  ·  CSS agreement 64%  ·  class names differ
+    matched nodes  section, h2, form, label, input, button
+  Styles  100%  styles (14/14 properties agree across 3 node pair(s))
+    section  padding: 20px, padding-bottom: 20px, padding-left: 20px, padding-right: 20px, padding-top: 20px
+    form  display: flex, flex-direction: column, gap: 8px, margin: 12px 0 0, margin-bottom: 0, margin-left: 0, margin-right: 0, margin-top: 12px
+    label  font-size: 12px
+  Behavior  67%  2 shared event(s)  (2↔3)
+    shared  change, submit
+    only canonical  click
+  Accessibility  0%  0 shared a11y token(s)  (1↔0)
+    only local  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (23↔0)
+    only local  PaddedPanel, PanelTitle, InviteForm, FieldLabel, TextField, DarkAction, PaddedPanel, PanelTitle, Feed, FeedRow, Icon, FeedMain, FeedText, TinyMuted, PaddedPanel, PanelTitle, Roster, RosterRow, Image, RowMain, RosterName, TinyMuted, TinyLink
+  **Fix** — No action needed beyond the note.
+
+- **SubscribePanel** — `SubscribePanel` looks like canonical `InviteTeammate`, but not closely enough to call it a copy — 0.25 (25%).
+  scores  Structure 40%  ·  Styles 27%  ·  Behavior 33%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  40%  structure (tree)
+    chain 3/6  ·  quality 80%  ·  CSS agreement 39%  ·  class names differ
+    matched nodes  form, label, input
+  Styles  27%  styles (4/15 properties agree across 2 node pair(s))
+    form  display: flex, flex-direction: column, gap: 8px
+    input  font-size: 13px
+    only local  form padding: 16px, form padding-bottom: 16px, form padding-left: 16px, form padding-right: 16px, form padding-top: 16px, form width: 360px
+    only canonical  form margin: 12px 0 0, form margin-bottom: 0, form margin-left: 0, form margin-right: 0, form margin-top: 12px
+  Behavior  33%  1 shared event(s)  (1↔3)
+    shared  submit
+    only canonical  change, click
+  Framework  0%  0 shared component usage(s)  (2↔0)
+    only local  EmailInput, ActionButton
+  **Fix** — No action needed beyond the note.
+
+- **DashboardMasthead** — `DashboardMasthead` looks like canonical `NotificationBell`, but not closely enough to call it a copy — 0.24 (24%).
+  scores  Structure 0%  ·  Styles 100%  ·  Behavior 33%  ·  Accessibility 9%  ·  Framework 35%  ·  Name 0%
+  Structure  0%  structure (tree)
+    chain 3/14  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  button, svg, span
+  Styles  100%  styles (6/6 properties agree across 2 node pair(s))
+    button  align-items: center, display: inline-flex, height: 36px, justify-content: center, position: relative, width: 36px
+  Behavior  33%  1 shared event(s)  (3↔1)
+    shared  click
+    only local  change, submit
+  Accessibility  9%  2 shared a11y token(s)  (6↔2)
+    shared  aria-hidden:true, aria-label:notifications
+    only local  aria-current:page, aria-label:main, aria-label:search, role:search
+  Framework  35%  1 shared component usage(s)  (14↔1)
+    shared  Bell
+    passed props  Bell: aria-hidden
+    only local  TopBar, Wordmark, NavBar, CurrentNavItem, NavItem, SearchForm, ScreenReaderText, SearchField, IconSubmit, Search, RoundIcon, UnreadDot, Image
   **Fix** — No action needed beyond the note.
 
 - **PaperDup** — `PaperDup` looks like canonical `Box`, but not closely enough to call it a copy — 0.24 (24%).
@@ -142,37 +1028,127 @@ Found 8 duplicate component(s) and 9 similar component(s), plus 15 component(s) 
     only canonical  div display: flex, div flex-direction: column, div gap: calc(var(--spacing) * 2)
   **Fix** — No action needed beyond the note.
 
-- **PaperDup** — `PaperDup` looks like canonical `Container`, but not closely enough to call it a copy — 0.24 (24%).
-  scores  Structure 60%  ·  Styles 0%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
-  Structure  60%  structure (tree)
-    chain 1/1  ·  quality 60%  ·  CSS agreement 0%  ·  class names differ
-    matched nodes  div
-  Styles  0%  styles (0/2 properties agree across 1 node pair(s))
-    only canonical  div margin-inline: auto, div max-width: var(--container-2xl)
-  **Fix** — No action needed beyond the note.
-
-- **GenericBlock** — `GenericBlock` looks like canonical `Box`, but not closely enough to call it a copy — 0.24 (24%).
+- **PaperDup** — `PaperDup` looks like canonical `CalloutBody`, but not closely enough to call it a copy — 0.24 (24%).
   scores  Structure 60%  ·  Styles 0%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
   Structure  60%  structure (tree)
     chain 1/1  ·  quality 60%  ·  CSS agreement 0%  ·  class names differ
     matched nodes  div
   Styles  0%  styles (0/6 properties agree across 1 node pair(s))
-    only local  div padding: 0 0 calc(var(--spacing) * 2) calc(var(--spacing) * 4), div padding-bottom: calc(var(--spacing) * 2), div padding-left: calc(var(--spacing) * 4)
-    only canonical  div display: flex, div flex-direction: column, div gap: calc(var(--spacing) * 2)
-  Behavior  0%  0 shared event(s)  (1↔0)
-    only local  click
+    only canonical  div display: flex, div flex: 1 1 0%, div flex-basis: 0%, div flex-direction: column, div flex-grow: 1, div gap: 2px
   **Fix** — No action needed beyond the note.
 
-- **GenericBlock** — `GenericBlock` looks like canonical `Container`, but not closely enough to call it a copy — 0.24 (24%).
+- **BannerShell** — `BannerShell` looks like canonical `Container`, but not closely enough to call it a copy — 0.24 (24%).
   scores  Structure 60%  ·  Styles 0%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
   Structure  60%  structure (tree)
     chain 1/1  ·  quality 60%  ·  CSS agreement 0%  ·  class names differ
     matched nodes  div
-  Styles  0%  styles (0/5 properties agree across 1 node pair(s))
-    only local  div padding: 0 0 calc(var(--spacing) * 2) calc(var(--spacing) * 4), div padding-bottom: calc(var(--spacing) * 2), div padding-left: calc(var(--spacing) * 4)
+  Styles  0%  styles (0/10 properties agree across 1 node pair(s))
+    only local  div display: flex, div flex-direction: column, div gap: 8px, div padding: 16px, div padding-bottom: 16px, div padding-left: 16px, div padding-right: 16px, div padding-top: 16px
     only canonical  div margin-inline: auto, div max-width: var(--container-2xl)
+  Accessibility  0%  0 shared a11y token(s)  (1↔0)
+    only local  role:alert
+  **Fix** — No action needed beyond the note.
+
+- **BannerShell** — `BannerShell` looks like canonical `Panel`, but not closely enough to call it a copy — 0.24 (24%).
+  scores  Structure 60%  ·  Styles 0%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  60%  structure (tree)
+    chain 1/1  ·  quality 60%  ·  CSS agreement 0%  ·  class names differ
+    matched nodes  div
+  Styles  0%  styles (0/8 properties agree across 1 node pair(s))
+    only local  div display: flex, div flex-direction: column, div gap: 8px, div padding: 16px, div padding-bottom: 16px, div padding-left: 16px, div padding-right: 16px, div padding-top: 16px
+  Accessibility  0%  0 shared a11y token(s)  (1↔0)
+    only local  role:alert
+  **Fix** — No action needed beyond the note.
+
+- **BannerAccent** — `BannerAccent` looks like canonical `CalloutRow`, but not closely enough to call it a copy — 0.24 (24%).
+  scores  Structure 50%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  50%  structure (tree)
+    chain 1/2  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  svg
+  Accessibility  0%  0 shared a11y token(s)  (1↔0)
+    only local  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (1↔1)
+    only local  Info
+    only canonical  CalloutGlyph
+  **Fix** — No action needed beyond the note.
+
+- **BannerLead** — `BannerLead` looks like canonical `CalloutGlyph`, but not closely enough to call it a copy — 0.24 (24%).
+  scores  Structure 50%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  50%  structure (tree)
+    chain 1/2  ·  quality 100%  ·  CSS agreement 100%  ·  class names differ
+    matched nodes  svg
+  Accessibility  0%  0 shared a11y token(s)  (0↔1)
+    only canonical  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (1↔1)
+    only local  BannerAccent
+    only canonical  Info
+  **Fix** — No action needed beyond the note.
+
+- **WorkQueue** — `WorkQueue` looks like canonical `TeamRoster`, but not closely enough to call it a copy — 0.23 (23%).
+  scores  Structure 32%  ·  Styles 67%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  32%  structure (tree)
+    chain 5/9  ·  quality 77%  ·  CSS agreement 56%  ·  4 CSS conflict(s)  ·  class names differ
+    matched nodes  ul, li, div, span, span
+  Styles  67%  styles (18/27 properties agree across 4 node pair(s))
+    ul  display: flex, flex-direction: column, margin-bottom: 0, margin-left: 0, margin-right: 0, padding: 0, padding-bottom: 0, padding-left: 0, padding-right: 0, padding-top: 0
+    li  align-items: center, display: flex
+    div  display: flex, flex: 1 1 0%, flex-basis: 0%, flex-direction: column, flex-grow: 1
+    span  font-size: 11px
+    differ  ul margin: 0 ≠ 12px 0 0, ul margin-top: 0 ≠ 12px, li gap: 12px ≠ 10px
+    only local  li padding: 12px 20px, li padding-bottom: 12px, li padding-left: 20px, li padding-right: 20px, li padding-top: 12px
+    only canonical  ul gap: 10px
   Behavior  0%  0 shared event(s)  (1↔0)
-    only local  click
+    only local  change
+  Accessibility  0%  0 shared a11y token(s)  (1↔0)
+    only local  aria-label:mark 
+  Framework  0%  0 shared component usage(s)  (8↔1)
+    only local  RowList, Row, RowCheck, RowMain, RowTitle, RowMeta, OutlinePill, StatusPill
+    only canonical  TeamMember
+  **Fix** — No action needed beyond the note.
+
+- **PrimaryAction** — `PrimaryAction` looks like canonical `NavToggle`, but not closely enough to call it a copy — 0.23 (23%).
+  scores  Structure 38%  ·  Styles 0%  ·  Behavior 50%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  38%  structure (tree)
+    chain 1/2  ·  quality 75%  ·  CSS agreement 38%  ·  class names differ
+    matched nodes  button
+  Styles  0%  styles (0/1 properties agree across 1 node pair(s))
+    only local  button font-size: var(--text-sm)
+  Behavior  50%  1 shared event(s)  (1↔1)
+    shared  click
+  Accessibility  0%  0 shared a11y token(s)  (0↔4)
+    only canonical  aria-controls:primary-nav, aria-expanded:true, aria-hidden:true, aria-label:open navigation menu
+  Framework  0%  0 shared component usage(s)  (0↔1)
+    only canonical  Menu
+  **Fix** — No action needed beyond the note.
+
+- **SecondaryAction** — `SecondaryAction` looks like canonical `NavToggle`, but not closely enough to call it a copy — 0.23 (23%).
+  scores  Structure 38%  ·  Styles 0%  ·  Behavior 50%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  38%  structure (tree)
+    chain 1/2  ·  quality 75%  ·  CSS agreement 38%  ·  class names differ
+    matched nodes  button
+  Styles  0%  styles (0/1 properties agree across 1 node pair(s))
+    only local  button font-size: var(--text-sm)
+  Behavior  50%  1 shared event(s)  (1↔1)
+    shared  click
+  Accessibility  0%  0 shared a11y token(s)  (0↔4)
+    only canonical  aria-controls:primary-nav, aria-expanded:true, aria-hidden:true, aria-label:open navigation menu
+  Framework  0%  0 shared component usage(s)  (0↔1)
+    only canonical  Menu
+  **Fix** — No action needed beyond the note.
+
+- **TertiaryAction** — `TertiaryAction` looks like canonical `NavToggle`, but not closely enough to call it a copy — 0.23 (23%).
+  scores  Structure 38%  ·  Styles 0%  ·  Behavior 50%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  38%  structure (tree)
+    chain 1/2  ·  quality 75%  ·  CSS agreement 38%  ·  class names differ
+    matched nodes  button
+  Styles  0%  styles (0/1 properties agree across 1 node pair(s))
+    only local  button font-size: var(--text-sm)
+  Behavior  50%  1 shared event(s)  (1↔1)
+    shared  click
+  Accessibility  0%  0 shared a11y token(s)  (0↔4)
+    only canonical  aria-controls:primary-nav, aria-expanded:true, aria-hidden:true, aria-label:open navigation menu
+  Framework  0%  0 shared component usage(s)  (0↔1)
+    only canonical  Menu
   **Fix** — No action needed beyond the note.
 
 - **StyledBadgeDup** — `StyledBadgeDup` looks like canonical `Badge`, but not closely enough to call it a copy — 0.22 (22%).
@@ -186,6 +1162,38 @@ Found 8 duplicate component(s) and 9 similar component(s), plus 15 component(s) 
     only local  Pill
   Name  35%  StyledBadgeDup ↔ Badge
     match  fuzzy-name  ·  word overlap 0%
+  **Fix** — No action needed beyond the note.
+
+- **EmailInput** — `EmailInput` looks like canonical `NavToggle`, but not closely enough to call it a copy — 0.21 (21%).
+  scores  Structure 33%  ·  Styles 0%  ·  Behavior 50%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  33%  structure (tree)
+    chain 1/2  ·  quality 66%  ·  CSS agreement 14%  ·  class names differ
+    matched nodes  input↔button
+  Styles  0%  styles (0/1 properties agree across 1 node pair(s))
+    only local  input font-size: 13px
+  Behavior  50%  1 shared event(s)  (2↔1)
+    shared  click
+    only local  change
+  Accessibility  0%  0 shared a11y token(s)  (0↔4)
+    only canonical  aria-controls:primary-nav, aria-expanded:true, aria-hidden:true, aria-label:open navigation menu
+  Framework  0%  0 shared component usage(s)  (0↔1)
+    only canonical  Menu
+  **Fix** — No action needed beyond the note.
+
+- **AlertBanner** — `AlertBanner` looks like canonical `StatCard`, but not closely enough to call it a copy — 0.21 (21%).
+  scores  Structure 27%  ·  Styles 67%  ·  Behavior 0%  ·  Accessibility 0%  ·  Framework 0%  ·  Name 0%
+  Structure  27%  structure (tree)
+    chain 4/6  ·  quality 68%  ·  CSS agreement 43%  ·  6 CSS conflict(s)  ·  class names differ
+    matched nodes  div↔article, div↔header, svg, p
+  Styles  67%  styles (8/12 properties agree across 3 node pair(s))
+    div  display: flex, flex-direction: column, padding: 16px, padding-bottom: 16px, padding-left: 16px, padding-right: 16px, padding-top: 16px
+    differ  div gap: 8px ≠ 6px, div align-items: flex-start ≠ center, div gap: 10px ≠ 6px
+    only canonical  div width: 220px
+  Accessibility  0%  0 shared a11y token(s)  (0↔1)
+    only canonical  aria-hidden:true
+  Framework  0%  0 shared component usage(s)  (6↔1)
+    only local  BannerShell, BannerLead, BannerInner, BannerCopy, BannerHeadline, BannerParagraph
+    only canonical  TrendingUp
   **Fix** — No action needed beyond the note.
 
 - **LabResultCard** — `LabResultCard` looks like canonical `Accordion`, but not closely enough to call it a copy — 0.20 (20%).
@@ -236,7 +1244,7 @@ Found 8 duplicate component(s) and 9 similar component(s), plus 15 component(s) 
     only canonical  aria-controls:panel-, aria-expanded:true, aria-hidden:true, role:region
   **Fix** — No action needed beyond the note.
 
-## Potentially missing component (5)
+## Potentially missing component (13)
 
 Several distinct components all matched the same canonical. The codebase is missing a shared component that would unify them — not that any single one is a duplicate.
 
@@ -246,9 +1254,9 @@ Several distinct components all matched the same canonical. The codebase is miss
 
 | Component | Location | Confidence |
 | --- | --- | --- |
-| PrimaryAction | `tests/components/duplicates/PrimaryAction.tsx:3` | 0.52 |
-| SecondaryAction | `tests/components/duplicates/SecondaryAction.tsx:3` | 0.52 |
-| TertiaryAction | `tests/components/duplicates/TertiaryAction.tsx:3` | 0.52 |
+| PrimaryAction | `tests/duplicates/PrimaryAction.tsx:3` | 0.52 |
+| SecondaryAction | `tests/duplicates/SecondaryAction.tsx:3` | 0.52 |
+| TertiaryAction | `tests/duplicates/TertiaryAction.tsx:3` | 0.52 |
 
 **Fix** — Extract a shared component for this group and have all 3 use it.
 
@@ -258,9 +1266,9 @@ Several distinct components all matched the same canonical. The codebase is miss
 
 | Component | Location | Confidence |
 | --- | --- | --- |
-| FullModalDup | `tests/components/duplicates/FullModalDup.tsx:10` | 0.77 |
-| TailwindModalDup | `tests/components/duplicates/TailwindModalDup.tsx:10` | 0.77 |
-| RawModalLike | `tests/components/duplicates/raw/RawModalLike.tsx:8` | 0.63 |
+| FullModalDup | `tests/duplicates/FullModalDup.tsx:10` | 0.77 |
+| TailwindModalDup | `tests/duplicates/TailwindModalDup.tsx:10` | 0.77 |
+| RawModalLike | `tests/duplicates/raw/RawModalLike.tsx:8` | 0.63 |
 
 **Fix** — Extract a shared component for this group and have all 3 use it.
 
@@ -270,9 +1278,9 @@ Several distinct components all matched the same canonical. The codebase is miss
 
 | Component | Location | Confidence |
 | --- | --- | --- |
-| FullModalDup | `tests/components/duplicates/FullModalDup.tsx:10` | 0.57 |
-| TailwindModalDup | `tests/components/duplicates/TailwindModalDup.tsx:10` | 0.57 |
-| RawModalLike | `tests/components/duplicates/raw/RawModalLike.tsx:8` | 0.45 |
+| FullModalDup | `tests/duplicates/FullModalDup.tsx:10` | 0.57 |
+| TailwindModalDup | `tests/duplicates/TailwindModalDup.tsx:10` | 0.57 |
+| RawModalLike | `tests/duplicates/raw/RawModalLike.tsx:8` | 0.45 |
 
 **Fix** — Extract a shared component for this group and have all 3 use it.
 
@@ -282,9 +1290,9 @@ Several distinct components all matched the same canonical. The codebase is miss
 
 | Component | Location | Confidence |
 | --- | --- | --- |
-| LabResultCard | `tests/components/duplicates/LabResultCard.tsx:3` | 0.55 |
-| PatientCard | `tests/components/duplicates/PatientCard.tsx:3` | 0.55 |
-| VitalsCard | `tests/components/duplicates/VitalsCard.tsx:3` | 0.55 |
+| LabResultCard | `tests/duplicates/LabResultCard.tsx:3` | 0.55 |
+| PatientCard | `tests/duplicates/PatientCard.tsx:3` | 0.55 |
+| VitalsCard | `tests/duplicates/VitalsCard.tsx:3` | 0.55 |
 
 **Fix** — Extract a shared component for this group and have all 3 use it.
 
@@ -294,8 +1302,98 @@ Several distinct components all matched the same canonical. The codebase is miss
 
 | Component | Location | Confidence |
 | --- | --- | --- |
-| LabOrderPanel | `tests/components/duplicates/LabOrderPanel.tsx:3` | 0.60 |
-| PatientSummaryPanel | `tests/components/duplicates/PatientSummaryPanel.tsx:3` | 0.60 |
-| VitalsTrendPanel | `tests/components/duplicates/VitalsTrendPanel.tsx:3` | 0.60 |
+| LabOrderPanel | `tests/duplicates/LabOrderPanel.tsx:3` | 0.60 |
+| PatientSummaryPanel | `tests/duplicates/PatientSummaryPanel.tsx:3` | 0.60 |
+| VitalsTrendPanel | `tests/duplicates/VitalsTrendPanel.tsx:3` | 0.60 |
 
 **Fix** — Extract a shared component for this group and have all 3 use it.
+
+### SharedMenuEntry
+
+3 distinct components all matched canonical `MenuEntry`. A shared component is likely missing — weakest link 0.25.
+
+| Component | Location | Confidence |
+| --- | --- | --- |
+| OptionRow | `tests/duplicates/a11y/menu/OptionRow.tsx:9` | 0.54 |
+| OptionList | `tests/duplicates/a11y/menu/OptionList.tsx:9` | 0.37 |
+| ProfileDropdown | `tests/duplicates/a11y/menu/ProfileDropdown.tsx:14` | 0.25 |
+
+**Fix** — Extract a shared component for this group and have all 3 use it.
+
+### SharedMenuList
+
+3 distinct components all matched canonical `MenuList`. A shared component is likely missing — weakest link 0.37.
+
+| Component | Location | Confidence |
+| --- | --- | --- |
+| OptionList | `tests/duplicates/a11y/menu/OptionList.tsx:9` | 0.65 |
+| ProfileDropdown | `tests/duplicates/a11y/menu/ProfileDropdown.tsx:14` | 0.45 |
+| OptionRow | `tests/duplicates/a11y/menu/OptionRow.tsx:9` | 0.37 |
+
+**Fix** — Extract a shared component for this group and have all 3 use it.
+
+### ActionSubmitControl
+
+2 distinct components all matched canonical `SubmitControl`. A shared component is likely missing — weakest link 0.34.
+
+| Component | Location | Confidence |
+| --- | --- | --- |
+| ActionButton | `tests/duplicates/behavior/ActionButton.tsx:9` | 0.72 |
+| PressableAction | `tests/duplicates/a11y/PressableAction.tsx:11` | 0.34 |
+
+**Fix** — Extract a shared component for this group and have all 2 use it.
+
+### SharedAccountMenu
+
+2 distinct components all matched canonical `AccountMenu`. A shared component is likely missing — weakest link 0.45.
+
+| Component | Location | Confidence |
+| --- | --- | --- |
+| ProfileDropdown | `tests/duplicates/a11y/menu/ProfileDropdown.tsx:14` | 0.54 |
+| OptionList | `tests/duplicates/a11y/menu/OptionList.tsx:9` | 0.45 |
+
+**Fix** — Extract a shared component for this group and have all 2 use it.
+
+### SharedDialogDismiss
+
+2 distinct components all matched canonical `DialogDismiss`. A shared component is likely missing — weakest link 0.32.
+
+| Component | Location | Confidence |
+| --- | --- | --- |
+| SheetClose | `tests/duplicates/a11y/SheetClose.tsx:8` | 0.64 |
+| PressableAction | `tests/duplicates/a11y/PressableAction.tsx:11` | 0.32 |
+
+**Fix** — Extract a shared component for this group and have all 2 use it.
+
+### SharedMenuButton
+
+2 distinct components all matched canonical `MenuButton`. A shared component is likely missing — weakest link 0.27.
+
+| Component | Location | Confidence |
+| --- | --- | --- |
+| OptionRow | `tests/duplicates/a11y/menu/OptionRow.tsx:9` | 0.43 |
+| EmailInput | `tests/duplicates/behavior/EmailInput.tsx:7` | 0.27 |
+
+**Fix** — Extract a shared component for this group and have all 2 use it.
+
+### SharedStatusChip
+
+2 distinct components all matched canonical `StatusChip`. A shared component is likely missing — weakest link 0.40.
+
+| Component | Location | Confidence |
+| --- | --- | --- |
+| StateTag | `tests/duplicates/styles/StateTag.tsx:7` | 0.52 |
+| ColumnCaption | `tests/duplicates/styles/ColumnCaption.tsx:11` | 0.40 |
+
+**Fix** — Extract a shared component for this group and have all 2 use it.
+
+### SharedTileDelta
+
+2 distinct components all matched canonical `TileDelta`. A shared component is likely missing — weakest link 0.25.
+
+| Component | Location | Confidence |
+| --- | --- | --- |
+| StyledBadgeDup | `tests/duplicates/styled/StyledBadgeDup.tsx:15` | 0.31 |
+| ColumnCaption | `tests/duplicates/styles/ColumnCaption.tsx:11` | 0.25 |
+
+**Fix** — Extract a shared component for this group and have all 2 use it.

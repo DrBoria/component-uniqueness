@@ -10,8 +10,8 @@ const whenReady = require("../dist/playgrounds/style-entrypoint.js").whenReady;
 const pluginDir = path.resolve(__dirname, "..");
 const relPosix = (abs: string) => path.relative(pluginDir, abs).split(path.sep).join("/");
 
-const CANON_ROOTS = ["tests/components/lib", "tests/components/lib/styled", "tests/components/lib/mui"];
-const APP_ROOTS = ["tests/components/duplicates", "tests/components/NOT_duplicates"];
+const CANON_ROOTS = ["tests/NOT_duplicates", "tests/NOT_duplicates/styled", "tests/NOT_duplicates/mui"];
+const APP_ROOTS = ["tests/duplicates", "tests/NOT_duplicates"];
 
 const build = async () => {
 	const config = normalizeOptions({

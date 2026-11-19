@@ -19,7 +19,7 @@ const runCli = (args: string[], opts: { cwd?: string } = {}) => {
 	return stdout;
 };
 
-const baseArgs = (report: string) => ["--repo-root", ".", "--roots", "tests/components/lib:tests/components/lib/styled:tests/components/lib/mui", "--app-roots", "tests/components/duplicates:tests/components/NOT_duplicates", "--report", report];
+const baseArgs = (report: string) => ["--repo-root", ".", "--roots", "tests/NOT_duplicates:tests/NOT_duplicates/styled:tests/NOT_duplicates/mui", "--app-roots", "tests/duplicates:tests/NOT_duplicates", "--report", report];
 
 const readReport = (report: string) => readFileSync(path.join(pluginDir, report), "utf8");
 
@@ -41,7 +41,10 @@ describe("CLI", () => {
 		const md = readReport(report);
 
 		expect(md).toContain("# Component duplicates (component-level funnel)");
-expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 canonical component\(s\)\./);
+		// Counts grew with the merged adversarial fixture: the two app roots now
+		// hold 57 + 108 = 165 files (one exported component each after unfolding)
+		// and the canon roots 109 unique components (was 31 files / 32 comps / 29).
+		expect(md).toMatch(/Scanned 165 app file\(s\), 165 app component\(s\) against 109 canonical component\(s\)\./);
 		expect(md).toContain("## High-confidence duplicates (confidence ≥ duplicate threshold) (");
 		expect(md).toContain("| FullBadgeDup |");
 		expect(md).toContain("| Badge |");
@@ -71,10 +74,12 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 
 	it("reads options from --config file", () => {
 		const report = "cli-config.md";
-		runCli(["--repo-root", ".", "--config", "tests/eslint.config.js", "--app-roots", "tests/components/duplicates:tests/components/NOT_duplicates", "--report", report]);
+		runCli(["--repo-root", ".", "--config", "tests/eslint.config.js", "--app-roots", "tests/duplicates:tests/NOT_duplicates", "--report", report]);
 		const md = readReport(report);
 
-		expect(md).toContain("against 29 canonical component(s)");
+		// Canon roots now yield 109 unique components (29 before the adversarial
+		// fixture merged into tests/NOT_duplicates).
+		expect(md).toContain("against 109 canonical component(s)");
 		expect(md).toContain("## Raw HTML outside canonical packages (");
 		expect(md).toContain("## Partial duplicates (parts) (");
 	}, 30_000);
@@ -104,7 +109,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 
 	it("restricts app files with --include", () => {
 		const report = "cli-include.md";
-		runCli(["--repo-root", ".", "--roots", "tests/components/lib:tests/components/lib/styled:tests/components/lib/mui", "--report", report, "--include", "tests/components/duplicates/FullBadgeDup.tsx"]);
+		runCli(["--repo-root", ".", "--roots", "tests/NOT_duplicates:tests/NOT_duplicates/styled:tests/NOT_duplicates/mui", "--report", report, "--include", "tests/duplicates/FullBadgeDup.tsx"]);
 		const md = readReport(report);
 
 		expect(md).toMatch(/Scanned 1 app file\(s\), 1 app component\(s\)/);
@@ -113,10 +118,11 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 
 	it("explicit --app-roots are not filtered out by a non-matching config include", () => {
 		const report = "cli-approots-include.md";
-		runCli(["--repo-root", ".", "--config", "tests/eslint.config.approots.js", "--app-roots", "tests/components/duplicates:tests/components/NOT_duplicates", "--report", report]);
+		runCli(["--repo-root", ".", "--config", "tests/eslint.config.approots.js", "--app-roots", "tests/duplicates:tests/NOT_duplicates", "--report", report]);
 		const md = readReport(report);
 
-expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 canonical component\(s\)\./);
+		// Same merged-fixture counts as the full-pipeline run above.
+		expect(md).toMatch(/Scanned 165 app file\(s\), 165 app component\(s\) against 109 canonical component\(s\)\./);
 		expect(md).toContain("| FullBadgeDup |");
 	}, 30_000);
 
@@ -124,7 +130,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		const stale = path.join(tmpRoot, "stale-catalog.json");
 		const { writeFileSync } = require("node:fs");
 		writeFileSync(stale, JSON.stringify({ components: [] }));
-		expect(() => runCli(["--repo-root", ".", "--roots", "tests/components/lib", "--out", stale, "--check"])).toThrow();
+		expect(() => runCli(["--repo-root", ".", "--roots", "tests/NOT_duplicates", "--out", stale, "--check"])).toThrow();
 	});
 
 	it("--files scans only the listed files without roots and skips the catalog", () => {
@@ -132,7 +138,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 		const catalog = path.join(pluginDir, "reports", "component-catalog.json");
 		const { existsSync } = require("node:fs");
 		const before = existsSync(catalog) ? readFileSync(catalog, "utf8") : null;
-		runCli(["--repo-root", ".", "--roots", "tests/components/lib", "--files", "tests/components/duplicates/FullBadgeDup.tsx", "--report", report]);
+		runCli(["--repo-root", ".", "--roots", "tests/NOT_duplicates", "--files", "tests/duplicates/FullBadgeDup.tsx", "--report", report]);
 		const md = readReport(report);
 
 		expect(md).toContain("Scanned 1 app file(s)");
@@ -143,7 +149,7 @@ expect(md).toMatch(/Scanned 31 app file\(s\), 32 app component\(s\) against 29 c
 
 	it("--files silently skips missing files", () => {
 		const report = "cli-files-missing.md";
-		runCli(["--repo-root", ".", "--roots", "tests/components/lib", "--files", "tests/components/duplicates/does-not-exist.tsx", "--report", report]);
+		runCli(["--repo-root", ".", "--roots", "tests/NOT_duplicates", "--files", "tests/duplicates/does-not-exist.tsx", "--report", report]);
 		const md = readReport(report);
 
 		expect(md).toContain("Scanned 0 app file(s)");

@@ -8,23 +8,25 @@ const { normalizeOptions, isIgnored } = require("../dist/config.js");
 const whenReady = require("../dist/playgrounds/style-entrypoint.js").whenReady;
 
 // ── ADVERSARIAL E2E ─────────────────────────────────────────────────────────
-// Runs the real pipeline against the adversarial/component fixture (18 hard
-// traps: a11y naming mechanisms, cross-style systems, deep nesting, complex
-// render branches) and scores every trap exactly as adversarial/run.cjs does.
-// Locks the detector ground truth so a future change cannot silently drop a
-// caught trap or flag a legitimate look-alike. The fixture lives OUTSIDE this
-// package; if absent the suite is skipped.
+// Runs the real pipeline against the in-repo fixture (18 hard traps: a11y
+// naming mechanisms, cross-style systems, deep nesting, complex render
+// branches) and scores every trap. Locks the detector ground truth so a
+// future change cannot silently drop a caught trap or flag a legitimate
+// look-alike. The fixture ships WITH this package: app components live in
+// tests/duplicates/, canonical ones in tests/NOT_duplicates/ (both merged
+// with the regular suites' fixtures), so the suite always runs.
 //
 // Known, documented gaps are asserted as MISS (not silently passed): c09/c18
 // stay below `similar` and c15 below `duplicate` after the weak-structure /
 // a11y-contradiction demotion. No trap may FAIL (a false duplicate on expect:none).
 
 const pluginDir = path.resolve(__dirname, "..");
-const fixtureDir = path.resolve(pluginDir, "../adversarial/component");
-const manifestPath = path.join(fixtureDir, "manifest.json");
+const manifestPath = path.join(__dirname, "manifest.json");
+
+const CANON_ROOTS = ["tests/NOT_duplicates", "tests/NOT_duplicates/styled", "tests/NOT_duplicates/mui"];
+const APP_ROOTS = ["tests/duplicates"];
 
 const fs = require("node:fs") as typeof import("node:fs");
-const hasFixture = fs.existsSync(manifestPath);
 
 const pairKey = (a: string, b: string) => [a, b].sort().join("::");
 
@@ -35,22 +37,20 @@ const verdict = (expect: string, tiers: string[]): "PASS" | "MISS" | "FAIL" => {
 	return tiers.includes(expect) ? "PASS" : "MISS";
 };
 
-const maybe = hasFixture ? describe : describe.skip;
-
-maybe("adversarial component e2e (fixture ground truth)", () => {
-	const manifest = hasFixture ? JSON.parse(fs.readFileSync(manifestPath, "utf8")) : { traps: [] };
+describe("adversarial component e2e (fixture ground truth)", () => {
+	const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 	let comp: any;
 
-	const relPosix = (abs: string) => path.relative(fixtureDir, abs).split(path.sep).join("/");
+	const relPosix = (abs: string) => path.relative(pluginDir, abs).split(path.sep).join("/");
 
 	const buildReport = async () => {
-		const config = normalizeOptions({ root: fixtureDir, componentsFolder: ["src/canon"], rawHtml: true, parts: true });
+		const config = normalizeOptions({ root: pluginDir, componentsFolder: CANON_ROOTS, rawHtml: true, parts: true });
 		await whenReady(config);
 		const shouldSkip = (abs: string) => isIgnored(relPosix(abs), [], config.exclude);
 		return main.buildComponentReport(
-			{ appRoots: ["src/app"], minCluster: 3, verbose: false, rawHtml: true, parts: true },
-			fixtureDir,
-			["src/canon"],
+			{ appRoots: APP_ROOTS, minCluster: 3, verbose: false, rawHtml: true, parts: true },
+			pluginDir,
+			CANON_ROOTS,
 			shouldSkip,
 			config,
 			null,

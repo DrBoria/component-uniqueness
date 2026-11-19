@@ -10,7 +10,7 @@ const frameworkMatcher = getFrameworkMatcher("react");
 
 const makePart = (props: string[], usages: any[] = []) => ({
 	name: "Hint",
-	path: "tests/components/NOT_duplicates/HintList.tsx",
+	path: "tests/NOT_duplicates/HintList.tsx",
 	partial: true,
 	dom: { tree: { tag: "div", css: {}, children: [] }, available: true },
 	framework: { props, events: [], names: [], usages, open: false },
@@ -20,7 +20,7 @@ const makePart = (props: string[], usages: any[] = []) => ({
 
 const makeOpenCanon = (name: string) => ({
 	name,
-	path: `tests/components/lib/${name}.tsx`,
+	path: `tests/NOT_duplicates/${name}.tsx`,
 	partial: false,
 	dom: { tree: { tag: "div", css: {}, children: [] }, available: true },
 	framework: { props: [], events: [], names: [], usages: [], open: true },

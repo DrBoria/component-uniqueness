@@ -12,9 +12,9 @@ const pluginDir = path.resolve(__dirname, "..");
 const relPosix = (abs: string) => path.relative(pluginDir, abs).split(path.sep).join("/");
 
 // Canon: a dynamic list component (maps over props, renders rows with expression children)
-const CANON_ROOTS = ["tests/components/fp/lib"];
+const CANON_ROOTS = ["tests/NOT_duplicates/fp/lib"];
 // App: a static diagram/placeholder (no .map(), no {expr}, only literal text + static divs)
-const APP_ROOTS = ["tests/components/fp/app"];
+const APP_ROOTS = ["tests/NOT_duplicates/fp/app"];
 
 const buildConfig = () =>
 	normalizeOptions({
