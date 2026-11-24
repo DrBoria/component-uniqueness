@@ -185,115 +185,56 @@ const codeMark = (rows, side, row) => {
 	return { line: at.line, from: at.from, to: at.to };
 };
 
-// ── FOLD ALIGNMENT ─────────────────────────────────────────────────────────
+// ── FOLD ALIGNMENT — REMOVED (W2R / L3) ────────────────────────────────────
 //
-// The code columns hide every line that takes part in no connection and fold each
-// hidden run into one "N lines hidden" button. The snapshot/match columns list ONLY
-// matched rows, so without the same folds their rows ride one fold-row high per
-// hidden run above them: the `span` snapshot lands beside the `svg` code line and
-// every ribbon reads as cross-wired. These helpers mirror the code column's folds
-// into a derived column so each row sits at the SAME height as its code line.
-
-// The fold runs of one code column: maximal runs of consecutive lines that take
-// part in no connection. `connected` is the set of line ids the lanes name. Each
-// run records `next` — the connected line that follows it (null for a trailing run).
-const foldRunsOf = (rows, side, connected) => {
-	const runs = [];
-	let count = 0;
-	for (const row of rows) {
-		const cell = row.cells?.[side];
-		if (cell == null) continue;
-		const line = String(cell.no);
-		if (connected.has(line)) {
-			if (count > 0) runs.push({ next: line, count });
-			count = 0;
-		} else {
-			count += 1;
-		}
-	}
-	if (count > 0) runs.push({ next: null, count });
-
-	return runs;
-};
-
-// Insert a fold row before the first shown row at/after each run's next connected
-// line, so the derived column's rows line up with the code column's. The fold row
-// carries the SAME id as that next code line, so the board measures it at the same
-// height and a ribbon meets its band level. A trailing run folds at the end.
-// The fold is an ORDINARY TEXT row ("⋯ N lines hidden") — the board renders text;
-// a textless placeholder used to leak its raw id (`fold-end-0`) onto the screen.
-const withFolds = (items, foldRuns) => {
-	if (!foldRuns || foldRuns.length === 0) return items;
-	const label = (run) => `⋯ ${run.count} line${run.count === 1 ? "" : "s"} hidden`;
-	const foldItem = (id, run) => ({ id, text: label(run) });
-	const out = [];
-	let runAt = 0;
-	for (const it of items) {
-		const line = it.line != null ? Number(it.line) : null;
-		while (runAt < foldRuns.length) {
-			const run = foldRuns[runAt];
-			if (run.next == null) break; // trailing run — emitted after the loop
-			if (line != null && line >= Number(run.next)) {
-				out.push(foldItem(`fold-${run.next}`, run));
-				runAt += 1;
-			} else {
-				break;
-			}
-		}
-		out.push(it);
-	}
-	for (; runAt < foldRuns.length; runAt += 1) {
-		const run = foldRuns[runAt];
-		out.push(foldItem(`fold-end-${runAt}`, run));
-	}
-
-	return out;
-};
+// The old code BAKED "⋯ N lines hidden" text rows into the derived columns so
+// their rows sat at the code columns' folded heights. That static baking leaked
+// fold text into the show-all state (the mandate violation) and duplicated the
+// board's own fold mechanism. There is now ONE fold owner: the board's reactive
+// `useRowFold`, which folds unconnected rows in EVERY column from the shared
+// connected set. The derived columns (snapshot / match / styles) pass their
+// rows as DATA and bake no fold text.
 
 // The snapshot column: one row per node, capped so it scrolls beside its code.
 // Each row carries its tone and a standing mark on the tag word, so every piece
 // of a lane is highlighted even before the pointer arrives. `parentIds` marks the
 // rows that head a subtree block, so they read emphasised (the block's head).
-// `foldRuns` mirrors the code column's folds so a snapshot row sits at the SAME
-// height as the code line it came from — without it the snapshot rows ride one
-// fold-row high and every ribbon lands on the wrong code line.
-const snapshotColumnOf = (rows, id, mirrored, parentIds, foldRuns) => ({
+const snapshotColumnOf = (rows, id, mirrored, parentIds) => ({
 	id,
 	kind: "items",
 	mirrored,
 	ratio: 1,
 	cap: true,
-	items: withFolds(
-		rows.map((row) => {
-			const tagRange = rangeOf(row.text, row.tag);
-			return { id: row.id, text: row.text, line: row.line ?? undefined, indent: row.depth ?? 0, blockParent: parentIds?.has(row.id) === true, marks: tagRange ? [tagRange] : [] };
-		}),
-		foldRuns,
-	),
+	// W2R / L3 — rows as DATA. Fold text is NEVER baked here: the derived columns
+	// list only matched rows (all connected), so the board's ONE reactive
+	// `useRowFold` has nothing to fold in them; the code columns fold their own
+	// unconnected rows. In the show-all state nothing is hidden in ANY column.
+	items: rows.map((row) => {
+		const tagRange = rangeOf(row.text, row.tag);
+		return { id: row.id, text: row.text, line: row.line ?? undefined, indent: row.depth ?? 0, blockParent: parentIds?.has(row.id) === true, marks: tagRange ? [tagRange] : [] };
+	}),
 });
 
 // The middle column: one row per matched pair. It names what corresponds and,
 // UNLESS the two are exactly the same (div≡div, b≡strong), shows the agreement
 // percentage — so `main vs div` reads "75%", not a silent ribbon.
-const matchColumnOf = (pairs, signal, parentIds, foldRuns) => ({
+const matchColumnOf = (pairs, signal, parentIds) => ({
 	id: "2",
 	kind: "items",
 	mirrored: false,
 	ratio: 1,
-	items: withFolds(
-		pairs.map((pair, index) => {
-			const label = signal === "a11y" ? pair.left.role || pair.left.name || pair.left.tag : pair.left.tag;
-			const exact = signal === "a11y" ? pair.sim >= 1 : sameTag(pair.left.tag, pair.right.tag);
-			// 100% = no number (it IS the same thing); only a partial match shows %.
-			const text = exact ? String(label ?? "") : `${label} · ${Math.round(pair.sim * 100)}%`;
-			const mark = rangeOf(text, String(label ?? ""));
+	// W2R / L3 — rows as DATA, no baked fold text (see snapshotColumnOf).
+	items: pairs.map((pair, index) => {
+		const label = signal === "a11y" ? pair.left.role || pair.left.name || pair.left.tag : pair.left.tag;
+		const exact = signal === "a11y" ? pair.sim >= 1 : sameTag(pair.left.tag, pair.right.tag);
+		// 100% = no number (it IS the same thing); only a partial match shows %.
+		const text = exact ? String(label ?? "") : `${label} · ${Math.round(pair.sim * 100)}%`;
+		const mark = rangeOf(text, String(label ?? ""));
 
-			// The % (when < 100) conveys how closely they agree; the lane's own
-			// colour says duplicate. No row wash — the mark + ribbon carry it.
-			return { id: `m${index}`, text, line: pair.left.line ?? undefined, blockParent: parentIds?.has(`m${index}`) === true, marks: mark ? [mark] : [] };
-		}),
-		foldRuns,
-	),
+		// The % (when < 100) conveys how closely they agree; the lane's own
+		// colour says duplicate. No row wash — the mark + ribbon carry it.
+		return { id: `m${index}`, text, line: pair.left.line ?? undefined, blockParent: parentIds?.has(`m${index}`) === true, marks: mark ? [mark] : [] };
+	}),
 });
 
 // ONE LANE PER MATCHED NODE — all five columns in the same lane:
@@ -388,12 +329,10 @@ export const buildSnapshotBoard = (pair, signal) => {
 	const shownLeft = pairs.map((p) => p.left);
 	const shownRight = pairs.map((p) => p.right);
 	const { connections, marksByLine } = connectionsOf(pairs, rows, signal);
-	// Mirror the code columns' folds into the snapshot/match columns so every row
-	// sits at the same height as its code line (otherwise the ribbons cross-wire).
-	const connectedLeft = new Set(connections.flatMap((c) => c.ends.filter((e) => e.column === "0").flatMap((e) => e.items.map(String))));
-	const connectedRight = new Set(connections.flatMap((c) => c.ends.filter((e) => e.column === "4").flatMap((e) => e.items.map(String))));
-	const leftFolds = foldRunsOf(rows, 0, connectedLeft);
-	const rightFolds = foldRunsOf(rows, 1, connectedRight);
+	// W2R / L3 — no static fold baking. The derived columns pass their matched
+	// rows as DATA; the board's ONE reactive `useRowFold` folds unconnected rows
+	// in every column (the code columns fold their own hidden runs). In show-all
+	// no column hides anything, so no `lines hidden` text can appear anywhere.
 	// Every matched node heads its own row (emphasised); no subtree block — a
 	// hover lights ITS OWN lane only, never the whole subtree.
 	const leftParents = new Set(shownLeft.map((r) => r.id));
@@ -406,9 +345,9 @@ export const buildSnapshotBoard = (pair, signal) => {
 		blocks: [],
 		columns: [
 			codeColumnOf(rows, 0, "0", paths[0]?.path, marksByLine),
-			snapshotColumnOf(shownLeft, "1", false, leftParents, leftFolds),
-			matchColumnOf(pairs, signal, midParents, leftFolds),
-			snapshotColumnOf(shownRight, "3", true, rightParents, rightFolds),
+			snapshotColumnOf(shownLeft, "1", false, leftParents),
+			matchColumnOf(pairs, signal, midParents),
+			snapshotColumnOf(shownRight, "3", true, rightParents),
 			codeColumnOf(rows, 1, "4", paths[1]?.path, marksByLine),
 		],
 	};
@@ -528,23 +467,17 @@ const buildStylesBoard = (pair, leftSnap, rightSnap, rows, paths) => {
 		connections.push({ id: `style:${index}`, tone: nodeTone, label: null, ends, marks });
 	});
 
-	// Mirror the code columns' folds so each node's header sits at the same height as
-	// its code line (the property rows follow it). Without this the style rows ride one
-	// fold-row high per hidden run above them and the ribbons cross-wire.
-	const connectedLeft = new Set(connections.flatMap((c) => c.ends.filter((e) => e.column === "0").flatMap((e) => e.items.map(String))));
-	const connectedRight = new Set(connections.flatMap((c) => c.ends.filter((e) => e.column === "4").flatMap((e) => e.items.map(String))));
-	const leftFolds = foldRunsOf(rows, 0, connectedLeft);
-	const rightFolds = foldRunsOf(rows, 1, connectedRight);
-
+	// W2R / L3 — the styles columns pass their rows as DATA; the board's reactive
+	// fold handles any unconnected rows. No baked `lines hidden` text here.
 	return {
 		rows,
 		connections,
 		blocks: [],
 		columns: [
 			codeColumnOf(rows, 0, "0", paths[0]?.path, marksByLine),
-			{ id: "1", kind: "items", mirrored: false, ratio: 1, cap: true, items: withFolds(styleRowsLeft, leftFolds) },
-			{ id: "2", kind: "items", mirrored: false, ratio: 1, items: withFolds(matchItems, leftFolds) },
-			{ id: "3", kind: "items", mirrored: true, ratio: 1, cap: true, items: withFolds(styleRowsRight, rightFolds) },
+			{ id: "1", kind: "items", mirrored: false, ratio: 1, cap: true, items: styleRowsLeft },
+			{ id: "2", kind: "items", mirrored: false, ratio: 1, items: matchItems },
+			{ id: "3", kind: "items", mirrored: true, ratio: 1, cap: true, items: styleRowsRight },
 			codeColumnOf(rows, 1, "4", paths[1]?.path, marksByLine),
 		],
 	};

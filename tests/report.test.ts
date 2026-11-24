@@ -181,4 +181,28 @@ describe("collectOverviewData", () => {
 		}
 		expect(checked).toBeGreaterThan(0);
 	});
+
+	it("W2R (d) — derived columns bake NO fold text (one reactive fold only)", async () => {
+		const comp = await buildComp();
+		const config = buildConfig();
+		const data = collectOverviewData({ comp, repoRoot: pluginDir, config, candidates: comp.candidates });
+		const { buildSnapshotBoard } = await import("../report/user-report/src/domain/snapshot-board");
+
+		let checked = 0;
+		for (const pair of data.pairs) {
+			const board = buildSnapshotBoard(pair, "structure");
+			if (!board) continue;
+			checked += 1;
+			// L3: the derived columns (snapshot/match) pass their rows as DATA and
+			// never bake "⋯ N lines hidden" text — folding is the board's ONE
+			// reactive `useRowFold`. A baked fold row here leaked fold text into
+			// the show-all state.
+			for (const column of board.columns.filter((c: any) => ["1", "2", "3"].includes(c.id))) {
+				for (const item of column.items ?? []) {
+					expect(/\blines? hidden\b/i.test(String(item.text ?? ""))).toBe(false);
+				}
+			}
+		}
+		expect(checked).toBeGreaterThan(0);
+	});
 });
