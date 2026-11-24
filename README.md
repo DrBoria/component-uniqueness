@@ -71,8 +71,8 @@ A component that already renders the canonical one is a usage, not a duplicate, 
 | `exclude` | stories, tests, `*.d.ts` | Globs to skip |
 | `ignoreDirs` | `node_modules`, `dist`, `build` | Added to the defaults |
 | `exts` | `.tsx` `.ts` `.jsx` `.js` | File extensions |
-| `weights` | name 0.10, structure 0.5, behavior 0.2, a11y 0.1, framework 0.15 | Signal weights |
-| `thresholds` | duplicate 0.6, similar 0.4 | Confidence cut-offs |
+| `weights` | name 0.10, structure 0.4, styles 0.15, behavior 0.15, a11y 0.1, framework 0.1 | Signal weights |
+| `thresholds` | duplicate 0.4, similar 0.2 | Confidence cut-offs |
 
 ## CLI
 
@@ -92,7 +92,7 @@ Options are read from the rule in `eslint.config.js`.
 | `--out <file>` | Catalog path |
 | `--include a.tsx:b.tsx` | Only scan matching app files |
 | `--ignore-dirs a:b` | Extra directories to skip |
-| `--thresholds dup:sim` | Confidence cut-offs, e.g. `0.5:0.3` |
+| `--thresholds dup:sim` | Confidence cut-offs, e.g. `0.4:0.2` |
 | `--raw-html` | Also report raw HTML that should be a canonical component |
 | `--parts` | Also report blocks inside components that duplicate a canonical |
 | `--config file` | Read rule options from a specific `eslint.config.js` or options file |
